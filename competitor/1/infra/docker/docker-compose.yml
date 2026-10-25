@@ -1,0 +1,187 @@
+name: fdr-portal
+
+services:
+  db:
+    # pgvector/pgvector:pg16 = official postgres:16 + the pgvector
+    # extension pre-installed, needed for the Compliance RAG agent's
+    # clause-chunk embeddings (Phase 6b). Verified pullable/available.
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fdr
+      POSTGRES_PASSWORD: fdr
+      POSTGRES_DB: fdr
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fdr -d fdr"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    restart: unless-stopped
+    volumes:
+      - valkey_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  garage:
+    image: dxflrs/garage:v2.4.1
+    restart: unless-stopped
+    command: ["/garage", "server", "--single-node", "--default-bucket"]
+    environment:
+      GARAGE_DEFAULT_ACCESS_KEY: ${GARAGE_ACCESS_KEY:-devaccesskey}
+      GARAGE_DEFAULT_SECRET_KEY: ${GARAGE_SECRET_KEY:-devsecretkeydevsecretkey}
+      GARAGE_DEFAULT_BUCKET: fdr-documents
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+    ports:
+      - "3900:3900"
+      - "3903:3903"
+    healthcheck:
+      # wget/curl don't exist in this minimal image; `garage status` talks
+      # to the node's own RPC port and exits non-zero if it can't connect.
+      test: ["CMD", "/garage", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  clamav:
+    image: clamav/clamav:stable
+    restart: unless-stopped
+    volumes:
+      - clamav_data:/var/lib/clamav
+    ports:
+      - "3310:3310"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo PING | nc -w 3 localhost 3310 | grep -q PONG"]
+      interval: 30s
+      timeout: 10s
+      retries: 60
+      start_period: 1800s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    restart: unless-stopped
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  migrate:
+    build:
+      context: ../../services/api
+    restart: "no"
+    command: ["uv", "run", "alembic", "upgrade", "head"]
+    environment:
+      MIGRATION_DATABASE_URL: postgresql+psycopg://fdr:fdr@db:5432/fdr
+      DATABASE_URL: postgresql+psycopg://fdr_app:fdr_app_dev_password@db:5432/fdr
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ../../services/api
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      ENV: dev
+      DATABASE_URL: postgresql+psycopg://fdr_app:fdr_app_dev_password@db:5432/fdr
+      READONLY_DATABASE_URL: postgresql+psycopg://fdr_readonly:fdr_readonly_dev_password@db:5432/fdr
+      VALKEY_URL: redis://valkey:6379/0
+      GARAGE_ENDPOINT: http://garage:3900
+      GARAGE_BUCKET: fdr-documents
+      KEYCLOAK_URL: http://keycloak:8080
+      CLAMAV_HOST: clamav
+      CLAMAV_PORT: "3310"
+    volumes:
+      - ../../services/api/app:/app/app:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # Postgres-outbox consumer + DB-leased scheduler loop (MASTER_PROMPT
+  # §4.2/§10.2), replacing the former Celery worker/beat pair. One
+  # process, two loops: the outbox consumer runs in the foreground, the
+  # scheduler (old Celery Beat's job — the reminder ladder cadence) runs
+  # in a background thread guarded by a Postgres advisory lock so only
+  # one replica's scheduler thread is ever active (app.outbox.scheduler).
+  # Does not depend on valkey: nothing in this process needs a broker
+  # any more (see app.outbox.run_worker).
+  worker:
+    build:
+      context: ../../services/api
+    restart: unless-stopped
+    command: ["uv", "run", "python", "-m", "app.outbox.run_worker"]
+    env_file:
+      - ../../.env
+    environment:
+      DATABASE_URL: postgresql+psycopg://fdr_app:fdr_app_dev_password@db:5432/fdr
+      READONLY_DATABASE_URL: postgresql+psycopg://fdr_readonly:fdr_readonly_dev_password@db:5432/fdr
+      GARAGE_ENDPOINT: http://garage:3900
+      GARAGE_BUCKET: fdr-documents
+      CLAMAV_HOST: clamav
+      CLAMAV_PORT: "3310"
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    volumes:
+      - ../../services/api/app:/app/app:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # web UI
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8025/livez"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - "8081:80"
+    depends_on:
+      - api
+      - keycloak
+
+volumes:
+  db_data:
+  valkey_data:
+  garage_meta:
+  garage_data:
+  clamav_data:

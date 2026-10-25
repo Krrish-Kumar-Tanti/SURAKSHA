@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: fdr
+          POSTGRES_PASSWORD: fdr
+          POSTGRES_DB: fdr
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fdr -d fdr"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      valkey:
+        image: valkey/valkey:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      MIGRATION_DATABASE_URL: postgresql+psycopg://fdr:fdr@localhost:5432/fdr
+      DATABASE_URL: postgresql+psycopg://fdr_app:fdr_app_dev_password@localhost:5432/fdr
+      TEST_DATABASE_URL: postgresql+psycopg://fdr_app:fdr_app_dev_password@localhost:5432/fdr
+      SUPERUSER_DATABASE_URL: postgresql+psycopg://fdr:fdr@localhost:5432/fdr
+      READONLY_DATABASE_URL: postgresql+psycopg://fdr_readonly:fdr_readonly_dev_password@localhost:5432/fdr
+      GARAGE_ENDPOINT: http://localhost:3900
+      GARAGE_ACCESS_KEY: devaccesskey
+      GARAGE_SECRET_KEY: devsecretkeydevsecretkey
+      CLAMAV_HOST: localhost
+      CLAMAV_PORT: "3310"
+      VALKEY_URL: redis://localhost:6379/0
+      # Optional: set a GROQ_API_KEY repository secret to also run the one
+      # live-provider integration test; it self-skips when absent.
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+      - name: Install OCR/PDF system packages
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr poppler-utils libmagic1
+      # Garage and ClamAV need a custom command/mounted config that GitHub
+      # Actions' `services:` containers don't support, so they're started
+      # directly rather than as service containers (same images/flags as
+      # infra/docker/docker-compose.yml).
+      - name: Start Garage (S3-compatible storage)
+        run: |
+          cat > /tmp/garage.toml <<EOF
+          metadata_dir = "/var/lib/garage/meta"
+          data_dir = "/var/lib/garage/data"
+          db_engine = "sqlite"
+          replication_factor = 1
+          rpc_bind_addr = "[::]:3901"
+          rpc_public_addr = "127.0.0.1:3901"
+          rpc_secret = "$(openssl rand -hex 32)"
+          [s3_api]
+          s3_region = "garage"
+          api_bind_addr = "[::]:3900"
+          root_domain = ".s3.garage.localhost"
+          [admin]
+          api_bind_addr = "[::]:3903"
+          admin_token = "$(openssl rand -base64 32)"
+          metrics_token = "$(openssl rand -base64 32)"
+          EOF
+          docker run -d --name garage -p 3900:3900 \
+            -e GARAGE_DEFAULT_ACCESS_KEY=devaccesskey \
+            -e GARAGE_DEFAULT_SECRET_KEY=devsecretkeydevsecretkey \
+            -e GARAGE_DEFAULT_BUCKET=fdr-documents \
+            -v /tmp/garage.toml:/etc/garage.toml:ro \
+            dxflrs/garage:v2.4.1 /garage server --single-node --default-bucket
+          for i in $(seq 1 30); do curl -sf http://localhost:3900 >/dev/null 2>&1 && break || sleep 2; done
+        working-directory: .
+      - name: Start ClamAV
+        run: |
+          docker run -d --name clamav -p 3310:3310 clamav/clamav:stable
+          for i in $(seq 1 90); do (echo PING | nc -w 3 localhost 3310 | grep -q PONG) && break || sleep 20; done
+        working-directory: .
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run alembic upgrade head
+      - run: uv run pytest
+
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build

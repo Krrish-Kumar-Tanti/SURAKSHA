@@ -1,5 +1,13 @@
 .DS_Store
 Thumbs.db
 *.tmp
-node_modules/
 agent_talking.md
+.kilo/
+node_modules/
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+**/__pycache__/
+**/*.pyc
+**/*.sqlite3
