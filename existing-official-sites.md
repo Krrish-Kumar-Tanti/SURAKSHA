@@ -388,7 +388,3 @@ This section walks through the complete security-deposit / FDR lifecycle as it o
 | 15 | facilities.aicte-india.org | `https://facilities.aicte-india.org` | 25 Oct 2026 (search snippet) | Approval portal facilities | UNVERIFIED (snippet only) |
 
 ---
-
-## 6. Note on verification
-
-Claims marked `[UNVERIFIED]` were retrieved from search snippets or search-indexed pages that returned 404 on direct fetch on 25 Oct 2026. Before citing them in the PPT or jury answers, download the official document and confirm. Claims marked `[FACT]` were retrieved directly or corroborated by official search-indexed text. Claims marked `[INFERENCE]` are reasoned conclusions, not primary-source claims.
