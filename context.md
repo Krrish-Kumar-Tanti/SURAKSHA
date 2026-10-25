@@ -4,8 +4,9 @@
 
 | Field | Value |
 |---|---|
-| Version | 1.2 (research synthesis + factual audit + PS lock) |
+| Version | 1.3 (research synthesis + factual audit + PS lock; demo pointer aligned) |
 | Prepared | 25 Oct 2026 |
+| Updated | 26 Oct 2026 — demo sequence points to build pack |
 | Owner | OpenCode (lead researcher / architect) for the Boss |
 | Status | PS selected: SIH26265; idea stage; submission deadline 28 Oct 2026 |
 | Scope | SIH26261–SIH26265 (AICTE, Software, Smart Automation) |
@@ -649,11 +650,13 @@ Scores 1–5. Higher is better except “competitor density,” where 5 = least 
 
 ### 7.6 7-minute demo script
 
+**Superseded:** use `build/04_DELIVERY.md` §5 for the exact current sequence. The table below is historical.
+
 **Setup:** synthetic institution “Sanjeevani Institute of Technology” (Engineering UG, leased building, ₹70 lakh required under base + leased multiplier; or use a NE institution to show the 50% concession — pick one hero case and one contrast case).
 
 | Time | Screen | Action | Line |
 |---:|---|---|---|
-| 0:00–0:40 | Home | Show portfolio: active, expiring, ₹ at risk, upcoming maturities | “AICTE is holding hundreds of crores in deposits. The question is not where the FDRs are; it is which ones are real, correctly sized, and safe to release.” |
+| 0:00–0:40 | Home | Show portfolio: active, expiring, ₹ at risk, upcoming maturities | “AICTE holds security deposits for institutions. The question is not where the FDRs are; it is which ones are real, correctly sized, and safe to release.” |
 | 0:40–1:40 | Institution submission | Upload FDR; OCR extracts amount, dates, IFSC, lien | “The institution declares ₹70 lakh. The document says ₹70 lakh. The bank says ₹35 lakh. The system shows all three, side by side.” |
 | 1:40–2:30 | Provenance | Highlight mismatch; show evidence; bank sandbox verification | “This is not a black-box fraud score. It is a field-level discrepancy with the page, the bounding box, and the bank reference.” |
 | 2:30–3:20 | Policy Pack | Show requirement trace: base 35L → leased ×2 → 70L; switch institution to NE → 17.5L; show clause citations | “This is the 2026-27 addendum. Most portals use illustrative norms. Ours can show why the number is the number.” |
