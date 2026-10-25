@@ -24,7 +24,6 @@ Unlike conventional portals that treat FDR verification as generic document uplo
 - **[enhancement.md](./enhancement.md)** — Master Amplification Plan fusing battle-tested architectures from past projects (PackParakh, Ekam, SchemeSaathi, and EduSphere) to elevate SURAKSHA to 500%–1000%.
 - **[context.md](./context.md)** — Official domain truth, APH references, decision matrix, competitor analysis, and risk mitigations.
 - **[opponent.md](./opponent.md)** — Deep competitive intelligence on existing public repositories and incumbent gaps.
-- **[agent_talking.md](./agent_talking.md)** — Multi-agent coordination and handoff protocol.
 
 ---
 
@@ -48,4 +47,3 @@ Unlike conventional portals that treat FDR verification as generic document uplo
 ## 👥 Contributors & Team
 
 - **Lead Architect / Owner:** Krrish Kumar Tanti
-- **Systems & Engineering:** Antigravity & OpenCode
