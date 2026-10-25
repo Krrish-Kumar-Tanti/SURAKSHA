@@ -40,7 +40,7 @@
 ### 1.2 Ekam — verified detail
 
 - **Real files:** `mcp-server/server.py`, `agent/agent.py`, `api/main.py`, `data/audit.jsonl` (745 lines).
-- **Real MCP:** 11 tools, MCP spec `2025-11-25`, `POST /mcp`; no separate `aictc_tools.py`.
+- **Real MCP:** 11 tools, MCP spec `2025-11-25`, `POST /mcp`; no separate `mcp-server/aicte_tools.py`.
 - **Real confirm gate:** `tool_propose_order` stages a proposal; `tool_confirm_order` consumes it once. It is a simple state machine, not cryptographic two-key approval. There is no `agent/confirm_gate.py`.
 - **Real audit:** append-only JSONL tool-call ledger. It is **not** hash-chained and not tamper-evident by itself.
 - **Real voice:** Polly endpoint in `api/main.py`; browser fallback. There is no `utils/voice_synthesizer.py`.
