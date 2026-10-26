@@ -43,119 +43,74 @@ export function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#F8F5EE]/90 border-b border-[#E5DFD5] px-4 sm:px-8 lg:px-10 py-3.5 transition-all">
-      <div className="max-w-[1440px] mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-50 backdrop-blur-2xl bg-[#F8F5EE]/50 border-b border-[#E5DFD5]/60 px-6 py-4 transition-all shadow-[0_8px_30px_-15px_rgba(28,29,26,0.06)]">
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-6">
         
-        {/* Brand & Emblem */}
+        {/* Brand */}
         <div 
           onClick={() => onNavigate('home')} 
-          className="flex items-center gap-3 cursor-pointer group"
+          className="flex items-center gap-2.5 cursor-pointer shrink-0"
         >
-          <div className="w-10 h-10 rounded-xl bg-[#444C3D] p-[1.5px] shadow-md group-hover:scale-105 transition-transform flex items-center justify-center">
-            <Shield className="w-5 h-5 text-[#F8F5EE]" />
+          <div className="w-9 h-9 rounded-full bg-[#444C3D] shadow-md hover:scale-105 transition-transform flex items-center justify-center">
+            <Shield className="w-4 h-4 text-[#F8F5EE]" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-[1.15rem] tracking-tight text-[#1C1D1A] font-['Instrument_Serif']">SURAKSHA</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#EFEAE1] border border-[#DDD6C9] text-[#444C3D] font-semibold">SIH26265</span>
-            </div>
-            <span className="block text-[11px] text-[#706E66] font-medium">AICTE Security Deposit Control Tower</span>
-          </div>
+          <span className="font-extrabold text-[1.05rem] tracking-tight text-[#1C1D1A] font-['Instrument_Serif'] hidden sm:block">SURAKSHA</span>
         </div>
 
-        {/* Central Nav Links */}
-        <nav className="hidden lg:flex items-center gap-5 text-[13px] font-medium text-[#55544E]">
-          <button 
-            onClick={() => handleNavClick('home')} 
-            className={`hover:text-[#1C1D1A] transition-colors cursor-pointer ${activeScreen === 'home' ? 'text-[#444C3D] font-bold' : ''}`}
-          >
-            Overview
-          </button>
-          <button 
-            onClick={() => handleNavClick('portfolio')} 
-            className={`hover:text-[#1C1D1A] transition-colors cursor-pointer ${activeScreen === 'portfolio' ? 'text-[#444C3D] font-bold' : ''}`}
-          >
-            Portfolio
-          </button>
-          <button 
-            onClick={() => handleNavClick('wizard')} 
-            className={`hover:text-[#1C1D1A] transition-colors cursor-pointer ${activeScreen === 'wizard' ? 'text-[#444C3D] font-bold' : ''}`}
-          >
-            FDR Submission
-          </button>
-          <button 
-            onClick={() => handleNavClick('provenance')} 
-            className={`hover:text-[#1C1D1A] transition-colors cursor-pointer ${activeScreen === 'provenance' ? 'text-[#444C3D] font-bold' : ''}`}
-          >
-            3-Way Provenance
-          </button>
-          <button 
-            onClick={() => handleNavClick('policy')} 
-            className={`hover:text-[#1C1D1A] transition-colors cursor-pointer ${activeScreen === 'policy' ? 'text-[#444C3D] font-bold' : ''}`}
-          >
-            Policy Trace
-          </button>
-          <button 
-            onClick={() => handleNavClick('release')} 
-            className={`hover:text-[#1C1D1A] transition-colors cursor-pointer ${activeScreen === 'release' ? 'text-[#444C3D] font-bold' : ''}`}
-          >
-            Release Graph
-          </button>
-          <button 
-            onClick={() => handleNavClick('audit')} 
-            className={`hover:text-[#1C1D1A] transition-colors cursor-pointer ${activeScreen === 'audit' ? 'text-[#444C3D] font-bold' : ''}`}
-          >
-            Audit Chain
-          </button>
+        {/* Glass Bubble Nav — Horizontal */}
+        <nav className="flex items-center gap-2.5 text-[12px] font-medium text-[#55544E] overflow-x-auto">
+          {[
+            { screen: 'home', label: 'Overview' },
+            { screen: 'portfolio', label: 'Portfolio' },
+            { screen: 'wizard', label: 'FDR Submission' },
+            { screen: 'provenance', label: 'Provenance' },
+            { screen: 'policy', label: 'Policy' },
+            { screen: 'release', label: 'Release' },
+            { screen: 'audit', label: 'Audit' },
+          ].map(({ screen, label }) => (
+            <button
+              key={screen}
+              onClick={() => handleNavClick(screen)}
+              className={`px-4 py-2 rounded-full bg-[#EFEAE1]/30 backdrop-blur-md border border-[#DDD6C9]/30 hover:bg-[#EFEAE1]/60 hover:scale-[1.1] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer whitespace-nowrap ${activeScreen === screen ? 'text-[#1C1D1A] font-bold bg-[#EFEAE1]/80 border-[#DDD6C9]/60' : 'text-[#55544E]'}`}
+            >
+              {label}
+            </button>
+          ))}
         </nav>
 
-        {/* Right Tools: Status / Sign In / Role Selector */}
-        <div className="flex items-center gap-3">
-          {/* Demo Clock Pill */}
-          <div className="hidden xl:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium">
-            <Clock className="w-3.5 h-3.5 text-[#444C3D]" />
-            <span>Clock: 25 Oct 2026</span>
+        {/* Right Tools */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1]/40 text-[#444C3D] text-[11px] font-mono font-medium backdrop-blur-sm">
+            <Clock className="w-3 h-3 text-[#444C3D]" />
+            <span>25 Oct 2026</span>
           </div>
-
           {!isAuthenticated ? (
-            /* Sign In Button for Guests */
             <button
               onClick={onLoginClick}
-              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs sm:text-sm font-medium transition shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium transition shadow-sm cursor-pointer hover:scale-[1.08] hover:-translate-y-0.5 duration-200"
             >
               <Lock className="w-3.5 h-3.5 text-white/90" />
               <span>Sign In</span>
             </button>
           ) : (
-            /* Authenticated User Menu */
             <div className="flex items-center gap-2">
-              {/* Persona Role Switcher */}
               <div className="relative">
                 <button
                   onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-                  className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium transition shadow-sm cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium transition shadow-sm cursor-pointer hover:scale-[1.05] duration-200"
                 >
                   <UserCheck className="w-3.5 h-3.5 text-white/90" />
-                  <span className="hidden md:inline font-mono text-[11px] text-white/80">Role:</span>
-                  <span className="font-semibold">{roles.find(r => r.id === currentRole)?.label || currentRole}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-white/70" />
+                  <span className="hidden sm:inline font-mono text-[11px] text-white/80">{currentRole}</span>
+                  <ChevronDown className="w-3 h-3 text-white/70" />
                 </button>
-
                 {roleMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-white border border-[#E5DFD5] shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150 text-left">
-                    <div className="text-[10px] font-mono uppercase text-[#706E66] px-3 py-1.5 font-bold">
-                      Switch Statutory Role
-                    </div>
+                  <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#F8F5EE]/90 backdrop-blur-xl border border-[#DDD6C9] shadow-2xl p-2 z-50 text-left">
+                    <div className="text-[10px] font-mono uppercase text-[#706E66] px-3 py-1 font-bold">Switch Role</div>
                     {roles.map((r) => (
                       <button
                         key={r.id}
-                        onClick={() => {
-                          onRoleChange(r.id);
-                          setRoleMenuOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-start justify-between transition-colors cursor-pointer ${
-                          currentRole === r.id ? 'bg-[#ECE7DE] text-[#444C3D] font-bold' : 'text-[#444C3D] hover:bg-[#F8F5EE]'
-                        }`}
+                        onClick={() => { onRoleChange(r.id); setRoleMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-start justify-between transition-colors cursor-pointer hover:scale-[1.03] duration-150 ${currentRole === r.id ? 'bg-[#ECE7DE] text-[#444C3D] font-bold' : 'text-[#444C3D] hover:bg-[#EFEAE1]'}`}
                       >
                         <div>
                           <div className="font-semibold text-[#1C1D1A]">{r.label}</div>
@@ -167,18 +122,15 @@ export function Navbar({
                   </div>
                 )}
               </div>
-
-              {/* Logout Button */}
               <button
                 onClick={onLogoutClick}
                 title="Sign Out"
-                className="p-2 rounded-lg border border-[#DDD6C9] bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#55544E] hover:text-[#1C1D1A] transition cursor-pointer"
+                className="p-2 rounded-full border border-[#DDD6C9] bg-[#EFEAE1]/40 hover:bg-[#E3DDCF] text-[#55544E] hover:text-[#1C1D1A] transition cursor-pointer hover:scale-[1.08] duration-200"
               >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
           )}
-
         </div>
       </div>
     </header>
