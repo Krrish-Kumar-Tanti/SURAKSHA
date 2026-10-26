@@ -9,3 +9,6 @@ competitor/
 Thumbs.db
 *.tmp
 .kilo/
+.vite/
+__pycache__/
+*.pyc
