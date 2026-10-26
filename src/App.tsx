@@ -18,6 +18,7 @@ import { ProvenancePage } from './components/pages/ProvenancePage';
 import { PolicyTracePage } from './components/pages/PolicyTracePage';
 import { ReleaseGraphPage } from './components/pages/ReleaseGraphPage';
 import { AuditChainPage } from './components/pages/AuditChainPage';
+import { HeroIntroSplash } from './components/HeroIntroSplash';
 import { 
   ArrowRight, 
   ShieldCheck, 
@@ -39,8 +40,13 @@ export default function App() {
   const [userSession, setUserSession] = useState<UserSession | null>(getSavedSession());
   const [currentRole, setCurrentRole] = useState(userSession?.role || 'DEALING_OFFICER');
   const [activeScreen, setActiveScreen] = useState('home');
+  const [showIntro, setShowIntro] = useState(true);
 
   const isAuthenticated = !!userSession;
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+  };
 
   const handleLoginSuccess = (session: UserSession) => {
     setUserSession(session);
@@ -107,6 +113,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F8F5EE] text-[#1C1D1A] selection:bg-[#444C3D] selection:text-white font-sans relative overflow-x-hidden">
+      {/* 4-5s Hero Intro Splash with Skip Option */}
+      {showIntro && <HeroIntroSplash onComplete={handleIntroComplete} />}
+
       {/* Top Scroll Progress Line */}
       <div id="scroll-progress" className="fixed top-0 left-0 h-[2.5px] bg-[#444C3D] z-50 transition-all duration-75" />
 
