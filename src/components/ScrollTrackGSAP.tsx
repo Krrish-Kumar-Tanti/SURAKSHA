@@ -29,12 +29,12 @@ export function ScrollTrackGSAP() {
 
     // Center coordinates for each station along the track
     const waypoints = [
-      { top: '7%', left: '72%' },
-      { top: '23%', left: '24%' },
-      { top: '39%', left: '72%' },
-      { top: '55%', left: '24%' },
-      { top: '71%', left: '72%' },
-      { top: '87%', left: '24%' },
+      { top: '10%', left: '76%' },
+      { top: '26%', left: '22%' },
+      { top: '42%', left: '76%' },
+      { top: '58%', left: '22%' },
+      { top: '74%', left: '76%' },
+      { top: '90%', left: '22%' },
     ];
 
     // Initial state: Beacon starts at Station 1; Station 1 is active & enlarged
@@ -66,7 +66,7 @@ export function ScrollTrackGSAP() {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: trackEl,
-        start: 'top 40%',
+        start: 'top 35%',
         end: 'bottom 85%',
         scrub: 1.0,
       },
@@ -112,7 +112,7 @@ export function ScrollTrackGSAP() {
 
   const stages = [
     {
-      posStyle: { left: '55%', top: '3%' },
+      posStyle: { left: '58%', top: '6%' },
       title: 'Digital Intake & Cryptographic Sealing',
       subtitle: 'SHA-256 Digest Sealing',
       desc: 'Raw FDR & Affidavit intake with SHA-256 hash sealing, anti-tamper timestamping, and canonical statutory metadata registry.',
@@ -124,7 +124,7 @@ export function ScrollTrackGSAP() {
       pill: 'SHA-256: 7f8a9e22...c41d',
     },
     {
-      posStyle: { left: '8%', top: '19%' },
+      posStyle: { left: '5%', top: '22%' },
       title: 'Policy Engine Table 1.4 Calculation',
       subtitle: 'Deterministic APH Sizing',
       desc: 'Evaluates required statutory FDR under AICTE APH Table 1.4 norms. Deterministically computes base deposit + 50% concession + ×2.0 leased land multiplier.',
@@ -136,7 +136,7 @@ export function ScrollTrackGSAP() {
       pill: 'Requirement: ₹20.00 Lakhs verified',
     },
     {
-      posStyle: { left: '55%', top: '35%' },
+      posStyle: { left: '58%', top: '38%' },
       title: '3-Way Zero-Hallucination Provenance',
       subtitle: 'Triangulated OCR & Bank Verification',
       desc: 'Field-level 3-way match: Institution declared values vs OCR document parsing vs Automated core banking sandbox API response.',
@@ -148,7 +148,7 @@ export function ScrollTrackGSAP() {
       pill: 'Provenance Delta: 0.00% (Verified)',
     },
     {
-      posStyle: { left: '8%', top: '51%' },
+      posStyle: { left: '5%', top: '54%' },
       title: '10-Year Custody & Lien Lineage Radar',
       subtitle: 'Continuous Cross-Trust Auditing',
       desc: 'Enforces statutory 10-year lock-in period with automated renewal tracking and cross-trust duplicate pledge detection across all scheduled banks.',
@@ -160,7 +160,7 @@ export function ScrollTrackGSAP() {
       pill: 'Maturity: 10 Years · Lien Active',
     },
     {
-      posStyle: { left: '55%', top: '67%' },
+      posStyle: { left: '58%', top: '70%' },
       title: 'Clause 6.46 DAG Release Clearances',
       subtitle: 'Multi-Bureau Statutory Gate',
       desc: 'Release request enters a strict Directed Acyclic Graph. Enforces mandatory clearances from PGRC Student Desk, Vigilance Bureau, and Regional Officer.',
@@ -172,7 +172,7 @@ export function ScrollTrackGSAP() {
       pill: 'CVO Clear · PGRC Clear · RO Signed',
     },
     {
-      posStyle: { left: '8%', top: '83%' },
+      posStyle: { left: '5%', top: '86%' },
       title: 'Cryptographic Release Sanction & NOC',
       subtitle: 'Immutable Ledger Finalization',
       desc: 'Issues a dual-signed cryptographic NOC, transmits automated bank sanction release notice, and commits the finalized block into the immutable audit chain.',
@@ -186,9 +186,9 @@ export function ScrollTrackGSAP() {
   ];
 
   return (
-    <section className="my-32 relative z-10">
-      {/* 1. Dedicated Header in Normal Flow (Completely Separated from Stage 01 to Guarantee Zero Overlap) */}
-      <div className="text-center max-w-3xl mx-auto px-6 mb-20">
+    <section className="my-36 relative z-10">
+      {/* 1. Dedicated Header in Normal Flow (Far Above Stage 01 with Generous 160px Margin to Guarantee Zero Overlap) */}
+      <div className="text-center max-w-2xl mx-auto px-6 mb-40">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-teal-500/30 bg-[#060812]/95 text-teal-300 text-xs font-mono font-semibold mb-4 backdrop-blur-xl shadow-lg">
           <Sparkles className="w-3.5 h-3.5 text-teal-400 animate-spin" style={{ animationDuration: '6s' }} />
           Out of Thin Air — Autonomous Compliance Pipeline
@@ -196,19 +196,19 @@ export function ScrollTrackGSAP() {
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg mb-4">
           The 6-Station Autonomous Circuit
         </h2>
-        <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto mb-6">
+        <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
           Scroll down to guide the live compliance ledger token through each checkpoint. Watch each station dynamically expand as the token arrives.
         </p>
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-teal-400 bg-teal-950/40 border border-teal-500/30 px-3.5 py-1.5 rounded-full">
+        <div className="inline-flex items-center gap-2 text-xs font-mono text-teal-400 bg-teal-950/40 border border-teal-500/30 px-4 py-2 rounded-full">
           <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
-          <span>Scroll down to navigate the pipeline</span>
+          <span>Scroll down to navigate through the 6 statutory stations</span>
         </div>
       </div>
 
-      {/* 2. The 400vh Track Container with the 6 Stations and the Animated Ball */}
+      {/* 2. The 380vh Track Container with the 6 Stations and the Animated Ball */}
       <div
         ref={trackRef}
-        className="relative h-[400vh] overflow-hidden"
+        className="relative h-[380vh] overflow-hidden max-w-[1540px] mx-auto px-4 sm:px-8"
         style={{
           background: 'radial-gradient(circle at 50% 50%, rgba(122,133,255,0.03) 0%, transparent 80%)',
         }}
@@ -231,7 +231,7 @@ export function ScrollTrackGSAP() {
             </linearGradient>
           </defs>
           <path
-            d="M 72 7 Q 48 15, 24 23 Q 48 31, 72 39 Q 48 47, 24 55 Q 48 63, 72 71 Q 48 79, 24 87"
+            d="M 76 10 Q 48 18, 22 26 Q 48 34, 76 42 Q 48 50, 22 58 Q 48 66, 76 74 Q 48 82, 22 90"
             fill="none"
             stroke="url(#circuitGrad)"
             strokeWidth="0.4"
