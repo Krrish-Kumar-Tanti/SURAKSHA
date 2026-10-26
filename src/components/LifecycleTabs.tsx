@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Clock, Shield, RefreshCw, KeyRound, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { AnimatedHeading } from './AnimatedHeading';
 
 export function LifecycleTabs() {
   const [activeTab, setActiveTab] = useState(0);
@@ -73,9 +74,12 @@ export function LifecycleTabs() {
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-teal-500/30 bg-teal-500/10 text-teal-300 text-xs font-mono font-medium mb-4">
           Lifecycle Management
         </div>
-        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+        <AnimatedHeading
+          as="h2"
+          className="text-3xl md:text-5xl font-black text-white tracking-tight"
+        >
           The 4 Phases of an AICTE Security Deposit
-        </h2>
+        </AnimatedHeading>
         <p className="text-slate-400 text-sm md:text-base mt-4">
           Explore how SURAKSHA manages deposits across their entire 10-year lifecycle from creation to safe refund.
         </p>

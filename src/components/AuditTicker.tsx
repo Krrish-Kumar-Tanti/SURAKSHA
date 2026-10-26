@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Hash, CheckCircle2, Lock, ArrowRight, Download, RefreshCw } from 'lucide-react';
+import { AnimatedHeading } from './AnimatedHeading';
 
 export function AuditTicker() {
   const [verifying, setVerifying] = useState(false);
@@ -33,9 +34,12 @@ export function AuditTicker() {
               <Hash className="w-3.5 h-3.5" />
               Cryptographic Audit Chain (M9)
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <AnimatedHeading
+              as="h3"
+              className="text-2xl sm:text-3xl font-black text-white tracking-tight"
+            >
               Tamper-Evident SHA-256 Ledger
-            </h3>
+            </AnimatedHeading>
             <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
               Every deposit creation, three-way verification, director waiver, and release clearance is sealed in a continuous hash chain.
             </p>

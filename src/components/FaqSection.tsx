@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, HelpCircle } from 'lucide-react';
+import { AnimatedHeading } from './AnimatedHeading';
 
 export function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -34,9 +35,12 @@ export function FaqSection() {
           <HelpCircle className="w-3.5 h-3.5" />
           Regulatory Clarity
         </div>
-        <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+        <AnimatedHeading
+          as="h2"
+          className="text-3xl md:text-4xl font-black text-white tracking-tight"
+        >
           Frequently Asked Questions
-        </h2>
+        </AnimatedHeading>
         <p className="text-slate-400 text-xs sm:text-sm mt-3">
           Detailed explanations of AICTE Approval Process Handbook (APH 2024–27) rules and SURAKSHA system mechanics.
         </p>

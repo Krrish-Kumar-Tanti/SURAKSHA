@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Scale, Layers, GitMerge, FileSearch, Lock, ArrowUpRight } from 'lucide-react';
+import { AnimatedHeading } from './AnimatedHeading';
 
 export function FeaturesBento() {
   const pillars = [
@@ -51,9 +52,12 @@ export function FeaturesBento() {
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-teal-500/30 bg-teal-500/10 text-teal-300 text-xs font-mono font-medium mb-4">
           Regulatory Architecture
         </div>
-        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
+        <AnimatedHeading
+          as="h2"
+          className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight"
+        >
           The 4 Pillars That Defend Every Security Deposit
-        </h2>
+        </AnimatedHeading>
         <p className="text-slate-400 text-sm md:text-base mt-4">
           Most systems merely upload PDFs to storage buckets. SURAKSHA builds the verifiable compliance engine that defends every release against CAG and vigilance scrutiny.
         </p>

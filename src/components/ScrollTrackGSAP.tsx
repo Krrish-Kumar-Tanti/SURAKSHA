@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Shield, Lock, FileSearch, Scale, Clock, CheckCircle2, Sparkles, ArrowDown } from 'lucide-react';
+import { AnimatedHeading } from './AnimatedHeading';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -271,9 +272,12 @@ export function ScrollTrackGSAP() {
           <Sparkles className="w-3.5 h-3.5 text-teal-400 animate-spin" style={{ animationDuration: '6s' }} />
           Out of Thin Air — Autonomous Compliance Pipeline
         </div>
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg mb-4">
+        <AnimatedHeading
+          as="h2"
+          className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg mb-4"
+        >
           The 6-Station Autonomous Circuit
-        </h2>
+        </AnimatedHeading>
         <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
           Scroll down to guide the live compliance ledger token through each checkpoint. Watch each station dynamically expand as the token docks at its corner.
         </p>

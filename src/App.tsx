@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Navbar } from './components/Navbar';
 import { VantaGlobe } from './components/VantaGlobe';
+import { AnimatedHeading } from './components/AnimatedHeading';
 import { CockpitPreview } from './components/CockpitPreview';
 import { FeaturesBento } from './components/FeaturesBento';
 import { ScrollTrackGSAP } from './components/ScrollTrackGSAP';
@@ -48,31 +49,6 @@ export default function App() {
   }, []);
 
 
-  // Letter-by-letter smoke reveal animation on headline
-  useEffect(() => {
-    const h = document.getElementById('smoke-headline');
-    if (!h) return;
-    const text = h.textContent?.trim() || '';
-    h.innerHTML = '';
-    const words = text.split(' ');
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      const wordSpan = document.createElement('span');
-      wordSpan.style.display = 'inline-block';
-      wordSpan.style.marginRight = '0.32em';
-      for (let j = 0; j < word.length; j++) {
-        const ch = document.createElement('span');
-        ch.textContent = word[j];
-        ch.style.display = 'inline-block';
-        ch.style.opacity = '0';
-        ch.style.animation = 'smokeIn 0.5s ease-out forwards';
-        ch.style.animationDelay = 0.04 * (i * word.length + j) + 's';
-        wordSpan.appendChild(ch);
-      }
-      h.appendChild(wordSpan);
-      if (i < words.length - 1) h.appendChild(document.createTextNode(' '));
-    }
-  }, []);
 
   // Scroll progress bar
   useEffect(() => {
@@ -124,13 +100,13 @@ export default function App() {
             </div>
 
             {/* Heavy, Bold, Crisp White Headline with Smoke Reveal — Left Aligned */}
-            <h1
-              id="smoke-headline"
+            <AnimatedHeading
+              as="h1"
               className="text-[clamp(2.5rem,4.8vw,4.5rem)] font-black leading-[1.04] tracking-[-0.04em] text-white mb-6 drop-shadow-md"
               style={{ fontWeight: 900 }}
             >
               AICTE Security Deposit Control Tower — Verifiable, Policy-Native Compliance.
-            </h1>
+            </AnimatedHeading>
 
             {/* Subtitle in warm readable tone - Left Aligned */}
             <p className="text-base sm:text-lg md:text-xl text-[#e6dedb] max-w-[580px] mb-10 leading-relaxed font-normal drop-shadow-sm">
