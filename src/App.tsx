@@ -47,63 +47,6 @@ export default function App() {
     };
   }, []);
 
-  // Smoke Canvas particle animation behind headline
-  useEffect(() => {
-    const canvas = document.getElementById('smoke-canvas') as HTMLCanvasElement;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    let particles: any[] = [];
-    let w = (canvas.width = window.innerWidth);
-    let h = (canvas.height = 420);
-    const resize = () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = 420;
-    };
-    window.addEventListener('resize', resize);
-
-    for (let i = 0; i < 75; i++) {
-      particles.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: 15 + Math.random() * 30,
-        dx: (Math.random() - 0.5) * 0.7,
-        dy: -0.7 - Math.random() * 1.0,
-        alpha: 0.04 + Math.random() * 0.12,
-        life: 0,
-        maxLife: 60 + Math.random() * 80,
-      });
-    }
-
-    let animId: number;
-    const animate = () => {
-      ctx.clearRect(0, 0, w, h);
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        p.x += p.dx;
-        p.y += p.dy;
-        p.life++;
-        if (p.life > p.maxLife || p.y < -20) {
-          p.x = Math.random() * w;
-          p.y = h + 20;
-          p.life = 0;
-          p.dx = (Math.random() - 0.5) * 0.7;
-          p.dy = -0.7 - Math.random() * 1.0;
-        }
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
-        ctx.fill();
-      }
-      animId = requestAnimationFrame(animate);
-    };
-    animate();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animId);
-    };
-  }, []);
 
   // Letter-by-letter smoke reveal animation on headline
   useEffect(() => {
@@ -167,8 +110,6 @@ export default function App() {
         {/* Vanta Globe Background with Interactive Mouse Control */}
         <VantaGlobe />
 
-        {/* Atmospheric Floating Smoke Canvas */}
-        <canvas id="smoke-canvas" className="absolute inset-0 z-[1] pointer-events-none opacity-20" />
 
         {/* Smooth Dark Gradient Transition at bottom into Control Tower */}
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent via-[#060812]/70 to-[#060812] pointer-events-none z-[2]" />
