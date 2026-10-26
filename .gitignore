@@ -1,5 +1,11 @@
+node_modules/
+dist/
+.env
+agent_talking.md
+agents.talking
+competitor/
+*.sqlite3
 .DS_Store
 Thumbs.db
 *.tmp
-node_modules/
-agent_talking.md
+.kilo/
