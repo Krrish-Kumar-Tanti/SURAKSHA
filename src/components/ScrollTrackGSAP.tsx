@@ -318,14 +318,15 @@ export function ScrollTrackGSAP() {
           />
         </svg>
 
-        {/* The Animated Travelling Ball / Compliance Ledger Token */}
+        {/* The Animated Travelling Ball / Digit Token */}
         <div
           ref={beaconRef}
-          className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-tr from-[#7a85ff] via-[#38bdf8] to-teal-400 shadow-[0_0_30px_rgba(122,133,255,0.9)]"
+          className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-[#7a85ff] via-[#38bdf8] to-teal-400 shadow-[0_0_25px_rgba(122,133,255,0.95)]"
         >
-          <div className="w-4 h-4 rounded-full bg-white shadow-inner animate-pulse" />
-          <div className="absolute -bottom-6 font-mono text-[9px] text-teal-200 font-extrabold whitespace-nowrap bg-black/95 px-2 py-0.5 rounded-full border border-teal-400/50 shadow-md">
-            LEDGER TOKEN
+          <div className="w-2.5 h-2.5 rounded-full bg-white shadow-inner animate-pulse" />
+          {/* Label positioned at the top of the circular token */}
+          <div className="absolute -top-6 font-mono text-[9px] text-teal-200 font-extrabold whitespace-nowrap bg-black/95 px-2.5 py-0.5 rounded-full border border-teal-400/50 shadow-md tracking-wider">
+            Digit token
           </div>
         </div>
 
