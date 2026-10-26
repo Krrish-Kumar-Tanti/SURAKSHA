@@ -1,8 +1,31 @@
 # SURAKSHA — AICTE Security Deposit Control Tower (SIH26265)
 
-> **SIH 2026 problem statement:** SIH26265 — Streamline of Security Deposit / FDR Portal.
-> **Scope:** SIH 2026 prototype with synthetic data; external integrations are labelled simulated/mock.
-> **Status:** idea and build contracts ready; source code not started.
+> **SIH 2026 problem statement:** SIH26265 — Streamline of Security Deposit / FDR Portal.  
+> **Scope:** Full-stack operational prototype with FastAPI backend, Core Banking adapters, and React/Tailwind/GSAP control tower cockpit.
+
+---
+
+## 🚀 Quick Start for Team Members
+
+Follow these two simple steps to run the complete system locally:
+
+### 1. Start the React Frontend (Port 3000)
+```bash
+# From repository root:
+npm install
+npm run dev
+```
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+### 2. Start the FastAPI Backend (Port 8000)
+```bash
+# In a second terminal window:
+cd backend
+pip install -r requirements.txt
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+- Live Backend Health: **[http://localhost:8000/health](http://localhost:8000/health)**
+- Interactive OpenAPI Docs: **[http://localhost:8000/docs](http://localhost:8000/docs)**
 
 ---
 
