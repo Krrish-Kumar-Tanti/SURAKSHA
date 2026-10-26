@@ -267,21 +267,22 @@ export function ScrollTrackGSAP() {
   return (
     <section className="my-36 relative z-10">
       {/* 1. Dedicated Header in Normal Flow (Completely Separated with 160px Margin) */}
+      {/* 1. Normal-Flow Section Intro Header with Large Bottom Margin */}
       <div className="text-center max-w-2xl mx-auto px-6 mb-40">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-teal-500/30 bg-[#060812]/95 text-teal-300 text-xs font-mono font-semibold mb-4 backdrop-blur-xl shadow-lg">
-          <Sparkles className="w-3.5 h-3.5 text-teal-400 animate-spin" style={{ animationDuration: '6s' }} />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-semibold mb-4 shadow-sm">
+          <Sparkles className="w-3.5 h-3.5 text-[#444C3D] animate-spin" style={{ animationDuration: '6s' }} />
           Out of Thin Air — Autonomous Compliance Pipeline
         </div>
         <AnimatedHeading
           as="h2"
-          className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg mb-4"
+          className="text-3xl sm:text-4xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] mb-4"
         >
-          The 6-Station Autonomous Circuit
+          The 6-Station Autonomous *Circuit*
         </AnimatedHeading>
-        <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
+        <p className="text-[#55544E] text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
           Scroll down to guide the live compliance ledger token through each checkpoint. Watch each station dynamically expand as the token docks at its corner.
         </p>
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-teal-400 bg-teal-950/40 border border-teal-500/30 px-4 py-2 rounded-full">
+        <div className="inline-flex items-center gap-2 text-xs font-mono text-[#444C3D] bg-[#EFEAE1] border border-[#DDD6C9] px-4 py-2 rounded-full">
           <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
           <span>Scroll down to navigate through the 6 statutory stations</span>
         </div>
@@ -290,34 +291,29 @@ export function ScrollTrackGSAP() {
       {/* 2. The 380vh Track Container with the 6 Stations and the Animated Ball */}
       <div
         ref={trackRef}
-        className="relative h-[380vh] overflow-hidden max-w-[1540px] mx-auto px-4 sm:px-8"
-        style={{
-          background: 'radial-gradient(circle at 50% 50%, rgba(122,133,255,0.03) 0%, transparent 80%)',
-        }}
+        className="relative h-[380vh] overflow-hidden max-w-[1540px] mx-auto px-4 sm:px-8 bg-[#F8F5EE]"
       >
         {/* SVG Connecting Track Curve Passing through Corner Docks of All 6 Stations */}
         <svg
-          className="absolute inset-0 w-full h-full pointer-events-none z-10 opacity-40"
+          className="absolute inset-0 w-full h-full pointer-events-none z-10 opacity-50"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
             <linearGradient id="circuitGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#6366f1" />
-              <stop offset="20%" stopColor="#38bdf8" />
-              <stop offset="40%" stopColor="#2dd4bf" />
-              <stop offset="60%" stopColor="#fbbf24" />
-              <stop offset="80%" stopColor="#a855f7" />
-              <stop offset="100%" stopColor="#34d399" />
+              <stop offset="0%" stopColor="#444C3D" />
+              <stop offset="30%" stopColor="#6E7A65" />
+              <stop offset="60%" stopColor="#8F9C84" />
+              <stop offset="100%" stopColor="#444C3D" />
             </linearGradient>
           </defs>
           <path
             d={svgPath}
             fill="none"
             stroke="url(#circuitGrad)"
-            strokeWidth="0.4"
-            strokeDasharray="1.4 0.8"
+            strokeWidth="0.5"
+            strokeDasharray="1.6 0.9"
             vectorEffect="non-scaling-stroke"
           />
         </svg>
@@ -325,11 +321,11 @@ export function ScrollTrackGSAP() {
         {/* The Animated Travelling Ball / Digit Token */}
         <div
           ref={beaconRef}
-          className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-[#7a85ff] via-[#38bdf8] to-teal-400 shadow-[0_0_25px_rgba(122,133,255,0.95)]"
+          className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-[#444C3D] shadow-[0_0_20px_rgba(68,76,61,0.6)]"
         >
           <div className="w-2.5 h-2.5 rounded-full bg-white shadow-inner animate-pulse" />
           {/* Label positioned at the top of the circular token */}
-          <div className="absolute -top-6 font-mono text-[9px] text-teal-200 font-extrabold whitespace-nowrap bg-black/95 px-2.5 py-0.5 rounded-full border border-teal-400/50 shadow-md tracking-wider">
+          <div className="absolute -top-6 font-mono text-[9px] text-[#F8F5EE] font-bold whitespace-nowrap bg-[#1C1D1A] px-2.5 py-0.5 rounded-full border border-[#444C3D] shadow-md tracking-wider">
             Digit token
           </div>
         </div>
@@ -348,28 +344,28 @@ export function ScrollTrackGSAP() {
                 id={`dock-node-${idx}`}
                 className={`absolute -top-3.5 ${
                   stg.dockSide === 'left' ? '-left-3.5' : '-right-3.5'
-                } w-7 h-7 rounded-full border border-teal-400/50 bg-[#060812] flex items-center justify-center z-30 shadow-[0_0_15px_rgba(45,212,191,0.4)] pointer-events-none transition-transform`}
+                } w-7 h-7 rounded-full border border-[#444C3D] bg-white flex items-center justify-center z-30 shadow-md pointer-events-none transition-transform`}
               >
-                <div className="w-2.5 h-2.5 rounded-full bg-teal-400" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#444C3D]" />
               </div>
 
-              {/* Station Card */}
+              {/* Station Card (Crisp White Editorial Paper) */}
               <div
                 id={`station-card-${idx}`}
-                className={`w-full rounded-2xl bg-[#0c1322]/95 border ${stg.border} p-6 sm:p-7 flex flex-col justify-between text-left cursor-default backdrop-blur-xl shadow-2xl transition-all duration-300`}
+                className="w-full rounded-2xl bg-white border border-[#E5DFD5] p-6 sm:p-7 flex flex-col justify-between text-left cursor-default shadow-[0_12px_35px_rgba(28,29,26,0.06)] transition-all duration-300"
               >
                 {/* Header row: Stage number & status badge */}
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs font-mono ${stg.accent} font-black tracking-wider`}>
+                    <span className="text-xs font-mono text-[#444C3D] font-bold tracking-wider">
                       STAGE {stg.step}
                     </span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
-                    <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DDD6C9]" />
+                    <span className="text-[11px] font-mono text-[#706E66] uppercase tracking-wider">
                       Statutory Checkpoint
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-white/10 text-white font-bold border border-white/15">
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#FAF8F5] text-[#55544E] font-medium border border-[#E5DFD5]">
                     {stg.badge}
                   </span>
                 </div>
@@ -377,14 +373,14 @@ export function ScrollTrackGSAP() {
                 {/* Title & Icon */}
                 <div className="mb-3.5">
                   <div className="flex items-center gap-3.5 mb-1.5">
-                    <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 shrink-0">
-                      <Icon className={`w-5 h-5 ${stg.accent}`} />
+                    <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] shrink-0 text-[#444C3D]">
+                      <Icon className="w-5 h-5 text-[#444C3D]" />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-white text-base sm:text-lg tracking-tight leading-snug">
+                      <h4 className="font-normal text-[#1C1D1A] font-['Instrument_Serif'] text-2xl tracking-tight leading-snug">
                         {stg.title}
                       </h4>
-                      <span className={`text-[11px] ${stg.accent} font-mono font-semibold block mt-0.5`}>
+                      <span className="text-[11px] text-[#706E66] font-mono font-medium block mt-0.5">
                         {stg.subtitle}
                       </span>
                     </div>
@@ -392,14 +388,14 @@ export function ScrollTrackGSAP() {
                 </div>
 
                 {/* Description - 100% Readable with zero obstruction */}
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-5 font-normal">
+                <p className="text-xs sm:text-sm text-[#55544E] leading-relaxed mb-5 font-normal">
                   {stg.desc}
                 </p>
 
                 {/* Bottom statutory audit pill */}
-                <div className="pt-3.5 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-400">Ledger Artifact:</span>
-                  <span className={`${stg.accent} font-bold`}>{stg.pill}</span>
+                <div className="pt-3.5 border-t border-[#E5DFD5] flex items-center justify-between text-xs font-mono">
+                  <span className="text-[#706E66]">Ledger Artifact:</span>
+                  <span className="text-[#444C3D] font-bold">{stg.pill}</span>
                 </div>
               </div>
             </div>

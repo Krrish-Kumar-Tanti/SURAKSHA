@@ -71,16 +71,16 @@ export function LifecycleTabs() {
   return (
     <section className="py-24 px-6 lg:px-10 max-w-[1376px] mx-auto relative z-10">
       <div className="text-center max-w-2xl mx-auto mb-16">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-teal-500/30 bg-teal-500/10 text-teal-300 text-xs font-mono font-medium mb-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-4">
           Lifecycle Management
         </div>
         <AnimatedHeading
           as="h2"
-          className="text-3xl md:text-5xl font-black text-white tracking-tight"
+          className="text-3xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em]"
         >
-          The 4 Phases of an AICTE Security Deposit
+          The 4 Phases of an AICTE *Security Deposit*
         </AnimatedHeading>
-        <p className="text-slate-400 text-sm md:text-base mt-4">
+        <p className="text-[#55544E] text-sm md:text-base mt-4">
           Explore how SURAKSHA manages deposits across their entire 10-year lifecycle from creation to safe refund.
         </p>
       </div>
@@ -91,10 +91,10 @@ export function LifecycleTabs() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(idx)}
-            className={`px-5 py-2.5 rounded-full text-xs font-semibold transition-all ${
+            className={`px-5 py-2.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
               activeTab === idx
-                ? 'bg-teal-500 text-slate-950 shadow-lg shadow-teal-500/20'
-                : 'bg-[#172338] text-slate-300 hover:text-white border border-white/5'
+                ? 'bg-[#444C3D] text-white shadow-sm'
+                : 'bg-[#ECE7DE] text-[#444C3D] hover:bg-[#E3DDCF] border border-[#DDD6C9]'
             }`}
           >
             {tab.label}
@@ -102,42 +102,42 @@ export function LifecycleTabs() {
         ))}
       </div>
 
-      {/* Tab Content Display Card */}
-      <div className="rounded-3xl bg-[#111a2b]/95 border border-white/10 p-8 lg:p-12 shadow-2xl backdrop-blur-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      {/* Tab Content Display Card (Crisp White Editorial Paper) */}
+      <div className="rounded-3xl bg-white border border-[#E5DFD5] p-8 lg:p-12 shadow-[0_15px_45px_rgba(28,29,26,0.06)] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         <div className="lg:col-span-7 space-y-6">
-          <div className="inline-flex items-center gap-2 text-xs font-mono text-teal-400 font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 text-xs font-mono text-[#444C3D] font-bold uppercase tracking-wider">
             <span>{tabs[activeTab].subtitle}</span>
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h3 className="text-3xl sm:text-4xl font-normal text-[#1C1D1A] font-['Instrument_Serif'] tracking-tight">
             {tabs[activeTab].title}
           </h3>
 
           <ul className="space-y-3.5 pt-2">
             {tabs[activeTab].bullets.map((b, i) => (
-              <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+              <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-[#55544E]">
+                <CheckCircle2 className="w-4 h-4 text-[#444C3D] shrink-0 mt-0.5" />
                 <span>{b}</span>
               </li>
             ))}
           </ul>
 
-          <div className="pt-4 flex items-center gap-6 border-t border-white/5">
+          <div className="pt-4 flex items-center gap-6 border-t border-[#E5DFD5]">
             <div>
-              <div className="text-2xl font-black text-white font-mono">{tabs[activeTab].stat}</div>
-              <div className="text-xs text-slate-400">{tabs[activeTab].statLabel}</div>
+              <div className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif']">{tabs[activeTab].stat}</div>
+              <div className="text-xs text-[#706E66]">{tabs[activeTab].statLabel}</div>
             </div>
           </div>
         </div>
 
         {/* 3D Visual for the Active Tab */}
-        <div className="lg:col-span-5 rounded-2xl overflow-hidden border border-white/10 bg-[#0b1220] h-64 lg:h-80 relative shadow-2xl">
+        <div className="lg:col-span-5 rounded-2xl overflow-hidden border border-[#E5DFD5] bg-[#FAF8F5] h-64 lg:h-80 relative shadow-md">
           <img
             src={tabs[activeTab].image}
             alt={tabs[activeTab].title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0b1220]/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent" />
         </div>
       </div>
     </section>

@@ -21,10 +21,10 @@ export function VantaGlobe() {
             minWidth: 200.0,
             scale: 1.0,
             scaleMobile: 1.0,
-            color: 0x000000,
-            color2: 0xffffff,
-            size: 1.0,
-            backgroundColor: 0x786464,
+            color: 0x444c3d,
+            color2: 0x8a9482,
+            size: 1.05,
+            backgroundColor: 0xf8f5ee,
           });
         } catch (err) {
           console.error('Vanta Globe init error:', err);

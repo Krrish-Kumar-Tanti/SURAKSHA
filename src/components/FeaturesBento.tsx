@@ -49,65 +49,62 @@ export function FeaturesBento() {
   return (
     <section className="py-24 px-6 lg:px-10 max-w-[1376px] mx-auto relative z-10">
       <div className="text-center max-w-2xl mx-auto mb-16">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-teal-500/30 bg-teal-500/10 text-teal-300 text-xs font-mono font-medium mb-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-4">
           Regulatory Architecture
         </div>
         <AnimatedHeading
           as="h2"
-          className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight"
+          className="text-3xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] leading-tight"
         >
-          The 4 Pillars That Defend Every Security Deposit
+          The 4 Pillars That Defend Every *Security Deposit*
         </AnimatedHeading>
-        <p className="text-slate-400 text-sm md:text-base mt-4">
+        <p className="text-[#55544E] text-sm md:text-base mt-4 leading-relaxed">
           Most systems merely upload PDFs to storage buckets. SURAKSHA builds the verifiable compliance engine that defends every release against CAG and vigilance scrutiny.
         </p>
       </div>
 
-      {/* Bento Grid (2x2 with rich Framer Cards & 3D Assets) */}
+      {/* Bento Grid (2x2 with rich Editorial Cards) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
         {pillars.map((pillar, idx) => {
           const Icon = pillar.icon;
           return (
             <div
               key={idx}
-              className={`group relative rounded-2xl bg-[#111a2b]/90 border border-white/10 overflow-hidden p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 ${pillar.border} hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-500/10`}
+              className="group relative rounded-2xl bg-white border border-[#E5DFD5] overflow-hidden p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#DDD6C9]"
             >
-              {/* Radial gradient backing */}
-              <div className={`absolute top-0 right-0 w-80 h-80 bg-gradient-to-br ${pillar.accent} blur-3xl pointer-events-none rounded-full opacity-60`} />
-
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-mono text-teal-400 tracking-wider font-semibold">
+                  <span className="text-[11px] font-mono text-[#444C3D] tracking-wider font-semibold">
                     {pillar.tag}
                   </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300">
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#FAF8F5] border border-[#E5DFD5] text-[#706E66]">
                     {pillar.badge}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2.5 rounded-xl bg-[#172338] border border-white/10 text-teal-300 group-hover:scale-110 transition-transform">
+                  <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] text-[#444C3D] group-hover:scale-105 transition-transform">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-teal-300 transition-colors">
+                  <h3 className="text-2xl font-normal text-[#1C1D1A] font-['Instrument_Serif'] tracking-tight group-hover:text-[#444C3D] transition-colors">
                     {pillar.title}
                   </h3>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#55544E] leading-relaxed">
                   {pillar.desc}
                 </p>
               </div>
 
               {/* 3D Asset Preview inside card */}
-              <div className="mt-6 rounded-xl overflow-hidden border border-white/10 relative h-48 sm:h-56 bg-[#0b1220]">
+              <div className="mt-6 rounded-xl overflow-hidden border border-[#E5DFD5] relative h-48 sm:h-56 bg-[#FAF8F5]">
                 <img
                   src={pillar.image}
                   alt={pillar.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111a2b] via-transparent to-transparent" />
-                <div className="absolute bottom-3 right-3 p-1.5 rounded-lg bg-[#0b1220]/80 backdrop-blur-md border border-white/10 text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-transparent" />
+                <div className="absolute bottom-3 right-3 p-1.5 rounded-lg bg-white/90 backdrop-blur-md border border-[#E5DFD5] text-[#1C1D1A] shadow-sm">
                   <ArrowUpRight className="w-4 h-4" />
                 </div>
               </div>
