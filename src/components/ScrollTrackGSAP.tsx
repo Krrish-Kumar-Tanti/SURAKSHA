@@ -56,47 +56,38 @@ export function ScrollTrackGSAP() {
         `Q 48 ${ (waypoints[4].y + waypoints[5].y) / 2 }, ${waypoints[5].x} ${waypoints[5].y}`;
       setSvgPath(pathD);
 
-      // Initial state: Beacon perches on Station 1 corner dock; Station 1 is enlarged
+      // Initial state: Beacon perches on Station 1 corner dock glowing golden; Station 1 is enlarged with golden glow
+      const GOLDEN_BORDER = 'rgba(251, 191, 36, 0.95)';
+      const GOLDEN_GLOW = '0 0 50px rgba(251, 191, 36, 0.45), 0 0 20px rgba(245, 158, 11, 0.25)';
+      const INACTIVE_CARD_BORDER = 'rgba(229, 223, 213, 0.7)';
+      
+      const TOKEN_GOLDEN_GLOW = '0 0 25px rgba(251, 191, 36, 0.95), 0 0 45px rgba(245, 158, 11, 0.8), 0 0 10px rgba(255, 255, 255, 0.6)';
+      const TOKEN_DEFAULT_SHADOW = '0 0 12px rgba(68, 76, 61, 0.5)';
+
       gsap.set(beacon, {
         top: waypoints[0].top,
         left: waypoints[0].left,
         scale: 1,
         opacity: 1,
+        boxShadow: TOKEN_GOLDEN_GLOW,
+        borderColor: 'rgba(251, 191, 36, 0.95)',
       });
 
       gsap.set(cards[0], {
         scale: 1.15,
         opacity: 1,
-        borderColor: 'rgba(99, 102, 241, 0.95)',
-        boxShadow: '0 0 50px rgba(99, 102, 241, 0.45)',
+        borderColor: GOLDEN_BORDER,
+        boxShadow: GOLDEN_GLOW,
       });
 
       for (let i = 1; i < cards.length; i++) {
         gsap.set(cards[i], {
           scale: 0.95,
           opacity: 0.45,
-          borderColor: 'rgba(255, 255, 255, 0.08)',
+          borderColor: INACTIVE_CARD_BORDER,
           boxShadow: 'none',
         });
       }
-
-      const borderColors = [
-        'rgba(99, 102, 241, 0.95)',
-        'rgba(56, 189, 248, 0.95)',
-        'rgba(45, 212, 191, 0.95)',
-        'rgba(251, 191, 36, 0.95)',
-        'rgba(168, 85, 247, 0.95)',
-        'rgba(52, 211, 153, 0.95)',
-      ];
-
-      const shadowGlows = [
-        '0 0 50px rgba(99, 102, 241, 0.45)',
-        '0 0 50px rgba(56, 189, 248, 0.45)',
-        '0 0 50px rgba(45, 212, 191, 0.45)',
-        '0 0 50px rgba(251, 191, 36, 0.45)',
-        '0 0 50px rgba(168, 85, 247, 0.45)',
-        '0 0 55px rgba(52, 211, 153, 0.55)',
-      ];
 
       if (tl) tl.kill();
 
@@ -116,15 +107,27 @@ export function ScrollTrackGSAP() {
         const nextPoint = waypoints[i + 1];
         const toDock = trackEl.querySelector(`#dock-node-${i + 1}`);
 
-        // 1. Token departs current corner and travels smoothly to next station's corner
+        // 1. Token departs current corner:
+        // - Previous card scales down, loses golden glow
+        // - Token transitions back to default shadow while traveling in between
         tl.to(
           fromCard,
           {
             scale: 0.95,
             opacity: 0.45,
-            borderColor: 'rgba(255, 255, 255, 0.08)',
+            borderColor: INACTIVE_CARD_BORDER,
             boxShadow: 'none',
             duration: 0.5,
+          },
+          `leg_${i}`
+        )
+        .to(
+          beacon,
+          {
+            boxShadow: TOKEN_DEFAULT_SHADOW,
+            borderColor: 'transparent',
+            duration: 0.35,
+            ease: 'power1.out',
           },
           `leg_${i}`
         )
@@ -138,29 +141,43 @@ export function ScrollTrackGSAP() {
           },
           `leg_${i}`
         )
-        // 2. THE EXACT INSTANT IT TOUCHES THE CORNER POINT, THE BOX GETS BIGGER!
+        // 2. THE EXACT INSTANT IT TOUCHES THE NEXT CORNER EDGE:
+        // - Card dynamically enlarges AND ignites with the same warm golden glow!
+        // - Token lights up with bright golden/yellowish glow!
         .to(
           toCard,
           {
             scale: 1.15,
             opacity: 1,
-            borderColor: borderColors[i + 1],
-            boxShadow: shadowGlows[i + 1],
+            borderColor: GOLDEN_BORDER,
+            boxShadow: GOLDEN_GLOW,
             duration: 0.7,
             ease: 'back.out(1.7)',
-          }
+          },
+          `leg_${i}+=1.85`
+        )
+        .to(
+          beacon,
+          {
+            boxShadow: TOKEN_GOLDEN_GLOW,
+            borderColor: 'rgba(251, 191, 36, 0.95)',
+            duration: 0.4,
+            ease: 'back.out(1.7)',
+          },
+          `leg_${i}+=1.85`
         )
         // 3. Pulse the corner dock ring when the token clicks into place
         .fromTo(
           toDock,
           { scale: 1 },
-          { scale: 1.35, duration: 0.35, yoyo: true, repeat: 1 },
-          '<'
+          { scale: 1.4, duration: 0.35, yoyo: true, repeat: 1 },
+          `leg_${i}+=1.85`
         )
         // 4. Dwell duration while scrolling so the user can comfortably read the full text
-        .to({}, { duration: 0.6 });
+        .to({}, { duration: 0.8 });
       }
     };
+
 
     const timer = setTimeout(() => {
       buildTimeline();
@@ -321,11 +338,11 @@ export function ScrollTrackGSAP() {
         {/* The Animated Travelling Ball / Digit Token */}
         <div
           ref={beaconRef}
-          className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-[#444C3D] shadow-[0_0_20px_rgba(68,76,61,0.6)]"
+          className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-[#444C3D] border-2 border-amber-400/90 transition-colors duration-200"
         >
-          <div className="w-2.5 h-2.5 rounded-full bg-white shadow-inner animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
           {/* Label positioned at the top of the circular token */}
-          <div className="absolute -top-6 font-mono text-[9px] text-[#F8F5EE] font-bold whitespace-nowrap bg-[#1C1D1A] px-2.5 py-0.5 rounded-full border border-[#444C3D] shadow-md tracking-wider">
+          <div className="absolute -top-6 font-mono text-[9px] text-[#F8F5EE] font-bold whitespace-nowrap bg-[#1C1D1A] px-2.5 py-0.5 rounded-full border border-amber-400/50 shadow-md tracking-wider">
             Digit token
           </div>
         </div>
