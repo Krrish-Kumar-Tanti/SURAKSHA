@@ -17,9 +17,10 @@ import { calculatePolicyDeposit } from '../../lib/api';
 
 interface FdrWizardPageProps {
   onNavigate: (screen: string) => void;
+  currentRole?: string;
 }
 
-export function FdrWizardPage({ onNavigate }: FdrWizardPageProps) {
+export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: FdrWizardPageProps) {
   const [step, setStep] = useState(1);
   const [bankName, setBankName] = useState('State Bank of India');
   const [ifsc, setIfsc] = useState('SBIN0001482');

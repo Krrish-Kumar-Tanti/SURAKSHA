@@ -1,3 +1,5 @@
+const GOLDEN_GLOW = '0 0 25px rgba(212, 175, 55, 0.35)';
+const TOKEN_GOLDEN_GLOW = '0 0 35px rgba(212, 175, 55, 0.6)';
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';

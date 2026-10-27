@@ -66,7 +66,7 @@ export default function App() {
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
     });
 
@@ -116,68 +116,68 @@ export default function App() {
       {/* Top Scroll Progress Line */}
       <div id="scroll-progress" className="fixed top-0 left-0 h-[2.5px] bg-[#444C3D] z-50 transition-all duration-75" />
 
-   {/* 1. Navbar call me onRoleChange ko update karein */}
-<Navbar
-  currentRole={currentRole}
-  onRoleChange={(newRole) => {
-    setCurrentRole(newRole);
-    // Role switch hote hi relevant page par redirect karein
-    if (newRole === 'INSTITUTION_USER') setActiveScreen('wizard');
-    else if (newRole === 'DEALING_OFFICER') setActiveScreen('portfolio');
-    else if (newRole === 'DIRECTOR_RB') setActiveScreen('policy');
-    else if (newRole === 'COMPETENT_AUTHORITY') setActiveScreen('release');
-    else if (newRole === 'AUDITOR') setActiveScreen('audit');
-  }}
-  activeScreen={activeScreen}
-  onNavigate={setActiveScreen}
-  isAuthenticated={isAuthenticated}
-  userSession={userSession}
-  onLoginClick={() => setActiveScreen('login')}
-  onLogoutClick={handleLogout}
-/>
+      {/* Navbar with Role Switcher */}
+      <Navbar
+        currentRole={currentRole}
+        onRoleChange={(newRole) => {
+          setCurrentRole(newRole);
+          if (newRole === 'INSTITUTION_USER') setActiveScreen('wizard');
+          else if (newRole === 'DEALING_OFFICER') setActiveScreen('portfolio');
+          else if (newRole === 'DIRECTOR_RB') setActiveScreen('policy');
+          else if (newRole === 'COMPETENT_AUTHORITY') setActiveScreen('release');
+          else if (newRole === 'AUDITOR') setActiveScreen('audit');
+        }}
+        activeScreen={activeScreen}
+        onNavigate={setActiveScreen}
+        isAuthenticated={isAuthenticated}
+        userSession={userSession}
+        onLoginClick={() => setActiveScreen('login')}
+        onLogoutClick={handleLogout}
+      />
 
-{/* 2. Har dedicated page render me currentRole prop pass karein */}
-{activeScreen === 'portfolio' && (
-  <>
-    <PortfolioPage currentRole={currentRole} onNavigate={setActiveScreen} />
-    <Footer />
-  </>
-)}
+      {/* RENDER DEDICATED SECTIONS */}
+      {activeScreen === 'portfolio' && (
+        <>
+          <PortfolioPage currentRole={currentRole} onNavigate={setActiveScreen} />
+          <Footer />
+        </>
+      )}
 
-{activeScreen === 'wizard' && (
-  <>
-    <FdrWizardPage currentRole={currentRole} onNavigate={setActiveScreen} />
-    <Footer />
-  </>
-)}
+      {activeScreen === 'wizard' && (
+        <>
+          <FdrWizardPage currentRole={currentRole} onNavigate={setActiveScreen} />
+          <Footer />
+        </>
+      )}
 
-{activeScreen === 'provenance' && (
-  <>
-    <ProvenancePage currentRole={currentRole} onNavigate={setActiveScreen} />
-    <Footer />
-  </>
-)}
+      {activeScreen === 'provenance' && (
+        <>
+          <ProvenancePage currentRole={currentRole} onNavigate={setActiveScreen} />
+          <Footer />
+        </>
+      )}
 
-{activeScreen === 'policy' && (
-  <>
-    <PolicyTracePage currentRole={currentRole} onNavigate={setActiveScreen} />
-    <Footer />
-  </>
-)}
+      {activeScreen === 'policy' && (
+        <>
+          <PolicyTracePage currentRole={currentRole} onNavigate={setActiveScreen} />
+          <Footer />
+        </>
+      )}
 
-{activeScreen === 'release' && (
-  <>
-    <ReleaseGraphPage currentRole={currentRole} onNavigate={setActiveScreen} />
-    <Footer />
-  </>
-)}
+      {activeScreen === 'release' && (
+        <>
+          <ReleaseGraphPage currentRole={currentRole} onNavigate={setActiveScreen} />
+          <Footer />
+        </>
+      )}
 
-{activeScreen === 'audit' && (
-  <>
-    <AuditChainPage currentRole={currentRole} onNavigate={setActiveScreen} />
-    <Footer />
-  </>
-)}
+      {activeScreen === 'audit' && (
+        <>
+          <AuditChainPage currentRole={currentRole} onNavigate={setActiveScreen} />
+          <Footer />
+        </>
+      )}
+
       {/* HOMEPAGE VIEW: Differentiates between Logged-in Cockpit vs Public Landing */}
       {activeScreen === 'home' && (
         <>
@@ -230,10 +230,10 @@ export default function App() {
                 </div>
               </div>
 
-             {/* 1. The Interactive Cockpit */}
-<div className="mb-12">
-  <CockpitPreview currentRole={currentRole} onNavigate={setActiveScreen} />
-</div>
+              {/* 1. The Interactive Cockpit */}
+              <div className="mb-12">
+                <CockpitPreview currentRole={currentRole} onNavigate={setActiveScreen} />
+              </div>
 
               {/* 2. The Tamper-Evident SHA-256 Ledger */}
               <div className="mb-12">
