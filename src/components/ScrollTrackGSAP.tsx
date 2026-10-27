@@ -1,5 +1,3 @@
-const GOLDEN_GLOW = '0 0 25px rgba(212, 175, 55, 0.35)';
-const TOKEN_GOLDEN_GLOW = '0 0 35px rgba(212, 175, 55, 0.6)';
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,6 +5,12 @@ import { Shield, Lock, FileSearch, Scale, Clock, CheckCircle2, Sparkles, ArrowDo
 import { AnimatedHeading } from './AnimatedHeading';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const GOLDEN_GLOW = '0 0 35px rgba(251, 191, 36, 0.45), 0 0 15px rgba(245, 158, 11, 0.25)';
+const TOKEN_GOLDEN_GLOW = '0 0 25px rgba(251, 191, 36, 0.95), 0 0 45px rgba(245, 158, 11, 0.8), 0 0 10px rgba(255, 255, 255, 0.6)';
+const TOKEN_DEFAULT_SHADOW = '0 0 12px rgba(68, 76, 61, 0.5)';
+const GOLDEN_BORDER = 'rgba(251, 191, 36, 0.95)';
+const INACTIVE_CARD_BORDER = 'rgba(229, 223, 213, 0.7)';
 
 export function ScrollTrackGSAP() {
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -47,31 +51,30 @@ export function ScrollTrackGSAP() {
           : { top: `${6 + i * 16}%`, left: '37%', x: 37, y: 6 + i * 16 };
       });
 
-      // Update SVG path to trace through every corner dock
+      // Update SVG path to trace through every corner dock without distortion
       const pathD =
         `M ${waypoints[0].x} ${waypoints[0].y} ` +
         `Q 48 ${(waypoints[0].y + waypoints[1].y) / 2}, ${waypoints[1].x} ${waypoints[1].y} ` +
         `Q 48 ${(waypoints[1].y + waypoints[2].y) / 2}, ${waypoints[2].x} ${waypoints[2].y} ` +
         `Q 48 ${(waypoints[2].y + waypoints[3].y) / 2}, ${waypoints[3].x} ${waypoints[3].y} ` +
-        `Q 48 ${(waypoints[4].y + waypoints[4].y) / 2}, ${waypoints[4].x} ${waypoints[4].y} ` +
+        `Q 48 ${(waypoints[3].y + waypoints[4].y) / 2}, ${waypoints[4].x} ${waypoints[4].y} ` +
         `Q 48 ${(waypoints[4].y + waypoints[5].y) / 2}, ${waypoints[5].x} ${waypoints[5].y}`;
       setSvgPath(pathD);
-
-      const GOLDEN_BORDER = 'rgba(251, 191, 36, 0.95)';
-      const INACTIVE_CARD_BORDER = 'rgba(229, 223, 213, 0.7)';
 
       gsap.set(beacon, {
         top: waypoints[0].top,
         left: waypoints[0].left,
         scale: 1,
         opacity: 1,
+        boxShadow: TOKEN_GOLDEN_GLOW,
         borderColor: GOLDEN_BORDER,
       });
 
       gsap.set(cards[0], {
-        scale: 1.05,
+        scale: 1.08,
         opacity: 1,
         borderColor: GOLDEN_BORDER,
+        boxShadow: GOLDEN_GLOW,
       });
 
       for (let i = 1; i < cards.length; i++) {
@@ -80,6 +83,7 @@ export function ScrollTrackGSAP() {
             scale: 0.96,
             opacity: 0.45,
             borderColor: INACTIVE_CARD_BORDER,
+            boxShadow: 'none',
           });
         }
       }
@@ -92,7 +96,7 @@ export function ScrollTrackGSAP() {
           trigger: trackEl,
           start: 'top 30%',
           end: 'bottom 85%',
-          scrub: 1.5, // Controls smooth deceleration for mouse wheel steps
+          scrub: 1.2,
         },
       });
 
@@ -108,10 +112,21 @@ export function ScrollTrackGSAP() {
             scale: 0.96,
             opacity: 0.45,
             borderColor: INACTIVE_CARD_BORDER,
+            boxShadow: 'none',
             duration: 0.5,
           },
           `leg_${i}`
         )
+          .to(
+            beacon,
+            {
+              boxShadow: TOKEN_DEFAULT_SHADOW,
+              borderColor: 'transparent',
+              duration: 0.35,
+              ease: 'power1.out',
+            },
+            `leg_${i}`
+          )
           .to(
             beacon,
             {
@@ -125,21 +140,32 @@ export function ScrollTrackGSAP() {
           .to(
             toCard,
             {
-              scale: 1.05,
+              scale: 1.08,
               opacity: 1,
               borderColor: GOLDEN_BORDER,
+              boxShadow: GOLDEN_GLOW,
               duration: 0.7,
-              ease: 'power2.out',
+              ease: 'back.out(1.5)',
+            },
+            `leg_${i}+=1.85`
+          )
+          .to(
+            beacon,
+            {
+              boxShadow: TOKEN_GOLDEN_GLOW,
+              borderColor: GOLDEN_BORDER,
+              duration: 0.4,
+              ease: 'back.out(1.5)',
             },
             `leg_${i}+=1.85`
           )
           .fromTo(
             toDock,
             { scale: 1 },
-            { scale: 1.3, duration: 0.35, yoyo: true, repeat: 1 },
+            { scale: 1.35, duration: 0.35, yoyo: true, repeat: 1 },
             `leg_${i}+=1.85`
           )
-          .to({}, { duration: 0.8 });
+          .to({}, { duration: 0.6 });
       }
     };
 
