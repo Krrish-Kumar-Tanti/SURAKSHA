@@ -25,6 +25,7 @@ import { ScrollTrackGSAP } from './components/ScrollTrackGSAP';
 import { LifecycleTabs } from './components/LifecycleTabs';
 import { AuditTicker } from './components/AuditTicker';
 import { FaqSection } from './components/FaqSection';
+import { Reviews3DSection } from './components/Reviews3DSection';
 import { Footer } from './components/Footer';
 import { LoginPage } from './components/LoginPage';
 import { PortfolioPage } from './components/pages/PortfolioPage';
@@ -373,6 +374,9 @@ export default function App() {
 
               {/* Regulatory FAQ Accordion */}
               <FaqSection />
+
+              {/* 3D Institutional Reviews Carousel */}
+              <Reviews3DSection />
 
               {/* Official AICTE Footer */}
               <Footer />

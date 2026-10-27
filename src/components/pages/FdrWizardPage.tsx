@@ -31,13 +31,13 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
   const [bankName, setBankName] = useState('State Bank of India');
   const [branch, setBranch] = useState('Pune Camp');
   const [ifsc, setIfsc] = useState('SBIN0001482');
-  const [fdrNumber, setFdrNumber] = useState('SBI/PUN/2026/884912');
-  const [depositAmount, setDepositAmount] = useState('7000000'); // ₹70 Lakhs
+  const [fdrNumber, setFdrNumber] = useState('FDR-SBI-2026-9921');
+  const [depositAmount, setDepositAmount] = useState('3500000'); // ₹35 Lakhs
   const [tenorYears, setTenorYears] = useState('10');
   const [issueDate, setIssueDate] = useState('2026-10-25');
   const [maturityDate, setMaturityDate] = useState('2036-10-25');
   const [programme, setProgramme] = useState('Engineering UG');
-  const [isLeased, setIsLeased] = useState(true);
+  const [isLeased, setIsLeased] = useState(false);
   const [isConcession, setIsConcession] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
   const [generatedHash, setGeneratedHash] = useState('');
@@ -443,12 +443,14 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
 
               <div className="pt-4 flex justify-between">
                 <button
+                  type="button"
                   onClick={() => setStep(2)}
-                  className="px-5 py-2.5 rounded-lg border border-[#DDD6C9] text-xs font-medium text-[#55544E]"
+                  className="px-5 py-2.5 rounded-lg border border-[#DDD6C9] text-xs font-medium text-[#55544E] cursor-pointer"
                 >
                   ← Back
                 </button>
                 <button
+                  type="button"
                   onClick={() => setStep(4)}
                   disabled={!uploadDone}
                   className="px-6 py-2.5 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-40"
