@@ -15,9 +15,12 @@ import { calculatePolicyDeposit } from '../../lib/api';
 
 interface PolicyTracePageProps {
   onNavigate: (screen: string) => void;
+  currentRole?: string;
 }
 
-export function PolicyTracePage({ onNavigate }: PolicyTracePageProps) {
+export function PolicyTracePage({ onNavigate, currentRole = 'DIRECTOR_RB' }: PolicyTracePageProps) 
+
+ {
   const [programme, setProgramme] = useState('Engineering UG');
   const [isLeased, setIsLeased] = useState(true);
   const [isConcession, setIsConcession] = useState(false);

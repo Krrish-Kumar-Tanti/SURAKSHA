@@ -1,6 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
+import { 
+  ArrowRight, 
+  ShieldCheck, 
+  Scale, 
+  Lock, 
+  Sparkles, 
+  UserCheck, 
+  Building2, 
+  FileCheck, 
+  Activity, 
+  Layers, 
+  ChevronRight 
+} from 'lucide-react';
+
 import { Navbar } from './components/Navbar';
 import { VantaGlobe } from './components/VantaGlobe';
 import { AnimatedHeading } from './components/AnimatedHeading';
@@ -19,19 +34,6 @@ import { PolicyTracePage } from './components/pages/PolicyTracePage';
 import { ReleaseGraphPage } from './components/pages/ReleaseGraphPage';
 import { AuditChainPage } from './components/pages/AuditChainPage';
 import { HeroIntroSplash } from './components/HeroIntroSplash';
-import { 
-  ArrowRight, 
-  ShieldCheck, 
-  Scale, 
-  Lock, 
-  Sparkles, 
-  UserCheck, 
-  Building2, 
-  FileCheck, 
-  Activity, 
-  Layers, 
-  ChevronRight 
-} from 'lucide-react';
 import { getSavedSession, clearSession, UserSession } from './lib/api';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -60,35 +62,30 @@ export default function App() {
     setActiveScreen('home');
   };
 
-  // Lenis Smooth Scroll initialization
+  // Global Lenis Smooth Scroll Setup connected to GSAP ScrollTrigger
   useEffect(() => {
-    const lenis = (window as any).Lenis
-      ? new (window as any).Lenis({
-          autoRaf: true,
-          duration: 1.2,
-          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          autoToggle: true,
-          anchors: true,
-          smoothWheel: true,
-          wrapper: window,
-          content: document.body,
-        })
-      : null;
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
 
-    if (lenis) {
-      lenis.on('scroll', ScrollTrigger.update);
-      gsap.ticker.add((time: number) => {
-        lenis.raf(time * 1000);
-      });
-      gsap.ticker.lagSmoothing(0);
-    }
+    lenis.on('scroll', ScrollTrigger.update);
+
+    const updateTicker = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateTicker);
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
-      if (lenis && lenis.destroy) lenis.destroy();
+      gsap.ticker.remove(updateTicker);
+      lenis.destroy();
     };
   }, []);
 
-  // Scroll progress bar
+  // Top Scroll progress bar
   useEffect(() => {
     const bar = document.getElementById('scroll-progress');
     if (!bar) return;
@@ -101,7 +98,7 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [activeScreen]);
 
-  // If user opened login screen
+  // Login View Override
   if (activeScreen === 'login') {
     return (
       <LoginPage
@@ -119,61 +116,68 @@ export default function App() {
       {/* Top Scroll Progress Line */}
       <div id="scroll-progress" className="fixed top-0 left-0 h-[2.5px] bg-[#444C3D] z-50 transition-all duration-75" />
 
-      {/* Navbar with Role Switcher, Sign In Button & Section Navigation */}
-      <Navbar
-        currentRole={currentRole}
-        onRoleChange={setCurrentRole}
-        activeScreen={activeScreen}
-        onNavigate={setActiveScreen}
-        isAuthenticated={isAuthenticated}
-        userSession={userSession}
-        onLoginClick={() => setActiveScreen('login')}
-        onLogoutClick={handleLogout}
-      />
+   {/* 1. Navbar call me onRoleChange ko update karein */}
+<Navbar
+  currentRole={currentRole}
+  onRoleChange={(newRole) => {
+    setCurrentRole(newRole);
+    // Role switch hote hi relevant page par redirect karein
+    if (newRole === 'INSTITUTION_USER') setActiveScreen('wizard');
+    else if (newRole === 'DEALING_OFFICER') setActiveScreen('portfolio');
+    else if (newRole === 'DIRECTOR_RB') setActiveScreen('policy');
+    else if (newRole === 'COMPETENT_AUTHORITY') setActiveScreen('release');
+    else if (newRole === 'AUDITOR') setActiveScreen('audit');
+  }}
+  activeScreen={activeScreen}
+  onNavigate={setActiveScreen}
+  isAuthenticated={isAuthenticated}
+  userSession={userSession}
+  onLoginClick={() => setActiveScreen('login')}
+  onLogoutClick={handleLogout}
+/>
 
-      {/* RENDER DEDICATED SECTIONS */}
-      {activeScreen === 'portfolio' && (
-        <>
-          <PortfolioPage onNavigate={setActiveScreen} />
-          <Footer />
-        </>
-      )}
+{/* 2. Har dedicated page render me currentRole prop pass karein */}
+{activeScreen === 'portfolio' && (
+  <>
+    <PortfolioPage currentRole={currentRole} onNavigate={setActiveScreen} />
+    <Footer />
+  </>
+)}
 
-      {activeScreen === 'wizard' && (
-        <>
-          <FdrWizardPage onNavigate={setActiveScreen} />
-          <Footer />
-        </>
-      )}
+{activeScreen === 'wizard' && (
+  <>
+    <FdrWizardPage currentRole={currentRole} onNavigate={setActiveScreen} />
+    <Footer />
+  </>
+)}
 
-      {activeScreen === 'provenance' && (
-        <>
-          <ProvenancePage onNavigate={setActiveScreen} />
-          <Footer />
-        </>
-      )}
+{activeScreen === 'provenance' && (
+  <>
+    <ProvenancePage currentRole={currentRole} onNavigate={setActiveScreen} />
+    <Footer />
+  </>
+)}
 
-      {activeScreen === 'policy' && (
-        <>
-          <PolicyTracePage onNavigate={setActiveScreen} />
-          <Footer />
-        </>
-      )}
+{activeScreen === 'policy' && (
+  <>
+    <PolicyTracePage currentRole={currentRole} onNavigate={setActiveScreen} />
+    <Footer />
+  </>
+)}
 
-      {activeScreen === 'release' && (
-        <>
-          <ReleaseGraphPage onNavigate={setActiveScreen} />
-          <Footer />
-        </>
-      )}
+{activeScreen === 'release' && (
+  <>
+    <ReleaseGraphPage currentRole={currentRole} onNavigate={setActiveScreen} />
+    <Footer />
+  </>
+)}
 
-      {activeScreen === 'audit' && (
-        <>
-          <AuditChainPage onNavigate={setActiveScreen} />
-          <Footer />
-        </>
-      )}
-
+{activeScreen === 'audit' && (
+  <>
+    <AuditChainPage currentRole={currentRole} onNavigate={setActiveScreen} />
+    <Footer />
+  </>
+)}
       {/* HOMEPAGE VIEW: Differentiates between Logged-in Cockpit vs Public Landing */}
       {activeScreen === 'home' && (
         <>
@@ -226,12 +230,12 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 1. The Interactive Cockpit (Right at the Top after login) */}
-              <div className="mb-12">
-                <CockpitPreview />
-              </div>
+             {/* 1. The Interactive Cockpit */}
+<div className="mb-12">
+  <CockpitPreview currentRole={currentRole} onNavigate={setActiveScreen} />
+</div>
 
-              {/* 2. The Tamper-Evident SHA-256 Ledger (Right below Cockpit) */}
+              {/* 2. The Tamper-Evident SHA-256 Ledger */}
               <div className="mb-12">
                 <AuditTicker />
               </div>
@@ -241,29 +245,26 @@ export default function App() {
           ) : (
             /* ========================================================
              * PUBLIC GUEST VIEW: Clean Editorial Landing Presentation
-             * (Cockpit and Internal Audit are moved inside after login)
              * ======================================================== */
             <>
-              {/* Hero Section Container with Warm Linen / Vestris Aesthetic */}
+              {/* Hero Section Container */}
               <section 
                 className="relative overflow-hidden text-left pt-20 px-6 lg:px-16 pb-28 z-10 min-h-[90vh] flex items-center bg-[#F8F5EE]"
               >
                 {/* Vanta Globe Background with Interactive Mouse Control */}
                 <VantaGlobe />
 
-                {/* Smooth Subtle Fade Transition at bottom */}
+                {/* Smooth Fade Transition */}
                 <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-b from-transparent to-[#F8F5EE] pointer-events-none z-[2]" />
 
-                {/* Hero Content — Strictly Left-Aligned on Left 50% so Right 50% lets Globe Shine */}
+                {/* Hero Content */}
                 <div className="relative z-10 max-w-[1440px] mx-auto w-full pointer-events-none">
                   <div className="max-w-[620px] lg:max-w-[680px] text-left pointer-events-auto">
-                    {/* Animated Hero Badge */}
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-8 shadow-sm">
                       <span className="w-2 h-2 rounded-full bg-[#444C3D] animate-pulse" />
                       SIH26265 · AICTE Approval Process Handbook (APH 2024–27)
                     </div>
 
-                    {/* Vestris Style Editorial Headline with Instrument Serif & Italic flourish */}
                     <AnimatedHeading
                       as="h1"
                       className="text-[clamp(2.6rem,5.2vw,4.8rem)] font-normal leading-[1.06] tracking-[-0.02em] text-[#1C1D1A] mb-6"
@@ -271,12 +272,10 @@ export default function App() {
                       ( AICTE Security Deposit *Control Tower* )
                     </AnimatedHeading>
 
-                    {/* Subtitle in warm editorial graphite */}
                     <p className="text-base sm:text-lg md:text-xl text-[#55544E] max-w-[580px] mb-10 leading-relaxed font-normal">
                       Autonomous compliance proving every FDR is <span className="text-[#1C1D1A] font-semibold">real</span> through 3-way reconciliation, <span className="text-[#1C1D1A] font-semibold">correctly sized</span> under APH Table 1.4, <span className="text-[#1C1D1A] font-semibold">continuously pledged</span>, and <span className="text-[#1C1D1A] font-semibold">safe to release</span> under Clause 6.46.
                     </p>
 
-                    {/* Vestris Olive Green & Cream Action Buttons */}
                     <div className="flex flex-wrap items-center justify-start gap-4">
                       <button
                         onClick={() => setActiveScreen('login')}
@@ -297,7 +296,7 @@ export default function App() {
                 </div>
               </section>
 
-              {/* Participating Banks Marquee Ticker */}
+              {/* Participating Banks Ticker */}
               <section className="py-10 px-6 bg-[#EFEAE1]/60 relative z-10 border-y border-[#E5DFD5]">
                 <div className="text-center text-[11px] font-mono uppercase tracking-[0.15em] mb-5 text-[#706E66]">
                   Simulated Banking & Statutory Desk Adapters
@@ -311,15 +310,15 @@ export default function App() {
                 </div>
               </section>
 
-              {/* The 4 Compliance Pillars Bento Grid */}
+              {/* 4 Compliance Pillars Bento Grid */}
               <div id="pillars">
                 <FeaturesBento />
               </div>
 
-              {/* The Working GSAP ScrollTrack Animation */}
+              {/* GSAP ScrollTrack Animation */}
               <ScrollTrackGSAP />
 
-              {/* The 4-Phase Interactive Lifecycle Stepper */}
+              {/* Lifecycle Stepper */}
               <LifecycleTabs />
 
               {/* Regulatory FAQ Accordion */}

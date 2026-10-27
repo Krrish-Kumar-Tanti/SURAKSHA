@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   AlertTriangle, 
@@ -17,8 +17,28 @@ import {
   Upload
 } from 'lucide-react';
 
-export function CockpitPreview() {
+interface CockpitPreviewProps {
+  currentRole?: string;
+  onNavigate?: (screen: string) => void;
+}
+
+export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: CockpitPreviewProps) {
   const [activeTab, setActiveTab] = useState<'portfolio' | 'provenance' | 'calculator' | 'graph'>('portfolio');
+
+  // Automatically focus relevant tab when role changes from Navbar
+  useEffect(() => {
+    if (currentRole === 'INSTITUTION_USER') {
+      setActiveTab('calculator');
+    } else if (currentRole === 'DEALING_OFFICER') {
+      setActiveTab('portfolio');
+    } else if (currentRole === 'DIRECTOR_RB') {
+      setActiveTab('provenance');
+    } else if (currentRole === 'COMPETENT_AUTHORITY') {
+      setActiveTab('graph');
+    } else if (currentRole === 'AUDITOR') {
+      setActiveTab('provenance');
+    }
+  }, [currentRole]);
 
   // Policy calculator states
   const [programme, setProgramme] = useState('Engineering UG');
@@ -39,12 +59,24 @@ export function CockpitPreview() {
   const leasedFactor = isLeased ? 2.0 : 1.0;
   const requiredAmount = baseAmount * concessionFactor * leasedFactor;
 
+  // Role Display Label Helper
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'INSTITUTION_USER': return 'College Registrar (SIT Pune)';
+      case 'DEALING_OFFICER': return 'Regional Dealing Officer (WRO)';
+      case 'DIRECTOR_RB': return 'Regional Director Desk';
+      case 'COMPETENT_AUTHORITY': return 'Approving Authority (Member Secretary)';
+      case 'AUDITOR': return 'Central Vigilance Auditor';
+      default: return role;
+    }
+  };
+
   return (
     <div className="relative mx-auto max-w-[1340px] px-4 sm:px-6 z-10 -mt-6">
-      {/* Vestris Style Soft Sky-Blue / Pastel Wash Frame Container */}
+      {/* Soft Sky-Blue / Pastel Wash Frame Container */}
       <div className="rounded-[32px] bg-gradient-to-b from-[#D6E6ED] to-[#E4EEF2] p-4 sm:p-8 border border-[#CADBE2] shadow-sm">
         
-        {/* Main Application Window (Crisp White Editorial Paper) */}
+        {/* Main Application Window */}
         <div className="relative rounded-2xl bg-white border border-[#E5DFD5] shadow-[0_15px_45px_rgba(28,29,26,0.06)] overflow-hidden">
           
           {/* Card Header & Tabs */}
@@ -52,10 +84,10 @@ export function CockpitPreview() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFEAE1] border border-[#DDD6C9] text-[#444C3D] text-xs font-semibold">
                 <span className="w-2 h-2 rounded-full bg-[#444C3D] animate-ping" />
-                Live Control Tower Cockpit
+                <span>Active Role: <strong className="font-mono text-[#1C1D1A]">{getRoleLabel(currentRole)}</strong></span>
               </div>
               <span className="text-xs text-[#706E66] hidden sm:inline font-mono">
-                Synthetic data · Simulated sandbox
+                Simulated Sandbox
               </span>
             </div>
 
@@ -63,7 +95,7 @@ export function CockpitPreview() {
             <div className="flex items-center gap-1 bg-[#ECE7DE] p-1 rounded-xl border border-[#DDD6C9]">
               <button
                 onClick={() => setActiveTab('portfolio')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   activeTab === 'portfolio' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
@@ -71,7 +103,7 @@ export function CockpitPreview() {
               </button>
               <button
                 onClick={() => setActiveTab('provenance')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   activeTab === 'provenance' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
@@ -79,7 +111,7 @@ export function CockpitPreview() {
               </button>
               <button
                 onClick={() => setActiveTab('calculator')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   activeTab === 'calculator' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
@@ -87,7 +119,7 @@ export function CockpitPreview() {
               </button>
               <button
                 onClick={() => setActiveTab('graph')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   activeTab === 'graph' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
@@ -99,7 +131,6 @@ export function CockpitPreview() {
           {/* Tab 1: Executive Portfolio */}
           {activeTab === 'portfolio' && (
             <div className="p-6 lg:p-8 space-y-6 bg-white">
-              {/* Top 4 KPI Metrics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
                   <div className="text-[11px] font-mono uppercase text-[#706E66]">Total ₹ Held</div>
@@ -163,7 +194,7 @@ export function CockpitPreview() {
             <div className="p-6 lg:p-8 space-y-6 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-[#1C1D1A] text-base font-['Instrument_Serif'] text-xl">Three-Way Provenance Reconciliation</h4>
+                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Three-Way Provenance Reconciliation</h4>
                   <p className="text-xs text-[#706E66]">Instrument: FDR-SIT-2016-001 · State Bank of India</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -175,7 +206,6 @@ export function CockpitPreview() {
                 </div>
               </div>
 
-              {/* 3-Way Comparison Table */}
               <div className="overflow-x-auto rounded-xl border border-[#E5DFD5]">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#FAF8F5] text-[#706E66] border-b border-[#E5DFD5] uppercase font-mono text-[10px]">
@@ -228,10 +258,10 @@ export function CockpitPreview() {
                 </table>
               </div>
 
-              {/* Officer / Director Action Control */}
+              {/* Action Control */}
               <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                 <div className="text-xs text-[#706E66]">
-                  Action requires Regional Director role. Every waiver is recorded in the SHA-256 audit ledger.
+                  Active designation: <strong className="text-[#1C1D1A]">{getRoleLabel(currentRole)}</strong>. Every action is recorded in the SHA-256 audit ledger.
                 </div>
                 <div className="flex items-center gap-3">
                   <button
@@ -242,7 +272,7 @@ export function CockpitPreview() {
                         : 'bg-[#B45309] hover:bg-[#92400E] text-white shadow-sm'
                     }`}
                   >
-                    {dispositionWaived ? 'Undo Waiver (Reset to Blocked)' : 'Director: Waive with Audit Note'}
+                    {dispositionWaived ? 'Undo Waiver (Reset to Blocked)' : 'Waive Discrepancy with Audit Note'}
                   </button>
                 </div>
               </div>
@@ -255,7 +285,7 @@ export function CockpitPreview() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 <div className="space-y-5">
                   <div>
-                    <h4 className="font-bold text-[#1C1D1A] text-base font-['Instrument_Serif'] text-xl">AICTE Approval Process Handbook (APH 2026–27)</h4>
+                    <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">AICTE Approval Process Handbook (APH 2026–27)</h4>
                     <p className="text-xs text-[#706E66]">Clause 1.12 Table 1.4 + Regional & Land Multipliers</p>
                   </div>
 
@@ -346,7 +376,7 @@ export function CockpitPreview() {
             <div className="p-6 lg:p-8 space-y-6 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-[#1C1D1A] text-base font-['Instrument_Serif'] text-xl">Clause 6.46 Multi-Clearance Release Graph</h4>
+                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Clause 6.46 Multi-Clearance Release Graph</h4>
                   <p className="text-xs text-[#706E66]">Release cannot execute until every required clearance node resolves green</p>
                 </div>
 
@@ -362,9 +392,8 @@ export function CockpitPreview() {
                 </div>
               </div>
 
-              {/* Interactive Node Graph Grid */}
+              {/* Node Graph Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Node 1: PGRC */}
                 <div 
                   onClick={() => setPgrcCleared(!pgrcCleared)}
                   className={`p-4 rounded-xl border cursor-pointer transition-all ${
@@ -382,7 +411,6 @@ export function CockpitPreview() {
                   <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>
                 </div>
 
-                {/* Node 2: Vigilance */}
                 <div 
                   onClick={() => setVigilanceCleared(!vigilanceCleared)}
                   className={`p-4 rounded-xl border cursor-pointer transition-all ${
@@ -400,7 +428,6 @@ export function CockpitPreview() {
                   <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>
                 </div>
 
-                {/* Node 3: Grants Cell */}
                 <div 
                   onClick={() => setGrantsCleared(!grantsCleared)}
                   className={`p-4 rounded-xl border cursor-pointer transition-all ${
@@ -418,7 +445,6 @@ export function CockpitPreview() {
                   <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>
                 </div>
 
-                {/* Node 4: 10-Yr Term */}
                 <div className="p-4 rounded-xl border bg-[#F2F7F0] border-[#BBD7B5] text-[#2D5A27]">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-mono uppercase">Statutory Period</span>
@@ -426,7 +452,7 @@ export function CockpitPreview() {
                   </div>
                   <div className="font-bold text-sm text-[#1C1D1A]">10-Year Hold Complete</div>
                   <div className="text-[11px] text-[#706E66] mt-1">Maturity date 01-Nov-2026 reached</div>
-                  <div className="text-[10px] text-[#2D5A27] mt-2 font-mono">Verified via Time Machine</div>
+                  <div className="text-[10px] text-[#2D5A27] mt-2 font-mono font-semibold">Verified via Time Machine</div>
                 </div>
               </div>
 
@@ -452,7 +478,7 @@ export function CockpitPreview() {
 
         </div>
 
-        {/* Vestris Style Bottom Action Banner (from Screenshot 3) */}
+        {/* Bottom Action Banner */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-3 py-2 text-left">
           <div>
             <div className="font-semibold text-sm text-[#1C1D1A]">Want to test your own deposit?</div>

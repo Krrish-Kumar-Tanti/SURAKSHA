@@ -15,12 +15,13 @@ import {
   X
 } from 'lucide-react';
 import { AnimatedHeading } from '../AnimatedHeading';
-
 interface ProvenancePageProps {
   onNavigate: (screen: string) => void;
+  currentRole?: string;
 }
 
-export function ProvenancePage({ onNavigate }: ProvenancePageProps) {
+export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: ProvenancePageProps) {
+
   const [waived, setWaived] = useState(false);
   const [selectedInst, setSelectedInst] = useState('SIT Pune (1-1092847291)');
   const [activeCheck, setActiveCheck] = useState<'match' | 'discrepant'>('match');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Building2, 
   Upload, 
@@ -33,14 +33,26 @@ export function FdrWizardPage({ onNavigate }: FdrWizardPageProps) {
   const [generatedHash, setGeneratedHash] = useState('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // File Upload Handlers
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setUploadDone(true);
+      setGeneratedHash('7c3b889a1f28b4c2e6840d21a99f1c7e923e4b7a123f890cde456812ab9901ef');
+    }
+  };
+
   const parsedAmountLakhs = parseFloat(depositAmount || '0') / 100000;
   const requiredAmountLakhs = (programme === 'Engineering UG' ? 35 : 15) * (isConcession ? 0.5 : 1.0) * (isLeased ? 2.0 : 1.0);
   const isCompliant = parsedAmountLakhs >= requiredAmountLakhs;
-
-  const handleSimulateUpload = () => {
-    setUploadDone(true);
-    setGeneratedHash('7c3b889a1f28b4c2e6840d21a99f1c7e923e4b7a123f890cde456812ab9901ef');
-  };
 
   return (
     <div className="min-h-screen bg-[#F8F5EE] text-[#1C1D1A] py-10 px-4 sm:px-8 max-w-[1100px] mx-auto text-left">
@@ -228,7 +240,7 @@ export function FdrWizardPage({ onNavigate }: FdrWizardPageProps) {
             </div>
           )}
 
-          {/* STEP 3: OCR & Upload Simulation */}
+          {/* STEP 3: OCR & Native File Upload */}
           {step === 3 && (
             <div className="space-y-6">
               <div>
@@ -240,15 +252,25 @@ export function FdrWizardPage({ onNavigate }: FdrWizardPageProps) {
                 </p>
               </div>
 
+              {/* Hidden System File Input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".pdf,.png,.jpg,.jpeg,.tiff"
+                className="hidden"
+              />
+
+              {/* Clickable Drag/Drop & File Selection Zone */}
               <div 
-                onClick={handleSimulateUpload}
+                onClick={handleUploadClick}
                 className={`p-8 rounded-2xl border-2 border-dashed transition-all text-center cursor-pointer ${
                   uploadDone ? 'border-emerald-500 bg-emerald-50/40' : 'border-[#DDD6C9] bg-[#FAF8F5] hover:border-[#444C3D]'
                 }`}
               >
                 <Upload className={`w-8 h-8 mx-auto mb-2 ${uploadDone ? 'text-emerald-600' : 'text-[#706E66]'}`} />
                 <div className="font-semibold text-sm text-[#1C1D1A]">
-                  {uploadDone ? 'FDR Certificate Processed (fdr_scan_sbi_2026.pdf)' : 'Click to Upload FDR Certificate (PDF / TIFF)'}
+                  {selectedFile ? `FDR Certificate Selected (${selectedFile.name})` : 'Click to Upload FDR Certificate (PDF / TIFF / JPG)'}
                 </div>
                 <div className="text-xs text-[#706E66] mt-1 font-mono">
                   {uploadDone ? 'OCR Extraction Confidence: 99.4%' : 'Max size 25MB · SHA-256 Digest will be cryptographically anchored'}

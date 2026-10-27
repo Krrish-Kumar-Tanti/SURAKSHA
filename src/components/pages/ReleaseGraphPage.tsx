@@ -18,9 +18,11 @@ import { AnimatedHeading } from '../AnimatedHeading';
 
 interface ReleaseGraphPageProps {
   onNavigate: (screen: string) => void;
+  currentRole?: string;
 }
 
-export function ReleaseGraphPage({ onNavigate }: ReleaseGraphPageProps) {
+export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORITY' }: ReleaseGraphPageProps) {
+
   const [pgrcCleared, setPgrcCleared] = useState(true);
   const [vigilanceCleared, setVigilanceCleared] = useState(true);
   const [grantsCleared, setGrantsCleared] = useState(true);

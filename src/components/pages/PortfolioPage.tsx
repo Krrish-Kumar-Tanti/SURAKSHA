@@ -20,9 +20,13 @@ import { AnimatedHeading } from '../AnimatedHeading';
 
 interface PortfolioPageProps {
   onNavigate: (screen: string) => void;
+  currentRole?: string;
 }
 
-export function PortfolioPage({ onNavigate }: PortfolioPageProps) {
+export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: PortfolioPageProps) {
+  // Aap yahan currentRole ke basis par specific action buttons ya columns hide/show kar sakte hain
+
+
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [selectedInst, setSelectedInst] = useState<InstitutionItem | null>(null);

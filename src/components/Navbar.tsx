@@ -78,12 +78,18 @@ export function Navbar({
           ))}
         </nav>
 
-        {/* Right Tools */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1]/40 text-[#444C3D] text-[11px] font-mono font-medium backdrop-blur-sm">
-            <Clock className="w-3 h-3 text-[#444C3D]" />
-            <span>25 Oct 2026</span>
-          </div>
+       {/* Right Tools */}
+  <div className="flex items-center gap-2 shrink-0">
+    <div className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1]/40 text-[#444C3D] text-[11px] font-mono font-medium backdrop-blur-sm">
+      <Clock className="w-3 h-3 text-[#444C3D]" />
+      <span>
+        {new Date().toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        })}
+      </span>
+    </div>
           {!isAuthenticated ? (
             <button
               onClick={onLoginClick}

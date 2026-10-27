@@ -40,64 +40,57 @@ export function ScrollTrackGSAP() {
           const leftPct = ((rect.left - trackRect.left + rect.width / 2) / trackRect.width) * 100;
           return { top: `${topPct}%`, left: `${leftPct}%`, x: leftPct, y: topPct };
         }
-        // Fallbacks if layout is still settling
         return i % 2 === 0
           ? { top: `${6 + i * 16}%`, left: '58%', x: 58, y: 6 + i * 16 }
           : { top: `${6 + i * 16}%`, left: '37%', x: 37, y: 6 + i * 16 };
       });
 
-      // Update SVG path to accurately trace through every corner dock
+      // Update SVG path to trace through every corner dock
       const pathD =
         `M ${waypoints[0].x} ${waypoints[0].y} ` +
-        `Q 48 ${ (waypoints[0].y + waypoints[1].y) / 2 }, ${waypoints[1].x} ${waypoints[1].y} ` +
-        `Q 48 ${ (waypoints[1].y + waypoints[2].y) / 2 }, ${waypoints[2].x} ${waypoints[2].y} ` +
-        `Q 48 ${ (waypoints[2].y + waypoints[3].y) / 2 }, ${waypoints[3].x} ${waypoints[3].y} ` +
-        `Q 48 ${ (waypoints[3].y + waypoints[4].y) / 2 }, ${waypoints[4].x} ${waypoints[4].y} ` +
-        `Q 48 ${ (waypoints[4].y + waypoints[5].y) / 2 }, ${waypoints[5].x} ${waypoints[5].y}`;
+        `Q 48 ${(waypoints[0].y + waypoints[1].y) / 2}, ${waypoints[1].x} ${waypoints[1].y} ` +
+        `Q 48 ${(waypoints[1].y + waypoints[2].y) / 2}, ${waypoints[2].x} ${waypoints[2].y} ` +
+        `Q 48 ${(waypoints[2].y + waypoints[3].y) / 2}, ${waypoints[3].x} ${waypoints[3].y} ` +
+        `Q 48 ${(waypoints[4].y + waypoints[4].y) / 2}, ${waypoints[4].x} ${waypoints[4].y} ` +
+        `Q 48 ${(waypoints[4].y + waypoints[5].y) / 2}, ${waypoints[5].x} ${waypoints[5].y}`;
       setSvgPath(pathD);
 
-      // Initial state: Beacon perches on Station 1 corner dock glowing golden; Station 1 is enlarged with golden glow
       const GOLDEN_BORDER = 'rgba(251, 191, 36, 0.95)';
-      const GOLDEN_GLOW = '0 0 50px rgba(251, 191, 36, 0.45), 0 0 20px rgba(245, 158, 11, 0.25)';
       const INACTIVE_CARD_BORDER = 'rgba(229, 223, 213, 0.7)';
-      
-      const TOKEN_GOLDEN_GLOW = '0 0 25px rgba(251, 191, 36, 0.95), 0 0 45px rgba(245, 158, 11, 0.8), 0 0 10px rgba(255, 255, 255, 0.6)';
-      const TOKEN_DEFAULT_SHADOW = '0 0 12px rgba(68, 76, 61, 0.5)';
 
       gsap.set(beacon, {
         top: waypoints[0].top,
         left: waypoints[0].left,
         scale: 1,
         opacity: 1,
-        boxShadow: TOKEN_GOLDEN_GLOW,
-        borderColor: 'rgba(251, 191, 36, 0.95)',
+        borderColor: GOLDEN_BORDER,
       });
 
       gsap.set(cards[0], {
-        scale: 1.15,
+        scale: 1.05,
         opacity: 1,
         borderColor: GOLDEN_BORDER,
-        boxShadow: GOLDEN_GLOW,
       });
 
       for (let i = 1; i < cards.length; i++) {
-        gsap.set(cards[i], {
-          scale: 0.95,
-          opacity: 0.45,
-          borderColor: INACTIVE_CARD_BORDER,
-          boxShadow: 'none',
-        });
+        if (cards[i]) {
+          gsap.set(cards[i], {
+            scale: 0.96,
+            opacity: 0.45,
+            borderColor: INACTIVE_CARD_BORDER,
+          });
+        }
       }
 
       if (tl) tl.kill();
 
-      // Master Timeline: travels strictly corner-to-corner across all 6 stations
+      // GSAP ScrollTrigger timeline with scrub smooth delay
       tl = gsap.timeline({
         scrollTrigger: {
           trigger: trackEl,
           start: 'top 30%',
           end: 'bottom 85%',
-          scrub: 1.0,
+          scrub: 1.5, // Controls smooth deceleration for mouse wheel steps
         },
       });
 
@@ -107,77 +100,46 @@ export function ScrollTrackGSAP() {
         const nextPoint = waypoints[i + 1];
         const toDock = trackEl.querySelector(`#dock-node-${i + 1}`);
 
-        // 1. Token departs current corner:
-        // - Previous card scales down, loses golden glow
-        // - Token transitions back to default shadow while traveling in between
         tl.to(
           fromCard,
           {
-            scale: 0.95,
+            scale: 0.96,
             opacity: 0.45,
             borderColor: INACTIVE_CARD_BORDER,
-            boxShadow: 'none',
             duration: 0.5,
           },
           `leg_${i}`
         )
-        .to(
-          beacon,
-          {
-            boxShadow: TOKEN_DEFAULT_SHADOW,
-            borderColor: 'transparent',
-            duration: 0.35,
-            ease: 'power1.out',
-          },
-          `leg_${i}`
-        )
-        .to(
-          beacon,
-          {
-            top: nextPoint.top,
-            left: nextPoint.left,
-            duration: 2.2,
-            ease: 'power1.inOut',
-          },
-          `leg_${i}`
-        )
-        // 2. THE EXACT INSTANT IT TOUCHES THE NEXT CORNER EDGE:
-        // - Card dynamically enlarges AND ignites with the same warm golden glow!
-        // - Token lights up with bright golden/yellowish glow!
-        .to(
-          toCard,
-          {
-            scale: 1.15,
-            opacity: 1,
-            borderColor: GOLDEN_BORDER,
-            boxShadow: GOLDEN_GLOW,
-            duration: 0.7,
-            ease: 'back.out(1.7)',
-          },
-          `leg_${i}+=1.85`
-        )
-        .to(
-          beacon,
-          {
-            boxShadow: TOKEN_GOLDEN_GLOW,
-            borderColor: 'rgba(251, 191, 36, 0.95)',
-            duration: 0.4,
-            ease: 'back.out(1.7)',
-          },
-          `leg_${i}+=1.85`
-        )
-        // 3. Pulse the corner dock ring when the token clicks into place
-        .fromTo(
-          toDock,
-          { scale: 1 },
-          { scale: 1.4, duration: 0.35, yoyo: true, repeat: 1 },
-          `leg_${i}+=1.85`
-        )
-        // 4. Dwell duration while scrolling so the user can comfortably read the full text
-        .to({}, { duration: 0.8 });
+          .to(
+            beacon,
+            {
+              top: nextPoint.top,
+              left: nextPoint.left,
+              duration: 2.2,
+              ease: 'power1.inOut',
+            },
+            `leg_${i}`
+          )
+          .to(
+            toCard,
+            {
+              scale: 1.05,
+              opacity: 1,
+              borderColor: GOLDEN_BORDER,
+              duration: 0.7,
+              ease: 'power2.out',
+            },
+            `leg_${i}+=1.85`
+          )
+          .fromTo(
+            toDock,
+            { scale: 1 },
+            { scale: 1.3, duration: 0.35, yoyo: true, repeat: 1 },
+            `leg_${i}+=1.85`
+          )
+          .to({}, { duration: 0.8 });
       }
     };
-
 
     const timer = setTimeout(() => {
       buildTimeline();
@@ -203,7 +165,7 @@ export function ScrollTrackGSAP() {
   const stages = [
     {
       posStyle: { left: '56%', top: '6%' },
-      dockSide: 'left', // Top-left corner
+      dockSide: 'left',
       title: 'Digital Intake & Cryptographic Sealing',
       subtitle: 'SHA-256 Digest Sealing',
       desc: 'Raw FDR & Affidavit intake with SHA-256 hash sealing, anti-tamper timestamping, and canonical statutory metadata registry.',
@@ -216,7 +178,7 @@ export function ScrollTrackGSAP() {
     },
     {
       posStyle: { left: '6%', top: '22%' },
-      dockSide: 'right', // Top-right corner
+      dockSide: 'right',
       title: 'Policy Engine Table 1.4 Calculation',
       subtitle: 'Deterministic APH Sizing',
       desc: 'Evaluates required statutory FDR under AICTE APH Table 1.4 norms. Deterministically computes base deposit + 50% concession + ×2.0 leased land multiplier.',
@@ -229,7 +191,7 @@ export function ScrollTrackGSAP() {
     },
     {
       posStyle: { left: '56%', top: '38%' },
-      dockSide: 'left', // Top-left corner
+      dockSide: 'left',
       title: '3-Way Zero-Hallucination Provenance',
       subtitle: 'Triangulated OCR & Bank Verification',
       desc: 'Field-level 3-way match: Institution declared values vs OCR document parsing vs Automated core banking sandbox API response.',
@@ -242,7 +204,7 @@ export function ScrollTrackGSAP() {
     },
     {
       posStyle: { left: '6%', top: '54%' },
-      dockSide: 'right', // Top-right corner
+      dockSide: 'right',
       title: '10-Year Custody & Lien Lineage Radar',
       subtitle: 'Continuous Cross-Trust Auditing',
       desc: 'Enforces statutory 10-year lock-in period with automated renewal tracking and cross-trust duplicate pledge detection across all scheduled banks.',
@@ -255,7 +217,7 @@ export function ScrollTrackGSAP() {
     },
     {
       posStyle: { left: '56%', top: '70%' },
-      dockSide: 'left', // Top-left corner
+      dockSide: 'left',
       title: 'Clause 6.46 DAG Release Clearances',
       subtitle: 'Multi-Bureau Statutory Gate',
       desc: 'Release request enters a strict Directed Acyclic Graph. Enforces mandatory clearances from PGRC Student Desk, Vigilance Bureau, and Regional Officer.',
@@ -268,7 +230,7 @@ export function ScrollTrackGSAP() {
     },
     {
       posStyle: { left: '6%', top: '86%' },
-      dockSide: 'right', // Top-right corner
+      dockSide: 'right',
       title: 'Cryptographic Release Sanction & NOC',
       subtitle: 'Immutable Ledger Finalization',
       desc: 'Issues a dual-signed cryptographic NOC, transmits automated bank sanction release notice, and commits the finalized block into the immutable audit chain.',
@@ -283,8 +245,6 @@ export function ScrollTrackGSAP() {
 
   return (
     <section className="my-36 relative z-10">
-      {/* 1. Dedicated Header in Normal Flow (Completely Separated with 160px Margin) */}
-      {/* 1. Normal-Flow Section Intro Header with Large Bottom Margin */}
       <div className="text-center max-w-2xl mx-auto px-6 mb-40">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-semibold mb-4 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-[#444C3D] animate-spin" style={{ animationDuration: '6s' }} />
@@ -305,12 +265,10 @@ export function ScrollTrackGSAP() {
         </div>
       </div>
 
-      {/* 2. The 380vh Track Container with the 6 Stations and the Animated Ball */}
       <div
         ref={trackRef}
-        className="relative h-[380vh] overflow-hidden max-w-[1540px] mx-auto px-4 sm:px-8 bg-[#F8F5EE]"
+        className="relative h-[380vh] max-w-[1540px] mx-auto px-4 sm:px-8 bg-[#F8F5EE]"
       >
-        {/* SVG Connecting Track Curve Passing through Corner Docks of All 6 Stations */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none z-10 opacity-50"
           viewBox="0 0 100 100"
@@ -335,19 +293,16 @@ export function ScrollTrackGSAP() {
           />
         </svg>
 
-        {/* The Animated Travelling Ball / Digit Token */}
         <div
           ref={beaconRef}
-          className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-[#444C3D] border-2 border-amber-400/90 transition-colors duration-200"
+          className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-[#444C3D] border-2 border-amber-400/90 transition-colors duration-200 shadow-md"
         >
-          <div className="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
-          {/* Label positioned at the top of the circular token */}
+          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
           <div className="absolute -top-6 font-mono text-[9px] text-[#F8F5EE] font-bold whitespace-nowrap bg-[#1C1D1A] px-2.5 py-0.5 rounded-full border border-amber-400/50 shadow-md tracking-wider">
             Digit token
           </div>
         </div>
 
-        {/* The 6 Statutory Stations — Larger, Roomier & Alternating Left/Right */}
         {stages.map((stg, idx) => {
           const Icon = stg.icon;
           return (
@@ -356,7 +311,6 @@ export function ScrollTrackGSAP() {
               style={stg.posStyle}
               className="absolute w-[92%] sm:w-[420px] md:w-[460px] lg:w-[490px] z-20"
             >
-              {/* Corner Dock Node: The exact topmost corner where the token docks without obscuring text */}
               <div
                 id={`dock-node-${idx}`}
                 className={`absolute -top-3.5 ${
@@ -366,12 +320,10 @@ export function ScrollTrackGSAP() {
                 <div className="w-2.5 h-2.5 rounded-full bg-[#444C3D]" />
               </div>
 
-              {/* Station Card (Crisp White Editorial Paper) */}
               <div
                 id={`station-card-${idx}`}
-                className="w-full rounded-2xl bg-white border border-[#E5DFD5] p-6 sm:p-7 flex flex-col justify-between text-left cursor-default shadow-[0_12px_35px_rgba(28,29,26,0.06)] transition-all duration-300"
+                className="w-full rounded-2xl bg-white border border-[#E5DFD5] p-6 sm:p-7 flex flex-col justify-between text-left cursor-default shadow-sm transition-transform duration-300"
               >
-                {/* Header row: Stage number & status badge */}
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono text-[#444C3D] font-bold tracking-wider">
@@ -387,7 +339,6 @@ export function ScrollTrackGSAP() {
                   </span>
                 </div>
 
-                {/* Title & Icon */}
                 <div className="mb-3.5">
                   <div className="flex items-center gap-3.5 mb-1.5">
                     <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] shrink-0 text-[#444C3D]">
@@ -404,12 +355,10 @@ export function ScrollTrackGSAP() {
                   </div>
                 </div>
 
-                {/* Description - 100% Readable with zero obstruction */}
                 <p className="text-xs sm:text-sm text-[#55544E] leading-relaxed mb-5 font-normal">
                   {stg.desc}
                 </p>
 
-                {/* Bottom statutory audit pill */}
                 <div className="pt-3.5 border-t border-[#E5DFD5] flex items-center justify-between text-xs font-mono">
                   <span className="text-[#706E66]">Ledger Artifact:</span>
                   <span className="text-[#444C3D] font-bold">{stg.pill}</span>

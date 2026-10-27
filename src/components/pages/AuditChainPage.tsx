@@ -16,9 +16,10 @@ import { INITIAL_AUDIT_BLOCKS, AuditBlock } from '../../lib/api';
 
 interface AuditChainPageProps {
   onNavigate: (screen: string) => void;
+  currentRole?: string;
 }
 
-export function AuditChainPage({ onNavigate }: AuditChainPageProps) {
+export function AuditChainPage({ onNavigate, currentRole = 'AUDITOR' }: AuditChainPageProps) {
   const [blocks, setBlocks] = useState<AuditBlock[]>(INITIAL_AUDIT_BLOCKS);
   const [search, setSearch] = useState('');
   const [verifying, setVerifying] = useState(false);
