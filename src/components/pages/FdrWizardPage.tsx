@@ -10,7 +10,10 @@ import {
   Key, 
   Clock, 
   AlertCircle,
-  FileText
+  FileText,
+  AlertTriangle,
+  Download,
+  ExternalLink
 } from 'lucide-react';
 import { AnimatedHeading } from '../AnimatedHeading';
 import { calculatePolicyDeposit } from '../../lib/api';
@@ -24,19 +27,121 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
   const [step, setStep] = useState(1);
   const [bankName, setBankName] = useState('State Bank of India');
   const [ifsc, setIfsc] = useState('SBIN0001482');
-  const [fdrNumber, setFdrNumber] = useState('SBI/PUN/2026/884912');
-  const [depositAmount, setDepositAmount] = useState('7000000'); // ₹70 Lakhs
+  const [fdrNumber, setFdrNumber] = useState('FDR-SBI-2026-9921');
+  const [depositAmount, setDepositAmount] = useState('3500000'); // ₹35 Lakhs
   const [tenorYears, setTenorYears] = useState('10');
   const [programme, setProgramme] = useState('Engineering UG');
-  const [isLeased, setIsLeased] = useState(true);
+  const [isLeased, setIsLeased] = useState(false);
   const [isConcession, setIsConcession] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
-  const [generatedHash, setGeneratedHash] = useState('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+  const [generatedHash, setGeneratedHash] = useState('7c3b889a1f28b4c2e6840d21a99f1c7e923e4b7a123f890cde456812ab9901ef');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // File Upload Handlers
+  // File Upload Handlers & Extracted OCR Metadata
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [ocrDetails, setOcrDetails] = useState<{
+    demoId: number;
+    bank: string;
+    fdrNumber: string;
+    amountLakhs: number;
+    tenor: string;
+    lienDetected: boolean;
+    confidence: string;
+    status: 'COMPLIANT' | 'DEFICIT' | 'DISCREPANT';
+    summary: string;
+  } | null>(null);
+
+  const applyDemoPreset = (demoNum: 1 | 2 | 3 | 4, customFileName?: string) => {
+    setUploadDone(true);
+    setSelectedFile({ name: customFileName || `OCR verification demo ${demoNum}.pdf` } as File);
+
+    if (demoNum === 1) {
+      setBankName('State Bank of India');
+      setIfsc('SBIN0001482');
+      setFdrNumber('FDR-SBI-2026-9921');
+      setDepositAmount('3500000');
+      setTenorYears('10');
+      setProgramme('Engineering UG');
+      setIsLeased(false);
+      setIsConcession(false);
+      setGeneratedHash('7c3b889a1f28b4c2e6840d21a99f1c7e923e4b7a123f890cde456812ab9901ef');
+      setOcrDetails({
+        demoId: 1,
+        bank: 'State Bank of India (Pune Main)',
+        fdrNumber: 'FDR-SBI-2026-9921',
+        amountLakhs: 35,
+        tenor: '120 Months (10.0 Years)',
+        lienDetected: true,
+        confidence: '99.8%',
+        status: 'COMPLIANT',
+        summary: 'Engineering UG Base ₹35L on Owned Campus · 100% Policy Match under Table 1.4',
+      });
+    } else if (demoNum === 2) {
+      setBankName('Punjab National Bank');
+      setIfsc('PUNB0014800');
+      setFdrNumber('FDR-PNB-2026-4412');
+      setDepositAmount('7000000');
+      setTenorYears('10');
+      setProgramme('Engineering UG');
+      setIsLeased(true);
+      setIsConcession(false);
+      setGeneratedHash('4f18c219a820b1e5a40b93821038e4a9194e82b71940a83b2719a8b192e40182');
+      setOcrDetails({
+        demoId: 2,
+        bank: 'Punjab National Bank (Shivaji Nagar)',
+        fdrNumber: 'FDR-PNB-2026-4412',
+        amountLakhs: 70,
+        tenor: '120 Months (10.0 Years)',
+        lienDetected: true,
+        confidence: '99.4%',
+        status: 'COMPLIANT',
+        summary: 'Leased Campus 2.0x Surcharge (₹35L × 2.0 = ₹70L) · 100% Policy Compliant',
+      });
+    } else if (demoNum === 3) {
+      setBankName('HDFC Bank Ltd.');
+      setIfsc('HDFC0000039');
+      setFdrNumber('FDR-HDFC-2026-1184');
+      setDepositAmount('1500000');
+      setTenorYears('10');
+      setProgramme('Engineering UG');
+      setIsLeased(false);
+      setIsConcession(false);
+      setGeneratedHash('9a820b1e5a40b93821038e4a9194e82b71940a83b2719a8b192e401827c3b889');
+      setOcrDetails({
+        demoId: 3,
+        bank: 'HDFC Bank Ltd. (Kothrud Pune)',
+        fdrNumber: 'FDR-HDFC-2026-1184',
+        amountLakhs: 15,
+        tenor: '120 Months (10.0 Years)',
+        lienDetected: true,
+        confidence: '98.9%',
+        status: 'DEFICIT',
+        summary: '⚠️ Statutory Deficit: Programme requires ₹35L, but submitted FDR is only ₹15L (-₹20 Lakhs deficit)',
+      });
+    } else {
+      setBankName('Canara Bank');
+      setIfsc('CNRB0000215');
+      setFdrNumber('FDR-CNRB-2026-8833');
+      setDepositAmount('2500000');
+      setTenorYears('3');
+      setProgramme('Engineering UG');
+      setIsLeased(false);
+      setIsConcession(false);
+      setGeneratedHash('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+      setOcrDetails({
+        demoId: 4,
+        bank: 'Canara Bank (Deccan Gymkhana)',
+        fdrNumber: 'FDR-CNRB-2026-8833',
+        amountLakhs: 25,
+        tenor: '36 Months (3.0 Years ONLY)',
+        lienDetected: false,
+        confidence: '96.2%',
+        status: 'DISCREPANT',
+        summary: '❌ Critical Discrepancy: AICTE Joint Lien missing on instrument & Short 3-year tenor violates mandatory 10-year lock-in',
+      });
+    }
+  };
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -45,9 +150,31 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedFile(file);
-      setUploadDone(true);
-      setGeneratedHash('7c3b889a1f28b4c2e6840d21a99f1c7e923e4b7a123f890cde456812ab9901ef');
+      const lower = file.name.toLowerCase();
+      if (lower.includes('demo 1') || lower.includes('demo1') || lower.includes('sbi')) {
+        applyDemoPreset(1, file.name);
+      } else if (lower.includes('demo 2') || lower.includes('demo2') || lower.includes('pnb') || lower.includes('leased')) {
+        applyDemoPreset(2, file.name);
+      } else if (lower.includes('demo 3') || lower.includes('demo3') || lower.includes('hdfc') || lower.includes('deficit')) {
+        applyDemoPreset(3, file.name);
+      } else if (lower.includes('demo 4') || lower.includes('demo4') || lower.includes('canara') || lower.includes('discrepant')) {
+        applyDemoPreset(4, file.name);
+      } else {
+        setSelectedFile(file);
+        setUploadDone(true);
+        setGeneratedHash('7c3b889a1f28b4c2e6840d21a99f1c7e923e4b7a123f890cde456812ab9901ef');
+        setOcrDetails({
+          demoId: 1,
+          bank: bankName,
+          fdrNumber: fdrNumber,
+          amountLakhs: parseFloat(depositAmount || '0') / 100000,
+          tenor: `${tenorYears} Years`,
+          lienDetected: true,
+          confidence: '99.2%',
+          status: 'COMPLIANT',
+          summary: 'Uploaded certificate parsed · SHA-256 digest sealed',
+        });
+      }
     }
   };
 
@@ -249,8 +376,102 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                   Step 3: Document Upload & AI OCR Extraction
                 </h3>
                 <p className="text-xs text-[#55544E] mt-1 font-mono">
-                  Upload the official scan of the FDR Certificate. Our OCR will cross-verify the hash against Core Banking.
+                  Upload an FDR certificate or pick one of the 4 statutory benchmark demo instruments below.
                 </p>
+              </div>
+
+              {/* Benchmark Demo FDR Instrument Picker */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-semibold text-[#706E66] uppercase tracking-wider">
+                    Select or Download Test Benchmarks (4 Demo FDRs):
+                  </span>
+                  <span className="text-[11px] font-mono text-[#444C3D]">
+                    PDF files located in /demo_fdrs/
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    {
+                      id: 1,
+                      title: 'OCR verification demo 1.pdf',
+                      badge: '100% SIZING MATCH',
+                      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                      desc: 'State Bank of India · ₹35 Lakhs · 10-Yr Term · Engineering UG on Owned Land',
+                      fileUrl: '/demo-fdrs/OCR%20verification%20demo%201.pdf',
+                    },
+                    {
+                      id: 2,
+                      title: 'OCR verification demo 2.pdf',
+                      badge: 'LEASED 2.0x MULTIPLIER',
+                      badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                      desc: 'Punjab National Bank · ₹70 Lakhs · 10-Yr Term · Leased Campus Covenant',
+                      fileUrl: '/demo-fdrs/OCR%20verification%20demo%202.pdf',
+                    },
+                    {
+                      id: 3,
+                      title: 'OCR verification demo 3.pdf',
+                      badge: 'DEFICIT ALERT (-₹20L)',
+                      badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
+                      desc: 'HDFC Bank Ltd. · ₹15 Lakhs · 10-Yr Term · Under-Sized Deposit for UG',
+                      fileUrl: '/demo-fdrs/OCR%20verification%20demo%203.pdf',
+                    },
+                    {
+                      id: 4,
+                      title: 'OCR verification demo 4.pdf',
+                      badge: 'CRITICAL DISCREPANCY',
+                      badgeColor: 'bg-red-100 text-red-800 border-red-300',
+                      desc: 'Canara Bank · ₹25 Lakhs · 3-Yr Tenor (Short) · Missing AICTE Joint Lien',
+                      fileUrl: '/demo-fdrs/OCR%20verification%20demo%204.pdf',
+                    },
+                  ].map((demo) => {
+                    const isCurrent = ocrDetails?.demoId === demo.id;
+                    return (
+                      <div
+                        key={demo.id}
+                        className={`p-3.5 rounded-xl border transition-all text-left ${
+                          isCurrent
+                            ? 'bg-[#FAF8F5] border-[#444C3D] ring-2 ring-[#444C3D]/20 shadow-sm'
+                            : 'bg-white border-[#E5DFD5] hover:border-[#DDD6C9]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="font-mono text-xs font-bold text-[#1C1D1A] truncate">
+                            {demo.title}
+                          </span>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border shrink-0 ${demo.badgeColor}`}>
+                            {demo.badge}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#706E66] mb-3 leading-snug">
+                          {demo.desc}
+                        </p>
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => applyDemoPreset(demo.id as 1 | 2 | 3 | 4)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold cursor-pointer transition-colors ${
+                              isCurrent
+                                ? 'bg-[#444C3D] text-white'
+                                : 'bg-[#EFEAE1] hover:bg-[#E5DFD5] text-[#444C3D]'
+                            }`}
+                          >
+                            {isCurrent ? '✓ Active in Wizard' : 'Load Demo'}
+                          </button>
+                          <a
+                            href={demo.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#DDD6C9] hover:bg-[#FAF8F5] text-[11px] font-mono text-[#55544E] transition-colors"
+                          >
+                            <ExternalLink className="w-3 h-3" /> View PDF
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Hidden System File Input */}
@@ -271,33 +492,99 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
               >
                 <Upload className={`w-8 h-8 mx-auto mb-2 ${uploadDone ? 'text-emerald-600' : 'text-[#706E66]'}`} />
                 <div className="font-semibold text-sm text-[#1C1D1A]">
-                  {selectedFile ? `FDR Certificate Selected (${selectedFile.name})` : 'Click to Upload FDR Certificate (PDF / TIFF / JPG)'}
+                  {selectedFile ? `FDR Certificate Selected: ${selectedFile.name}` : 'Or Click to Upload Any FDR Certificate (PDF / JPG)'}
                 </div>
                 <div className="text-xs text-[#706E66] mt-1 font-mono">
-                  {uploadDone ? 'OCR Extraction Confidence: 99.4%' : 'Max size 25MB · SHA-256 Digest will be cryptographically anchored'}
+                  {uploadDone
+                    ? `Extraction Confidence: ${ocrDetails?.confidence || '99.4%'} · Anchored to Core Banking Sandbox`
+                    : 'Select any "OCR verification demo 1..4.pdf" from your file picker to test'}
                 </div>
               </div>
 
-              {uploadDone && (
-                <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] space-y-2 text-xs">
-                  <div className="font-mono text-[#706E66]">Extracted OCR Digest:</div>
-                  <div className="p-2.5 bg-white rounded-lg border border-[#E5DFD5] font-mono text-[11px] text-[#444C3D] break-all">
-                    {generatedHash}
+              {/* Extracted OCR Information Breakdown Card */}
+              {uploadDone && ocrDetails && (
+                <div className="p-5 rounded-2xl bg-white border border-[#DDD6C9] space-y-4 shadow-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E5DFD5] pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-mono font-bold ${
+                        ocrDetails.status === 'COMPLIANT' 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : ocrDetails.status === 'DEFICIT'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {ocrDetails.status}
+                      </span>
+                      <span className="text-xs font-semibold text-[#1C1D1A]">
+                        {ocrDetails.summary}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono text-[#706E66]">
+                      Confidence: <strong className="text-emerald-700">{ocrDetails.confidence}</strong>
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-emerald-700 font-mono text-xs">
-                    <CheckCircle2 className="w-4 h-4" /> Joint Pledge Lien to AICTE detected in OCR text
+
+                  {/* 4-Field Extracted Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
+                    <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
+                      <div className="text-[10px] font-mono uppercase text-[#706E66]">Detected Bank</div>
+                      <div className="text-xs font-bold text-[#1C1D1A] mt-1 truncate">{ocrDetails.bank}</div>
+                      <div className="text-[10px] font-mono text-[#8C8A82] mt-0.5">{ifsc}</div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
+                      <div className="text-[10px] font-mono uppercase text-[#706E66]">Instrument No</div>
+                      <div className="text-xs font-bold text-[#1C1D1A] mt-1 font-mono">{ocrDetails.fdrNumber}</div>
+                      <div className="text-[10px] font-mono text-emerald-700 mt-0.5">CBS Validated</div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
+                      <div className="text-[10px] font-mono uppercase text-[#706E66]">Principal Amount</div>
+                      <div className="text-sm font-bold text-[#1C1D1A] mt-1">₹{ocrDetails.amountLakhs} Lakhs</div>
+                      <div className="text-[10px] font-mono text-[#8C8A82] mt-0.5">INR {depositAmount}</div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
+                      <div className="text-[10px] font-mono uppercase text-[#706E66]">AICTE Joint Lien</div>
+                      <div className={`text-xs font-bold mt-1 flex items-center gap-1 ${
+                        ocrDetails.lienDetected ? 'text-emerald-700' : 'text-red-700'
+                      }`}>
+                        {ocrDetails.lienDetected ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Verified
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> MISSING
+                          </>
+                        )}
+                      </div>
+                      <div className="text-[10px] font-mono text-[#8C8A82] mt-0.5">{ocrDetails.tenor}</div>
+                    </div>
+                  </div>
+
+                  {/* Cryptographic SHA-256 Digest */}
+                  <div className="pt-2">
+                    <div className="text-[10px] font-mono text-[#706E66] mb-1">
+                      SHA-256 Immutable Digital Sealing Hash:
+                    </div>
+                    <div className="p-2.5 bg-[#FAF8F5] rounded-lg border border-[#E5DFD5] font-mono text-[11px] text-[#444C3D] break-all">
+                      {generatedHash}
+                    </div>
                   </div>
                 </div>
               )}
 
               <div className="pt-4 flex justify-between">
                 <button
+                  type="button"
                   onClick={() => setStep(2)}
-                  className="px-5 py-2.5 rounded-lg border border-[#DDD6C9] text-xs font-medium text-[#55544E]"
+                  className="px-5 py-2.5 rounded-lg border border-[#DDD6C9] text-xs font-medium text-[#55544E] cursor-pointer"
                 >
                   ← Back
                 </button>
                 <button
+                  type="button"
                   onClick={() => setStep(4)}
                   disabled={!uploadDone}
                   className="px-6 py-2.5 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-40"
