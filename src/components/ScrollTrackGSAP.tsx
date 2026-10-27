@@ -194,80 +194,80 @@ export function ScrollTrackGSAP() {
     {
       posStyle: { left: '56%', top: '6%' },
       dockSide: 'left',
-      title: 'Digital Intake & Cryptographic Sealing',
-      subtitle: 'SHA-256 Digest Sealing',
-      desc: 'Raw FDR & Affidavit intake with SHA-256 hash sealing, anti-tamper timestamping, and canonical statutory metadata registry.',
+      title: 'Add receipt details',
+      subtitle: 'Planned intake step',
+      desc: 'Enter the receipt details and attach supporting documents for review.',
       icon: Lock,
       step: '01',
-      badge: 'SEALED & TIMESTAMPED',
+      badge: 'Planned',
       accent: 'text-indigo-400',
       border: 'border-indigo-500/30',
-      pill: 'SHA-256: 7f8a9e22...c41d',
+      pill: 'Sample fingerprint only',
     },
     {
       posStyle: { left: '6%', top: '22%' },
       dockSide: 'right',
-      title: 'Policy Engine Table 1.4 Calculation',
-      subtitle: 'Deterministic APH Sizing',
-      desc: 'Evaluates required statutory FDR under AICTE APH Table 1.4 norms. Deterministically computes base deposit + 50% concession + ×2.0 leased land multiplier.',
+      title: 'Estimate the deposit amount',
+      subtitle: 'Simplified demo calculation',
+      desc: 'Use programme, concession, and premises details to estimate the deposit amount. Confirm requirements against current official guidance.',
       icon: Scale,
       step: '02',
-      badge: 'NORM CHECK PASS',
+      badge: 'Example',
       accent: 'text-sky-400',
       border: 'border-sky-500/30',
-      pill: 'Requirement: ₹20.00 Lakhs verified',
+      pill: 'Estimated amount',
     },
     {
       posStyle: { left: '56%', top: '38%' },
       dockSide: 'left',
-      title: '3-Way Zero-Hallucination Provenance',
-      subtitle: 'Triangulated OCR & Bank Verification',
-      desc: 'Field-level 3-way match: Institution declared values vs OCR document parsing vs Automated core banking sandbox API response.',
+      title: 'Compare receipt and bank details',
+      subtitle: 'Planned verification step',
+      desc: 'The intended check compares submitted details, receipt contents, and bank records. This demo uses fixed sample values instead.',
       icon: FileSearch,
       step: '03',
-      badge: '3-WAY MATCH 100%',
+      badge: 'Sample only',
       accent: 'text-teal-400',
       border: 'border-teal-500/30',
-      pill: 'Provenance Delta: 0.00% (Verified)',
+      pill: 'Compare submitted, receipt, and bank details',
     },
     {
       posStyle: { left: '6%', top: '54%' },
       dockSide: 'right',
-      title: '10-Year Custody & Lien Lineage Radar',
-      subtitle: 'Continuous Cross-Trust Auditing',
-      desc: 'Enforces statutory 10-year lock-in period with automated renewal tracking and cross-trust duplicate pledge detection across all scheduled banks.',
+      title: 'Track a deposit and its maturity',
+      subtitle: 'Planned tracking step',
+      desc: 'The intended service tracks deposit terms and renewal dates. Automatic reminders and duplicate-pledge monitoring are not running here.',
       icon: Clock,
       step: '04',
-      badge: 'CUSTODY ACTIVE',
+      badge: 'Planned',
       accent: 'text-amber-400',
       border: 'border-amber-500/30',
-      pill: 'Maturity: 10 Years · Lien Active',
+      pill: 'Tenor and lien status',
     },
     {
       posStyle: { left: '56%', top: '70%' },
       dockSide: 'left',
-      title: 'Clause 6.46 DAG Release Clearances',
-      subtitle: 'Multi-Bureau Statutory Gate',
-      desc: 'Release request enters a strict Directed Acyclic Graph. Enforces mandatory clearances from PGRC Student Desk, Vigilance Bureau, and Regional Officer.',
+      title: 'Review a release request',
+      subtitle: 'Planned review step',
+      desc: 'Gather required clearances before a reviewer makes a release decision.',
       icon: Shield,
       step: '05',
-      badge: '3/3 GATES CLEARED',
+      badge: 'Preview',
       accent: 'text-purple-400',
       border: 'border-purple-500/30',
-      pill: 'CVO Clear · PGRC Clear · RO Signed',
+      pill: 'No clearance recorded',
     },
     {
       posStyle: { left: '6%', top: '86%' },
       dockSide: 'right',
-      title: 'Cryptographic Release Sanction & NOC',
-      subtitle: 'Immutable Ledger Finalization',
-      desc: 'Issues a dual-signed cryptographic NOC, transmits automated bank sanction release notice, and commits the finalized block into the immutable audit chain.',
+      title: 'Record a release decision',
+      subtitle: 'Planned final step',
+      desc: 'Record the authorized release decision and prepare the related documents.',
       icon: CheckCircle2,
       step: '06',
-      badge: 'RELEASE SANCTIONED',
+      badge: 'Final review',
       accent: 'text-emerald-400',
       border: 'border-emerald-500/30',
-      pill: 'Block #10492 · Dual-Signed NOC Dispatched',
+      pill: 'No release order created',
     },
   ];
 
@@ -276,20 +276,20 @@ export function ScrollTrackGSAP() {
       <div className="text-center max-w-2xl mx-auto px-6 mb-40">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-semibold mb-4 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-[#444C3D] animate-spin" style={{ animationDuration: '6s' }} />
-          Out of Thin Air — Autonomous Compliance Pipeline
+          Planned process
         </div>
         <AnimatedHeading
           as="h2"
           className="text-3xl sm:text-4xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] mb-4"
         >
-          The 6-Station Autonomous *Circuit*
+          The deposit *lifecycle*
         </AnimatedHeading>
         <p className="text-[#55544E] text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
-          Scroll down to guide the live compliance ledger token through each checkpoint. Watch each station dynamically expand as the token docks at its corner.
+          Explore the stages from entering receipt details to reviewing a release.
         </p>
         <div className="inline-flex items-center gap-2 text-xs font-mono text-[#444C3D] bg-[#EFEAE1] border border-[#DDD6C9] px-4 py-2 rounded-full">
           <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
-          <span>Scroll down to navigate through the 6 statutory stations</span>
+          <span>Scroll to explore the six example stages</span>
         </div>
       </div>
 

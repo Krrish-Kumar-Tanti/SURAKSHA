@@ -44,16 +44,16 @@ export function PolicyTracePage({ onNavigate, currentRole = 'DIRECTOR_RB' }: Pol
       <div className="mb-8">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-3">
           <Sparkles className="w-3.5 h-3.5 text-[#444C3D]" />
-          Statutory Policy & Sizing Rule Engine
+          Sample policy estimate
         </div>
         <AnimatedHeading
           as="h1"
           className="text-3xl sm:text-4xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] font-['Instrument_Serif']"
         >
-          ( APH Table 1.4 *Policy Trace* )
+          ( *Policy estimate* )
         </AnimatedHeading>
         <p className="text-sm sm:text-base text-[#55544E] mt-2 max-w-2xl">
-          Deterministic execution of AICTE Approval Process Handbook (APH 2024–27) Table 1.4 security deposit norms with full clause citations.
+          Explore how programme, premises, and concession details affect the estimated deposit amount.
         </p>
       </div>
 
@@ -66,7 +66,7 @@ export function PolicyTracePage({ onNavigate, currentRole = 'DIRECTOR_RB' }: Pol
                 Institutional Parameters
               </h3>
               <p className="text-xs text-[#706E66] font-mono mt-0.5">
-                Adjust statutory inputs to recompute required deposit
+                Change the example inputs to update the estimate
               </p>
             </div>
 
@@ -118,7 +118,7 @@ export function PolicyTracePage({ onNavigate, currentRole = 'DIRECTOR_RB' }: Pol
                 />
               </div>
               <p className="text-[11px] text-[#55544E] leading-relaxed">
-                Institutions functioning on leased building/land incur a <span className="font-bold text-[#1C1D1A]">2.0x</span> statutory deposit multiplier to safeguard students.
+                The demo applies a <span className="font-bold text-[#1C1D1A]">2.0x</span> example multiplier for leased premises. Confirm actual requirements with current official guidance.
               </p>
             </div>
 
@@ -137,7 +137,7 @@ export function PolicyTracePage({ onNavigate, currentRole = 'DIRECTOR_RB' }: Pol
                 />
               </div>
               <p className="text-[11px] text-[#55544E] leading-relaxed">
-                Eligible institutions receive a <span className="font-bold text-[#1C1D1A]">50% relief</span> on the base deposit obligation under APH Table 1.4.
+                The demo applies a <span className="font-bold text-[#1C1D1A]">50% example reduction</span>. Eligibility must be confirmed against current official guidance.
               </p>
             </div>
           </div>
@@ -149,14 +149,14 @@ export function PolicyTracePage({ onNavigate, currentRole = 'DIRECTOR_RB' }: Pol
             <div className="flex items-center justify-between pb-4 border-b border-[#E5DFD5] mb-6">
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[#706E66] block">
-                  Deterministic Trace
+                  Example calculation
                 </span>
                 <h3 className="text-xl font-normal text-[#1C1D1A] font-['Instrument_Serif']">
-                  Clause-by-Clause Calculation DAG
+                  How the estimate is calculated
                 </h3>
               </div>
               <div className="text-right">
-                <span className="text-[10px] font-mono text-[#706E66] block">Mandatory Deposit</span>
+                <span className="text-[10px] font-mono text-[#706E66] block">Estimated amount (demo)</span>
                 <span className="text-2xl font-bold text-[#444C3D] font-mono">
                   ₹{traceData?.requiredAmount || 70} Lakhs
                 </span>
@@ -184,7 +184,7 @@ export function PolicyTracePage({ onNavigate, currentRole = 'DIRECTOR_RB' }: Pol
             {/* Regulatory Citations Accordion */}
             <div className="mt-6 pt-6 border-t border-[#E5DFD5]">
               <div className="text-xs font-mono uppercase text-[#706E66] font-bold mb-3">
-                Official Regulatory Citations
+                References used by this estimate
               </div>
               <ul className="space-y-2 text-xs text-[#55544E]">
                 {traceData?.citations?.map((cit: string, idx: number) => (
@@ -201,7 +201,7 @@ export function PolicyTracePage({ onNavigate, currentRole = 'DIRECTOR_RB' }: Pol
                 onClick={() => onNavigate('release')}
                 className="px-6 py-3 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-2 cursor-pointer shadow-sm"
               >
-                Proceed to Release Graph <ArrowRight className="w-4 h-4" />
+                View release workflow examples <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>

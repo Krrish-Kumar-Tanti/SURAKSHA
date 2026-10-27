@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Clock, UserCheck, ChevronDown, CheckCircle2, Lock, LogOut, ArrowRight, User } from 'lucide-react';
 import { UserSession } from '../lib/api';
+import { isScreenAllowed } from '../lib/roleAccess';
 
 interface NavbarProps {
   currentRole: string;
@@ -26,12 +27,16 @@ export function Navbar({
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
 
   const roles = [
-    { id: 'INSTITUTION_USER', label: 'College Registrar', desc: 'SIT Pune / Submit FDR' },
-    { id: 'DEALING_OFFICER', label: 'Dealing Officer', desc: 'Regional Office Verification' },
-    { id: 'DIRECTOR_RB', label: 'Regional Director', desc: 'Waive & Portfolio Risk' },
-    { id: 'COMPETENT_AUTHORITY', label: 'Approving Authority', desc: 'Release Final Sanction' },
-    { id: 'AUDITOR', label: 'Central Auditor', desc: 'Cryptographic Hash Verification' },
+    { id: 'INSTITUTION_USER', label: 'College Registrar', desc: 'Own FDR submission preview' },
+    { id: 'DEALING_OFFICER', label: 'Dealing Officer', desc: 'Review and process regional records' },
+    { id: 'DIRECTOR_RB', label: 'Regional Director', desc: 'Regional oversight and critical review' },
+    { id: 'COMPETENT_AUTHORITY', label: 'Approving Authority', desc: 'Final release decision' },
+    { id: 'ACCOUNTS', label: 'Accounts', desc: 'Release document examples' },
+    { id: 'AUDITOR', label: 'Central Auditor', desc: 'Read-only portfolio and audit examples' },
+    { id: 'ADMIN', label: 'System Administrator', desc: 'System status and administration availability' },
   ];
+
+  const canSwitchDemoRole = userSession?.token.startsWith('jwt_synthetic_token_') ?? false;
 
   const handleNavClick = (screen: string) => {
     if (!isAuthenticated && screen !== 'home') {
@@ -39,6 +44,7 @@ export function Navbar({
       onLoginClick();
       return;
     }
+    if (isAuthenticated && !isScreenAllowed(currentRole, screen)) return;
     onNavigate(screen);
   };
 
@@ -63,11 +69,12 @@ export function Navbar({
             { screen: 'home', label: 'Overview' },
             { screen: 'portfolio', label: 'Portfolio' },
             { screen: 'wizard', label: 'FDR Submission' },
-            { screen: 'provenance', label: 'Provenance' },
-            { screen: 'policy', label: 'Policy' },
-            { screen: 'release', label: 'Release' },
+            { screen: 'provenance', label: 'Bank records' },
+            { screen: 'policy', label: 'Policy estimate' },
+            { screen: 'release', label: currentRole === 'ACCOUNTS' ? 'Release Letters' : 'Release' },
             { screen: 'audit', label: 'Audit' },
-          ].map(({ screen, label }) => (
+            { screen: 'admin', label: 'Administration' },
+          ].filter(({ screen }) => !isAuthenticated ? screen === 'home' : isScreenAllowed(currentRole, screen)).map(({ screen, label }) => (
             <button
               key={screen}
               onClick={() => handleNavClick(screen)}
@@ -100,7 +107,7 @@ export function Navbar({
             </button>
           ) : (
             <div className="flex items-center gap-2">
-              <div className="relative">
+              {canSwitchDemoRole && <div className="relative">
                 <button
                   onClick={() => setRoleMenuOpen(!roleMenuOpen)}
                   className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium transition shadow-sm cursor-pointer hover:scale-[1.05] duration-200"
@@ -111,7 +118,7 @@ export function Navbar({
                 </button>
                 {roleMenuOpen && (
                   <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#F8F5EE]/90 backdrop-blur-xl border border-[#DDD6C9] shadow-2xl p-2 z-50 text-left">
-                    <div className="text-[10px] font-mono uppercase text-[#706E66] px-3 py-1 font-bold">Switch Role</div>
+                    <div className="text-[10px] font-mono uppercase text-[#706E66] px-3 py-1 font-bold">Switch Demo Role</div>
                     {roles.map((r) => (
                       <button
                         key={r.id}
@@ -127,7 +134,7 @@ export function Navbar({
                     ))}
                   </div>
                 )}
-              </div>
+              </div>}
               <button
                 onClick={onLogoutClick}
                 title="Sign Out"

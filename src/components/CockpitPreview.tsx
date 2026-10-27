@@ -16,6 +16,7 @@ import {
   Sparkles,
   Upload
 } from 'lucide-react';
+import { canIssueReleaseSanction, canResolveDiscrepancies, canSetReleaseClearances, getCockpitTabs, CockpitTab } from '../lib/roleAccess';
 
 interface CockpitPreviewProps {
   currentRole?: string;
@@ -23,22 +24,22 @@ interface CockpitPreviewProps {
 }
 
 export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: CockpitPreviewProps) {
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'provenance' | 'calculator' | 'graph'>('portfolio');
+  const allowedTabs = getCockpitTabs(currentRole);
+  const isRegionScoped = ['INSTITUTION_USER', 'DEALING_OFFICER', 'DIRECTOR_RB'].includes(currentRole);
+  const [activeTab, setActiveTab] = useState<CockpitTab>('portfolio');
+  const visibleTab = allowedTabs.includes(activeTab) ? activeTab : allowedTabs[0] ?? 'portfolio';
 
-  // Automatically focus relevant tab when role changes from Navbar
   useEffect(() => {
-    if (currentRole === 'INSTITUTION_USER') {
-      setActiveTab('calculator');
-    } else if (currentRole === 'DEALING_OFFICER') {
-      setActiveTab('portfolio');
-    } else if (currentRole === 'DIRECTOR_RB') {
-      setActiveTab('provenance');
-    } else if (currentRole === 'COMPETENT_AUTHORITY') {
-      setActiveTab('graph');
-    } else if (currentRole === 'AUDITOR') {
-      setActiveTab('provenance');
-    }
-  }, [currentRole]);
+    const preferredTab: Record<string, CockpitTab> = {
+      INSTITUTION_USER: 'calculator',
+      DEALING_OFFICER: 'portfolio',
+      DIRECTOR_RB: 'provenance',
+      COMPETENT_AUTHORITY: 'graph',
+      AUDITOR: 'provenance',
+    };
+    const preferred = preferredTab[currentRole];
+    setActiveTab(preferred && allowedTabs.includes(preferred) ? preferred : allowedTabs[0] ?? 'portfolio');
+  }, [currentRole, allowedTabs]);
 
   // Policy calculator states
   const [programme, setProgramme] = useState('Engineering UG');
@@ -87,62 +88,63 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                 <span>Active Role: <strong className="font-mono text-[#1C1D1A]">{getRoleLabel(currentRole)}</strong></span>
               </div>
               <span className="text-xs text-[#706E66] hidden sm:inline font-mono">
-                Simulated Sandbox
+                Demonstration preview
               </span>
             </div>
 
             {/* Interactive Mode Tabs */}
             <div className="flex items-center gap-1 bg-[#ECE7DE] p-1 rounded-xl border border-[#DDD6C9]">
-              <button
+              {allowedTabs.includes('portfolio') && <button
                 onClick={() => setActiveTab('portfolio')}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  activeTab === 'portfolio' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
+                  visibleTab === 'portfolio' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
-                1. Executive Portfolio
-              </button>
-              <button
+                1. Portfolio examples
+              </button>}
+              {allowedTabs.includes('provenance') && <button
                 onClick={() => setActiveTab('provenance')}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  activeTab === 'provenance' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
+                  visibleTab === 'provenance' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
-                2. 3-Way Provenance
-              </button>
-              <button
+                2. Bank record examples
+              </button>}
+              {allowedTabs.includes('calculator') && <button
                 onClick={() => setActiveTab('calculator')}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  activeTab === 'calculator' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
+                  visibleTab === 'calculator' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
-                3. Policy Engine
-              </button>
-              <button
+                3. Policy estimate
+              </button>}
+              {allowedTabs.includes('graph') && <button
                 onClick={() => setActiveTab('graph')}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  activeTab === 'graph' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
+                  visibleTab === 'graph' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
-                4. Clause 6.46 Graph
-              </button>
+                4. Release workflow
+              </button>}
             </div>
           </div>
 
           {/* Tab 1: Executive Portfolio */}
-          {activeTab === 'portfolio' && (
+          {visibleTab === 'portfolio' && (
             <div className="p-6 lg:p-8 space-y-6 bg-white">
+              <p className="text-xs text-[#706E66]">Portfolio overview</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
                   <div className="text-[11px] font-mono uppercase text-[#706E66]">Total ₹ Held</div>
-                  <div className="text-2xl font-black text-[#1C1D1A] mt-1 font-['Instrument_Serif'] text-3xl">₹24.85 Cr</div>
+                  <div className="text-2xl font-black text-[#1C1D1A] mt-1 font-['Instrument_Serif'] text-3xl">{isRegionScoped ? '₹70 Lakhs' : '₹24.85 Cr'}</div>
                   <div className="text-[11px] text-[#444C3D] flex items-center gap-1 mt-1 font-medium">
-                    <TrendingUp className="w-3 h-3" /> 142 Active Deposits
+                    <TrendingUp className="w-3 h-3" /> {isRegionScoped ? '1 Active Deposit' : '142 Active Deposits'}
                   </div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-[#FDF2F2] border border-[#F5C2C2]">
                   <div className="text-[11px] font-mono uppercase text-[#991B1B]">₹ at Risk</div>
-                  <div className="text-2xl font-black text-[#B91C1C] mt-1 font-['Instrument_Serif'] text-3xl">₹70,00,000</div>
+                  <div className="text-2xl font-black text-[#B91C1C] mt-1 font-['Instrument_Serif'] text-3xl">{isRegionScoped ? '₹35,00,000' : '₹70,00,000'}</div>
                   <div className="text-[11px] text-[#DC2626] flex items-center gap-1 mt-1">
                     <AlertTriangle className="w-3 h-3" /> 1 Critical Discrepancy
                   </div>
@@ -150,13 +152,13 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
 
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
                   <div className="text-[11px] font-mono uppercase text-[#706E66]">Expiring in 90 Days</div>
-                  <div className="text-2xl font-black text-[#B45309] mt-1 font-['Instrument_Serif'] text-3xl">12 FDRs</div>
-                  <div className="text-[11px] text-[#706E66] mt-1">T-Minus Automated Alerts</div>
+                  <div className="text-2xl font-black text-[#B45309] mt-1 font-['Instrument_Serif'] text-3xl">{isRegionScoped ? '1 FDR' : '12 FDRs'}</div>
+                  <div className="text-[11px] text-[#706E66] mt-1">Example count; alerts are not sent</div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
                   <div className="text-[11px] font-mono uppercase text-[#706E66]">Pending Clearances</div>
-                  <div className="text-2xl font-black text-[#444C3D] mt-1 font-['Instrument_Serif'] text-3xl">8 Releases</div>
+                  <div className="text-2xl font-black text-[#444C3D] mt-1 font-['Instrument_Serif'] text-3xl">{isRegionScoped ? '1 Release' : '8 Releases'}</div>
                   <div className="text-[11px] text-[#706E66] mt-1">Under Clause 6.46 DAG</div>
                 </div>
               </div>
@@ -171,37 +173,37 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-[#1C1D1A] text-sm">SIT Pune (1-1092847291)</span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#FEE2E2] text-[#B91C1C] font-bold">
-                        CRITICAL_AMOUNT_MISMATCH
+                        Sample discrepancy
                       </span>
                     </div>
                     <p className="text-xs text-[#55544E] mt-1">
-                      Declared ₹70,00,000 vs Bank Sandbox confirmed balance of ₹35,00,000. Release is blocked.
+                      Example declared amount ₹70,00,000 vs bank record ₹35,00,000.
                     </p>
                   </div>
                 </div>
-                <button 
+                {allowedTabs.includes('provenance') && <button
                   onClick={() => setActiveTab('provenance')}
                   className="px-4 py-2 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white font-semibold text-xs flex items-center gap-2 transition shrink-0 shadow-sm cursor-pointer"
                 >
                   Inspect 3-Way Match <ChevronRight className="w-3.5 h-3.5" />
-                </button>
+                </button>}
               </div>
             </div>
           )}
 
           {/* Tab 2: 3-Way Provenance Scanner */}
-          {activeTab === 'provenance' && (
+          {visibleTab === 'provenance' && (
             <div className="p-6 lg:p-8 space-y-6 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Three-Way Provenance Reconciliation</h4>
-                  <p className="text-xs text-[#706E66]">Instrument: FDR-SIT-2016-001 · State Bank of India</p>
+                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Example record comparison</h4>
+                  <p className="text-xs text-[#706E66]">Sample instrument: FDR-SIT-2016-001 · State Bank of India</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-2.5 py-1 rounded-full text-xs font-mono font-bold ${
                     dispositionWaived ? 'bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]' : 'bg-[#FEE2E2] text-[#B91C1C] border border-[#FCA5A5]'
                   }`}>
-                    {dispositionWaived ? 'WAIVED_BY_DIRECTOR' : 'CRITICAL_DISCREPANT'}
+                    {dispositionWaived ? 'SAMPLE WAIVER PREVIEW' : 'SAMPLE DIFFERENCE'}
                   </span>
                 </div>
               </div>
@@ -212,19 +214,19 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                     <tr>
                       <th className="py-3 px-4">Field</th>
                       <th className="py-3 px-4">1. Declared (College)</th>
-                      <th className="py-3 px-4">2. Document (OCR Evidence)</th>
-                      <th className="py-3 px-4">3. Bank Sandbox (Simulated)</th>
-                      <th className="py-3 px-4">Match Status</th>
+                      <th className="py-3 px-4">2. Example receipt value</th>
+                      <th className="py-3 px-4">3. Example bank value</th>
+                      <th className="py-3 px-4">Example comparison</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E5DFD5] font-mono">
                     <tr className="bg-[#FDF2F2]">
                       <td className="py-3 px-4 font-bold text-[#1C1D1A]">Amount (₹)</td>
                       <td className="py-3 px-4 text-[#55544E]">₹70,00,000</td>
-                      <td className="py-3 px-4 text-[#55544E]">₹70,00,000 (Conf: 99.1%)</td>
+                      <td className="py-3 px-4 text-[#55544E]">₹70,00,000 (example receipt value)</td>
                       <td className="py-3 px-4 text-[#B91C1C] font-bold">₹35,00,000</td>
                       <td className="py-3 px-4 text-[#B91C1C] font-bold flex items-center gap-1.5">
-                        <AlertTriangle className="w-3.5 h-3.5" /> MISMATCH (-₹35L)
+                        <AlertTriangle className="w-3.5 h-3.5" /> Example difference
                       </td>
                     </tr>
                     <tr>
@@ -233,7 +235,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                       <td className="py-3 px-4 text-[#55544E]">FDR-SIT-2016-001</td>
                       <td className="py-3 px-4 text-[#55544E]">FDR-SIT-2016-001</td>
                       <td className="py-3 px-4 text-[#444C3D] font-bold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> EXACT_MATCH
+                        <CheckCircle className="w-3.5 h-3.5" /> Example match
                       </td>
                     </tr>
                     <tr>
@@ -242,7 +244,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                       <td className="py-3 px-4 text-[#55544E]">Jointly to AICTE</td>
                       <td className="py-3 px-4 text-[#55544E]">Confirmed (Lien-AICTE-10Y)</td>
                       <td className="py-3 px-4 text-[#444C3D] font-bold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> EXACT_MATCH
+                        <CheckCircle className="w-3.5 h-3.5" /> Example match
                       </td>
                     </tr>
                     <tr>
@@ -251,7 +253,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                       <td className="py-3 px-4 text-[#55544E]">01-Nov-2026</td>
                       <td className="py-3 px-4 text-[#55544E]">01-Nov-2026</td>
                       <td className="py-3 px-4 text-[#444C3D] font-bold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> EXACT_MATCH
+                        <CheckCircle className="w-3.5 h-3.5" /> Example match
                       </td>
                     </tr>
                   </tbody>
@@ -261,10 +263,10 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
               {/* Action Control */}
               <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                 <div className="text-xs text-[#706E66]">
-                  Active designation: <strong className="text-[#1C1D1A]">{getRoleLabel(currentRole)}</strong>. Every action is recorded in the SHA-256 audit ledger.
+                  Current role: <strong className="text-[#1C1D1A]">{getRoleLabel(currentRole)}</strong>.
                 </div>
                 <div className="flex items-center gap-3">
-                  <button
+                  {canResolveDiscrepancies(currentRole) && <button
                     onClick={() => setDispositionWaived(!dispositionWaived)}
                     className={`px-4 py-2 rounded-lg text-xs font-semibold transition cursor-pointer ${
                       dispositionWaived 
@@ -272,15 +274,15 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                         : 'bg-[#B45309] hover:bg-[#92400E] text-white shadow-sm'
                     }`}
                   >
-                    {dispositionWaived ? 'Undo Waiver (Reset to Blocked)' : 'Waive Discrepancy with Audit Note'}
-                  </button>
+                    {dispositionWaived ? 'Reset sample waiver' : 'Preview waiver label'}
+                  </button>}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Tab 3: Policy Engine Live Calculator */}
-          {activeTab === 'calculator' && (
+          {/* Tab 3: Policy estimate */}
+          {visibleTab === 'calculator' && (
             <div className="p-6 lg:p-8 space-y-6 bg-white">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 <div className="space-y-5">
@@ -372,22 +374,22 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
           )}
 
           {/* Tab 4: Clause 6.46 Release Eligibility Graph */}
-          {activeTab === 'graph' && (
+          {visibleTab === 'graph' && (
             <div className="p-6 lg:p-8 space-y-6 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Clause 6.46 Multi-Clearance Release Graph</h4>
-                  <p className="text-xs text-[#706E66]">Release cannot execute until every required clearance node resolves green</p>
+                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Example release prerequisites</h4>
+                  <p className="text-xs text-[#706E66]">Review the listed clearance statuses for this release request.</p>
                 </div>
 
                 <div className="text-xs font-mono">
-                  Overall State:{' '}
+                  Sample state:{' '}
                   <span className={`px-2.5 py-1 rounded-full font-bold ${
                     pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived
                       ? 'bg-[#EAF3E7] text-[#2D5A27] border border-[#BBD7B5]'
                       : 'bg-[#FEE2E2] text-[#B91C1C] border border-[#FCA5A5]'
                   }`}>
-                    {pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived ? 'ELIGIBLE_FOR_RELEASE' : 'BLOCKED_BY_POLICY'}
+                    {pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived ? 'SAMPLE ITEMS CLEAR' : 'SAMPLE ITEM PENDING'}
                   </span>
                 </div>
               </div>
@@ -395,8 +397,8 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
               {/* Node Graph Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div 
-                  onClick={() => setPgrcCleared(!pgrcCleared)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  onClick={canSetReleaseClearances(currentRole) ? () => setPgrcCleared(!pgrcCleared) : undefined}
+                  className={`p-4 rounded-xl border transition-all ${canSetReleaseClearances(currentRole) ? 'cursor-pointer' : ''} ${
                     pgrcCleared ? 'bg-[#F2F7F0] border-[#BBD7B5] text-[#2D5A27]' : 'bg-[#FDF2F2] border-[#F5C2C2] text-[#991B1B] hover:border-[#DC2626]'
                   }`}
                 >
@@ -408,12 +410,12 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   <div className="text-[11px] text-[#706E66] mt-1">
                     {pgrcCleared ? 'No complaints pending' : 'Active complaint flagged'}
                   </div>
-                  <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>
+                  {canSetReleaseClearances(currentRole) && <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>}
                 </div>
 
                 <div 
-                  onClick={() => setVigilanceCleared(!vigilanceCleared)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  onClick={canSetReleaseClearances(currentRole) ? () => setVigilanceCleared(!vigilanceCleared) : undefined}
+                  className={`p-4 rounded-xl border transition-all ${canSetReleaseClearances(currentRole) ? 'cursor-pointer' : ''} ${
                     vigilanceCleared ? 'bg-[#F2F7F0] border-[#BBD7B5] text-[#2D5A27]' : 'bg-[#FDF2F2] border-[#F5C2C2] text-[#991B1B] hover:border-[#DC2626]'
                   }`}
                 >
@@ -425,12 +427,12 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   <div className="text-[11px] text-[#706E66] mt-1">
                     {vigilanceCleared ? 'No vigilance inquiry' : 'Pending vigilance check'}
                   </div>
-                  <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>
+                  {canSetReleaseClearances(currentRole) && <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>}
                 </div>
 
                 <div 
-                  onClick={() => setGrantsCleared(!grantsCleared)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  onClick={canSetReleaseClearances(currentRole) ? () => setGrantsCleared(!grantsCleared) : undefined}
+                  className={`p-4 rounded-xl border transition-all ${canSetReleaseClearances(currentRole) ? 'cursor-pointer' : ''} ${
                     grantsCleared ? 'bg-[#F2F7F0] border-[#BBD7B5] text-[#2D5A27]' : 'bg-[#FDF2F2] border-[#F5C2C2] text-[#991B1B] hover:border-[#DC2626]'
                   }`}
                 >
@@ -442,7 +444,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   <div className="text-[11px] text-[#706E66] mt-1">
                     {grantsCleared ? 'All grants reconciled' : 'Unspent grant balance'}
                   </div>
-                  <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>
+                  {canSetReleaseClearances(currentRole) && <div className="text-[10px] text-[#8C8A82] mt-2 font-mono">Click to toggle clearance</div>}
                 </div>
 
                 <div className="p-4 rounded-xl border bg-[#F2F7F0] border-[#BBD7B5] text-[#2D5A27]">
@@ -452,26 +454,25 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   </div>
                   <div className="font-bold text-sm text-[#1C1D1A]">10-Year Hold Complete</div>
                   <div className="text-[11px] text-[#706E66] mt-1">Maturity date 01-Nov-2026 reached</div>
-                  <div className="text-[10px] text-[#2D5A27] mt-2 font-mono font-semibold">Verified via Time Machine</div>
+                  <div className="text-[10px] text-[#55544E] mt-2 font-mono font-semibold">Tenor status</div>
                 </div>
               </div>
 
               {/* Approval Execution Action */}
               <div className="pt-2 flex flex-wrap items-center justify-between gap-4">
                 <div className="text-xs text-[#706E66]">
-                  Backend guard clause rejects with HTTP 422 if any node is blocked. Maker-checker segregated.
+                  Review each clearance before the final decision.
                 </div>
-                <button
-                  disabled={!(pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived)}
-                  className={`px-6 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
-                    pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived
-                      ? 'bg-[#444C3D] hover:bg-[#353C2F] text-white shadow-sm cursor-pointer'
-                      : 'bg-[#E5DFD5] text-[#8C8A82] cursor-not-allowed'
-                  }`}
+                {canIssueReleaseSanction(currentRole) && <button
+                  disabled
+                  className="px-6 py-2.5 rounded-lg text-xs font-bold bg-[#E5DFD5] text-[#8C8A82] cursor-not-allowed"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  Execute Release Sanction Order (Clause 6.46)
-                </button>
+                  Release approval unavailable in demo
+                </button>}
+                {!canIssueReleaseSanction(currentRole) && (
+                  <span className="text-xs text-[#706E66]">Final sanction is restricted to the Competent Authority.</span>
+                )}
               </div>
             </div>
           )}
@@ -479,28 +480,30 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
         </div>
 
         {/* Bottom Action Banner */}
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-3 py-2 text-left">
-          <div>
-            <div className="font-semibold text-sm text-[#1C1D1A]">Want to test your own deposit?</div>
-            <div className="text-xs text-[#55544E]">
-              Submit any institutional FDR certificate to run live 3-way reconciliation against simulated CBS adapters.
+        {currentRole === 'INSTITUTION_USER' && (
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-3 py-2 text-left">
+            <div>
+              <div className="font-semibold text-sm text-[#1C1D1A]">Want to test your own deposit?</div>
+              <div className="text-xs text-[#55544E]">
+                Enter FDR details and review the submission steps.
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={() => setActiveTab('provenance')}
+                className="px-5 py-2.5 bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium rounded-lg shadow-sm transition-all cursor-pointer"
+              >
+                View bank record examples
+              </button>
+              <button
+                onClick={() => setActiveTab('calculator')}
+                className="px-5 py-2.5 bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#1C1D1A] text-xs font-medium rounded-lg border border-[#DDD6C9] transition-all cursor-pointer"
+              >
+                Simulate APH Calculation
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => setActiveTab('provenance')}
-              className="px-5 py-2.5 bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium rounded-lg shadow-sm transition-all cursor-pointer"
-            >
-              Try with SIT Pune sample
-            </button>
-            <button
-              onClick={() => setActiveTab('calculator')}
-              className="px-5 py-2.5 bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#1C1D1A] text-xs font-medium rounded-lg border border-[#DDD6C9] transition-all cursor-pointer"
-            >
-              Simulate APH Calculation
-            </button>
-          </div>
-        </div>
+        )}
 
       </div>
     </div>

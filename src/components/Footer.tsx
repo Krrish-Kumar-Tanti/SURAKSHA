@@ -1,7 +1,33 @@
 import React from 'react';
-import { Shield, ExternalLink, CheckCircle } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
-export function Footer() {
+interface FooterProps {
+  currentRole?: string;
+}
+
+const roleCapabilities: Record<string, string[]> = {
+  INSTITUTION_USER: ['Portfolio', 'FDR submission', 'Bank records', 'Policy estimate', 'Release workflow'],
+  DEALING_OFFICER: ['Portfolio', 'Bank records', 'Policy estimate', 'Release workflow'],
+  DIRECTOR_RB: ['Portfolio', 'Bank records', 'Release workflow'],
+  COMPETENT_AUTHORITY: ['Portfolio', 'Release workflow', 'Audit'],
+  ACCOUNTS: ['Release letters'],
+  AUDITOR: ['Portfolio', 'Bank records', 'Audit'],
+  ADMIN: ['Service reachability check', 'Administration feature availability'],
+};
+
+const publicCapabilities = [
+  'Role-specific workspaces',
+  'Portfolio and policy tools',
+  'FDR submission',
+  'Bank record review',
+  'Release workflow',
+  'Audit history',
+  'System administration',
+];
+
+export function Footer({ currentRole }: FooterProps) {
+  const capabilities = currentRole ? roleCapabilities[currentRole] ?? [] : publicCapabilities;
+
   return (
     <footer className="border-t border-[#DFD8CB] bg-[#EFEAE1] pt-16 pb-12 px-6 lg:px-10 text-xs text-[#706E66] relative z-10">
       <div className="max-w-[1376px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-[#DFD8CB]">
@@ -18,12 +44,8 @@ export function Footer() {
             </div>
           </div>
           <p className="text-[#55544E] text-xs max-w-md leading-relaxed">
-            Policy-native Security Deposit & FDR Control Tower for the All India Council for Technical Education (AICTE). Defending statutory compliance across every college deposit.
+            Security-deposit submission, review, and release workflows for institutions and AICTE staff.
           </p>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#DDD6C9] text-[11px] text-[#444C3D] font-mono">
-            <CheckCircle className="w-3.5 h-3.5 text-[#444C3D]" />
-            <span>Prototype Environment · All Data Synthetic</span>
-          </div>
         </div>
 
         {/* Regulatory Anchors */}
@@ -40,18 +62,11 @@ export function Footer() {
 
         {/* System Capabilities */}
         <div>
-          <div className="font-bold text-[#1C1D1A] uppercase text-[11px] font-mono tracking-wider mb-3">10 Platform Screens</div>
+          <div className="font-bold text-[#1C1D1A] uppercase text-[11px] font-mono tracking-wider mb-3">
+            {currentRole ? 'Your workspace' : 'Platform features'}
+          </div>
           <ul className="space-y-2 text-[#55544E] text-[11px]">
-            <li>1. Login & Persona Switcher</li>
-            <li>2. Executive Portfolio Dashboard</li>
-            <li>3. FDR Submission Wizard</li>
-            <li>4. Three-Way Provenance Scanner</li>
-            <li>5. Policy Trace & APH Calculator</li>
-            <li>6. Clause 6.46 Release DAG</li>
-            <li>7. Time Machine & Countdown</li>
-            <li>8. Cryptographic Audit Verifier</li>
-            <li>9. Cross-Institution Pledge Radar</li>
-            <li>10. Maturity Cash-Flow Forecast</li>
+            {capabilities.map((capability) => <li key={capability}>{capability}</li>)}
           </ul>
         </div>
       </div>
@@ -60,11 +75,16 @@ export function Footer() {
         <div>
           © 2026 SURAKSHA Control Tower · Built for Smart India Hackathon (SIH26265) · AICTE Theme
         </div>
-        <div className="flex items-center gap-6">
-          <span className="hover:text-[#1C1D1A] transition">FastAPI + PostgreSQL</span>
-          <span className="hover:text-[#1C1D1A] transition">React + Vite + TypeScript</span>
-          <span className="hover:text-[#1C1D1A] transition">GSAP + Lenis Engine</span>
-        </div>
+        {currentRole === 'ADMIN' && (
+          <div className="flex items-center gap-6">
+            <span>API: FastAPI</span>
+            <span>Data store: PostgreSQL</span>
+            <span>Web client: React + TypeScript</span>
+          </div>
+        )}
+      </div>
+      <div className="max-w-[1376px] mx-auto mt-6 border-t border-[#DFD8CB] pt-4 text-[10px] text-[#706E66]">
+        Demonstration build · Dashboard records and workflow outcomes are illustrative.
       </div>
     </footer>
   );

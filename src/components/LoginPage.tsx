@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Lock, UserCheck, ArrowRight, CheckCircle2, AlertCircle, Building2, Scale, KeyRound, Sparkles } from 'lucide-react';
+import { Shield, Lock, UserCheck, ArrowRight, CheckCircle2, AlertCircle, Building2, Scale, KeyRound, Sparkles, FileText } from 'lucide-react';
 import { apiLogin, checkBackendHealth, UserSession } from '../lib/api';
 import { AnimatedHeading } from './AnimatedHeading';
 
@@ -9,10 +9,11 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
-  const [email, setEmail] = useState('dealing.officer@aicte.gov.in');
-  const [password, setPassword] = useState('demo123');
+  const [email, setEmail] = useState('officer@aicte.example.test');
+  const [password, setPassword] = useState('demo-password');
   const [selectedRole, setSelectedRole] = useState('DEALING_OFFICER');
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const [backendStatus, setBackendStatus] = useState<{ connected: boolean; service?: string }>({ connected: false });
 
   // Quick Persona Profiles matching SIH26265
@@ -21,33 +22,64 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
       id: 'INSTITUTION_USER',
       label: 'College Registrar',
       org: 'SIT Pune (1-1092847291)',
-      email: 'registrar@sitpune.edu.in',
-      desc: 'Submit FDR, track 3-way match, request release',
+      email: 'registrar@sit.example.test',
+      desc: 'Submit FDR details and review institution deposits',
       icon: Building2,
+      password: 'demo-password',
     },
     {
       id: 'DEALING_OFFICER',
       label: 'Dealing Officer',
       org: 'AICTE Western Regional Office',
-      email: 'dealing.officer@aicte.gov.in',
-      desc: 'Verify OCR vs CBS, check Table 1.4 norms',
+      email: 'officer@aicte.example.test',
+      desc: 'Review institutional records and release clearances',
       icon: Shield,
+      password: 'demo-password',
     },
     {
       id: 'DIRECTOR_RB',
       label: 'Regional Director',
       org: 'AICTE Approval Bureau',
-      email: 'director.rb@aicte.gov.in',
-      desc: 'Waive minor discrepancies, portfolio risk oversight',
+      email: 'director@aicte.example.test',
+      desc: 'Review regional deposits and significant discrepancies',
       icon: Scale,
+      password: 'demo-password',
     },
     {
       id: 'COMPETENT_AUTHORITY',
       label: 'Approving Authority',
       org: 'AICTE Headquarters (New Delhi)',
-      email: 'approving.authority@aicte.gov.in',
-      desc: 'Final Clause 6.46 release sanction order & NOC',
+      email: 'ca@aicte.example.test',
+      desc: 'Review requests and make release decisions',
       icon: KeyRound,
+      password: 'demo-password',
+    },
+    {
+      id: 'ACCOUNTS',
+      label: 'Accounts',
+      org: 'AICTE Finance Desk',
+      email: 'accounts@aicte.example.test',
+      desc: 'Prepare and review release letters',
+      icon: FileText,
+      password: 'demo-password',
+    },
+    {
+      id: 'AUDITOR',
+      label: 'Central Auditor',
+      org: 'Audit & Compliance',
+      email: 'auditor@aicte.example.test',
+      desc: 'Review deposit records and audit history',
+      icon: Shield,
+      password: 'demo-password',
+    },
+    {
+      id: 'ADMIN',
+      label: 'System Administrator',
+      org: 'AICTE Headquarters',
+      email: 'admin@aicte.example.test',
+      desc: 'Monitor application service status',
+      icon: KeyRound,
+      password: 'demo-password',
     },
   ];
 
@@ -60,15 +92,19 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
   const handleSelectPersona = (p: typeof personas[0]) => {
     setSelectedRole(p.id);
     setEmail(p.email);
-    setPassword('demo123');
+    setPassword(p.password);
+    setLoginError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setLoginError('');
     try {
       const session = await apiLogin(email, password, selectedRole);
       onLoginSuccess(session);
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Sign-in failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -94,7 +130,7 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${backendStatus.connected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
           <span className="text-xs font-mono text-[#55544E]">
-            {backendStatus.connected ? 'FastAPI Backend Online (Port 8000)' : 'Simulated Adapter Fallback Ready'}
+            {backendStatus.connected ? 'Backend online' : 'Demo sign-in available'}
           </span>
           {onCancel && (
             <button
@@ -114,24 +150,24 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
         <div className="lg:col-span-6 space-y-6 text-left">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium">
             <Sparkles className="w-3.5 h-3.5 text-[#444C3D]" />
-            Regulatory Compliance Gateway
+            Select a role to continue
           </div>
 
           <AnimatedHeading
             as="h1"
             className="text-4xl sm:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] leading-tight"
           >
-            ( Sign in to *Control Tower* )
+            ( Sign in to *SURAKSHA* )
           </AnimatedHeading>
 
           <p className="text-base text-[#55544E] leading-relaxed">
-            AICTE Security Deposit & FDR Management System. Select your statutory role or use one of the quick demo credentials below.
+            Choose a role and sign in with its demo ID.
           </p>
 
           {/* Quick Demo Persona Selector Cards */}
           <div className="pt-2 space-y-2.5">
             <div className="text-[11px] font-mono uppercase text-[#706E66] font-bold">
-              Select Demo Persona (One-Click Setup)
+              Choose your role
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {personas.map((p) => {
@@ -166,7 +202,7 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
           <div className="rounded-3xl bg-white border border-[#E5DFD5] p-8 sm:p-10 shadow-[0_15px_45px_rgba(28,29,26,0.06)] text-left">
             <div className="mb-6">
               <h3 className="text-2xl font-normal text-[#1C1D1A] font-['Instrument_Serif'] tracking-tight">
-                Authentication Credentials
+                Sign-in details
               </h3>
               <p className="text-xs text-[#706E66] mt-1 font-mono">
                 Active role: <span className="font-bold text-[#444C3D]">{selectedRole}</span>
@@ -174,6 +210,11 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {loginError && (
+                <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                  {loginError}
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-mono text-[#55544E] mb-1.5">Official Email Address</label>
                 <input
@@ -208,7 +249,7 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
                     'Signing in to Control Tower...'
                   ) : (
                     <>
-                      Enter Control Tower Cockpit <ArrowRight className="w-4 h-4" />
+                      Sign in <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
@@ -216,8 +257,8 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
             </form>
 
             <div className="mt-6 pt-5 border-t border-[#E5DFD5] text-[11px] text-[#706E66] flex items-center justify-between">
-              <span>Prototype environment</span>
-              <span className="font-mono">Audit Log: SHA-256 Enabled</span>
+              <span>Role-based sign-in</span>
+              <span className="font-mono">SURAKSHA</span>
             </div>
           </div>
         </div>

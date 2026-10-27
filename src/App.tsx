@@ -33,15 +33,17 @@ import { ProvenancePage } from './components/pages/ProvenancePage';
 import { PolicyTracePage } from './components/pages/PolicyTracePage';
 import { ReleaseGraphPage } from './components/pages/ReleaseGraphPage';
 import { AuditChainPage } from './components/pages/AuditChainPage';
+import { AdminPage } from './components/pages/AdminPage';
 import { HeroIntroSplash } from './components/HeroIntroSplash';
-import { getSavedSession, clearSession, UserSession } from './lib/api';
+import { getSavedSession, clearSession, saveSession, UserSession } from './lib/api';
+import { AppScreen, getDefaultScreen, isScreenAllowed } from './lib/roleAccess';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const [userSession, setUserSession] = useState<UserSession | null>(getSavedSession());
   const [currentRole, setCurrentRole] = useState(userSession?.role || 'DEALING_OFFICER');
-  const [activeScreen, setActiveScreen] = useState('home');
+  const [activeScreen, setActiveScreen] = useState<string>(userSession ? getDefaultScreen(userSession.role) : 'home');
   const [showIntro, setShowIntro] = useState(true);
 
   const isAuthenticated = !!userSession;
@@ -53,7 +55,7 @@ export default function App() {
   const handleLoginSuccess = (session: UserSession) => {
     setUserSession(session);
     setCurrentRole(session.role);
-    setActiveScreen('home');
+    setActiveScreen(getDefaultScreen(session.role));
   };
 
   const handleLogout = () => {
@@ -61,6 +63,49 @@ export default function App() {
     setUserSession(null);
     setActiveScreen('home');
   };
+
+  const handleDemoRoleChange = (role: string) => {
+    setCurrentRole(role);
+    setActiveScreen(getDefaultScreen(role));
+    if (userSession?.token.startsWith('jwt_synthetic_token_')) {
+      const roleNames: Record<string, string> = {
+        INSTITUTION_USER: 'College Registrar',
+        DEALING_OFFICER: 'Dealing Officer',
+        DIRECTOR_RB: 'Regional Director',
+        COMPETENT_AUTHORITY: 'Approving Authority',
+        ACCOUNTS: 'Accounts',
+        AUDITOR: 'Central Auditor',
+        ADMIN: 'System Administrator',
+      };
+      const updatedSession = {
+        ...userSession,
+        role,
+        displayName: roleNames[role] ?? role,
+      };
+      setUserSession(updatedSession);
+      saveSession(updatedSession);
+    }
+  };
+
+  const navigateToScreen = (screen: string) => {
+    if (screen === 'login') {
+      setActiveScreen(screen);
+      return;
+    }
+    if (!isAuthenticated && screen !== 'home') {
+      setActiveScreen('login');
+      return;
+    }
+    if (isScreenAllowed(currentRole, screen)) {
+      setActiveScreen(screen);
+    }
+  };
+
+  const visibleScreen: AppScreen | 'login' = activeScreen === 'login'
+    ? 'login'
+    : isAuthenticated && !isScreenAllowed(currentRole, activeScreen)
+      ? getDefaultScreen(currentRole)
+      : isAuthenticated ? activeScreen as AppScreen : 'home';
 
   // Global Lenis Smooth Scroll Setup connected to GSAP ScrollTrigger
   useEffect(() => {
@@ -99,7 +144,7 @@ export default function App() {
   }, [activeScreen]);
 
   // Login View Override
-  if (activeScreen === 'login') {
+  if (visibleScreen === 'login') {
     return (
       <LoginPage
         onLoginSuccess={handleLoginSuccess}
@@ -119,67 +164,67 @@ export default function App() {
       {/* Navbar with Role Switcher */}
       <Navbar
         currentRole={currentRole}
-        onRoleChange={(newRole) => {
-          setCurrentRole(newRole);
-          if (newRole === 'INSTITUTION_USER') setActiveScreen('wizard');
-          else if (newRole === 'DEALING_OFFICER') setActiveScreen('portfolio');
-          else if (newRole === 'DIRECTOR_RB') setActiveScreen('policy');
-          else if (newRole === 'COMPETENT_AUTHORITY') setActiveScreen('release');
-          else if (newRole === 'AUDITOR') setActiveScreen('audit');
-        }}
-        activeScreen={activeScreen}
-        onNavigate={setActiveScreen}
+        onRoleChange={handleDemoRoleChange}
+        activeScreen={visibleScreen}
+        onNavigate={navigateToScreen}
         isAuthenticated={isAuthenticated}
         userSession={userSession}
         onLoginClick={() => setActiveScreen('login')}
         onLogoutClick={handleLogout}
       />
 
+      {visibleScreen === 'admin' && (
+        <>
+          <AdminPage />
+          <Footer currentRole={currentRole} />
+        </>
+      )}
+
       {/* RENDER DEDICATED SECTIONS */}
-      {activeScreen === 'portfolio' && (
+      {visibleScreen === 'portfolio' && (
         <>
-          <PortfolioPage currentRole={currentRole} onNavigate={setActiveScreen} />
-          <Footer />
+          <PortfolioPage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
+          <Footer currentRole={currentRole} />
         </>
       )}
 
-      {activeScreen === 'wizard' && (
+      {visibleScreen === 'wizard' && (
         <>
-          <FdrWizardPage currentRole={currentRole} onNavigate={setActiveScreen} />
-          <Footer />
+          <FdrWizardPage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
+          <Footer currentRole={currentRole} />
         </>
       )}
 
-      {activeScreen === 'provenance' && (
+      {visibleScreen === 'provenance' && (
         <>
-          <ProvenancePage currentRole={currentRole} onNavigate={setActiveScreen} />
-          <Footer />
+          <ProvenancePage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
+          <Footer currentRole={currentRole} />
         </>
       )}
 
-      {activeScreen === 'policy' && (
+      {visibleScreen === 'policy' && (
         <>
-          <PolicyTracePage currentRole={currentRole} onNavigate={setActiveScreen} />
-          <Footer />
+          <PolicyTracePage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
+          <Footer currentRole={currentRole} />
         </>
       )}
 
-      {activeScreen === 'release' && (
+      {visibleScreen === 'release' && (
         <>
-          <ReleaseGraphPage currentRole={currentRole} onNavigate={setActiveScreen} />
-          <Footer />
+          <ReleaseGraphPage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
+          <Footer currentRole={currentRole} />
         </>
       )}
 
-      {activeScreen === 'audit' && (
+      {visibleScreen === 'audit' && (
         <>
-          <AuditChainPage currentRole={currentRole} onNavigate={setActiveScreen} />
-          <Footer />
+          <AuditChainPage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
+          <Footer currentRole={currentRole} />
         </>
       )}
 
       {/* HOMEPAGE VIEW: Differentiates between Logged-in Cockpit vs Public Landing */}
-      {activeScreen === 'home' && (
+      {visibleScreen === 'home' && (
         <>
           {isAuthenticated ? (
             /* ========================================================
@@ -191,56 +236,61 @@ export default function App() {
                 <div className="space-y-1">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFEAE1] border border-[#DDD6C9] text-[#444C3D] text-xs font-mono font-medium">
                     <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                    Active Statutory Session: {userSession?.role}
+                    Signed in as {currentRole}
                   </div>
                   <h2 className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif'] pt-1">
-                    Control Tower Operational Command
+                    Your SURAKSHA workspace
                   </h2>
                   <p className="text-xs text-[#55544E] font-mono">
-                    Signed in as <strong className="text-[#1C1D1A]">{userSession?.displayName}</strong> · Region: {userSession?.regionCode || 'WRO'} · SHA-256 Audit Anchored
+                    Signed in as <strong className="text-[#1C1D1A]">{userSession?.displayName}</strong> · Region: {userSession?.regionCode || 'WRO'}
+                    {isScreenAllowed(currentRole, 'audit') && ' · Sample audit events'}
                   </p>
                 </div>
 
                 {/* Quick Navigation Action Pills */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={() => setActiveScreen('portfolio')}
+                  {isScreenAllowed(currentRole, 'portfolio') && <button
+                    onClick={() => navigateToScreen('portfolio')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
                     <Building2 className="w-3.5 h-3.5 text-[#444C3D]" /> Portfolio Table
-                  </button>
-                  <button
-                    onClick={() => setActiveScreen('wizard')}
+                  </button>}
+                  {isScreenAllowed(currentRole, 'wizard') && <button
+                    onClick={() => navigateToScreen('wizard')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
                     <FileCheck className="w-3.5 h-3.5 text-[#444C3D]" /> Submit FDR
-                  </button>
-                  <button
-                    onClick={() => setActiveScreen('provenance')}
+                  </button>}
+                  {isScreenAllowed(currentRole, 'provenance') && <button
+                    onClick={() => navigateToScreen('provenance')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <Activity className="w-3.5 h-3.5 text-[#444C3D]" /> 3-Way Provenance
-                  </button>
-                  <button
-                    onClick={() => setActiveScreen('release')}
+                    <Activity className="w-3.5 h-3.5 text-[#444C3D]" /> Bank record examples
+                  </button>}
+                  {isScreenAllowed(currentRole, 'release') && <button
+                    onClick={() => navigateToScreen('release')}
                     className="px-3.5 py-2 rounded-xl bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-1.5 transition shadow-sm cursor-pointer"
                   >
-                    Release DAG <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
+                    {currentRole === 'ACCOUNTS' ? 'Release letter examples' : 'Release workflow'} <ChevronRight className="w-3.5 h-3.5" />
+                  </button>}
                 </div>
               </div>
 
               {/* 1. The Interactive Cockpit */}
-              <div className="mb-12">
-                <CockpitPreview currentRole={currentRole} onNavigate={setActiveScreen} />
-              </div>
+              {currentRole !== 'ACCOUNTS' && currentRole !== 'ADMIN' && (
+                <div className="mb-12">
+                  <CockpitPreview key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
+                </div>
+              )}
 
               {/* 2. The Tamper-Evident SHA-256 Ledger */}
-              <div className="mb-12">
-                <AuditTicker />
-              </div>
+              {isScreenAllowed(currentRole, 'audit') && (
+                <div className="mb-12">
+                  <AuditTicker />
+                </div>
+              )}
 
-              <Footer />
+              <Footer currentRole={currentRole} />
             </div>
           ) : (
             /* ========================================================
@@ -273,7 +323,7 @@ export default function App() {
                     </AnimatedHeading>
 
                     <p className="text-base sm:text-lg md:text-xl text-[#55544E] max-w-[580px] mb-10 leading-relaxed font-normal">
-                      Autonomous compliance proving every FDR is <span className="text-[#1C1D1A] font-semibold">real</span> through 3-way reconciliation, <span className="text-[#1C1D1A] font-semibold">correctly sized</span> under APH Table 1.4, <span className="text-[#1C1D1A] font-semibold">continuously pledged</span>, and <span className="text-[#1C1D1A] font-semibold">safe to release</span> under Clause 6.46.
+                      Security-deposit workflows for institutions and AICTE staff, including submission, review, policy estimates, and release.
                     </p>
 
                     <div className="flex flex-wrap items-center justify-start gap-4">

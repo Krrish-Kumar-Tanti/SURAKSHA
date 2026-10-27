@@ -7,24 +7,24 @@ export function FaqSection() {
 
   const faqs = [
     {
-      q: 'Why does SURAKSHA require a Three-Way Provenance match instead of trusting PDF uploads?',
-      a: 'A simple PDF scan can be tampered with or encashed early without AICTE knowledge. SURAKSHA cross-references three independent layers: the institution declaration, high-accuracy OCR with bounding-box tracking on the physical receipt, and structured bank sandbox/API verification of live liens.',
+      q: 'How does bank record review help?',
+      a: 'It compares receipt details with available bank and institution records so reviewers can identify differences that need attention.',
     },
     {
-      q: 'How does SURAKSHA calculate the deposit amount for Leased land under APH 2026–27?',
-      a: 'Under Addendum/Corrigendum 2026–27 Item 11, any institution operating on leased building or land is subject to a mandatory 2.0× doubling multiplier on Table 1.4 baseline rates (e.g., an Engineering UG base of ₹35 Lakhs becomes ₹70 Lakhs).',
+      q: 'How is the policy estimate calculated?',
+      a: 'The estimate uses the selected programme, premises status, and concession details. Review the cited handbook and current guidance when confirming an institution’s requirement.',
     },
     {
-      q: 'What prevents premature or unauthorized security deposit refunds under Clause 6.46?',
-      a: 'The Clause 6.46 Release DAG enforces mandatory clearance nodes across the Student Grievance Redressal Cell (PGRC), the Central Vigilance Bureau, and the Grants Cell. The backend enforces atomic HTTP 422 guard clauses, making approval technically impossible while any clearance is pending.',
+      q: 'What is checked before a release?',
+      a: 'The workflow brings together the required grievance, vigilance, grant, and holding-period clearances for review before a release decision.',
     },
     {
-      q: 'How does the Cross-Institution Pledge Radar detect duplicate pledges?',
-      a: 'Large educational trusts often operate multiple institutions. SURAKSHA computes cryptographic document hashes and traces identical FDR numbers across all registered colleges, immediately flagging and freezing deposits that share collateral.',
+      q: 'How are duplicate pledges identified?',
+      a: 'Receipt numbers and document fingerprints can be compared across institutions to surface possible duplicate pledges for review.',
     },
     {
-      q: 'Who retains the interest earned on fixed deposits over the 10-year term?',
-      a: 'Under APH Clause 1.12(iv), interest accrued on security deposits is retained exclusively by AICTE for statutory technical education development funds. Only the original principal deposit is refundable to the institution upon full compliance.',
+      q: 'Where can I see the deposit lifecycle?',
+      a: 'The lifecycle view follows a deposit from submission and sizing through custody, maturity, and release.',
     },
   ];
 
@@ -42,7 +42,7 @@ export function FaqSection() {
           Frequently Asked *Questions*
         </AnimatedHeading>
         <p className="text-[#55544E] text-xs sm:text-sm mt-3">
-          Detailed explanations of AICTE Approval Process Handbook (APH 2024–27) rules and SURAKSHA system mechanics.
+          Deposits, reviews, and release workflow.
         </p>
       </div>
 

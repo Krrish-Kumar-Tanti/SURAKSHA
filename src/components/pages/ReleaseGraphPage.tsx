@@ -12,9 +12,9 @@ import {
   Clock, 
   Check, 
   Lock,
-  Printer
 } from 'lucide-react';
 import { AnimatedHeading } from '../AnimatedHeading';
+import { canIssueReleaseSanction, canSetReleaseClearances } from '../../lib/roleAccess';
 
 interface ReleaseGraphPageProps {
   onNavigate: (screen: string) => void;
@@ -23,6 +23,8 @@ interface ReleaseGraphPageProps {
 
 export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORITY' }: ReleaseGraphPageProps) {
 
+  const canEditClearances = canSetReleaseClearances(currentRole);
+  const canApproveSanction = canIssueReleaseSanction(currentRole);
   const [pgrcCleared, setPgrcCleared] = useState(true);
   const [vigilanceCleared, setVigilanceCleared] = useState(true);
   const [grantsCleared, setGrantsCleared] = useState(true);
@@ -32,22 +34,49 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
 
   const allClear = pgrcCleared && vigilanceCleared && grantsCleared && courtInjunctionClear && termServed;
 
+  if (currentRole === 'ACCOUNTS') {
+    return (
+      <div className="min-h-screen bg-[#F8F5EE] text-[#1C1D1A] py-10 px-4 sm:px-8 max-w-[1100px] mx-auto text-left">
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-3">
+            Release Documentation
+          </div>
+          <AnimatedHeading
+            as="h1"
+            className="text-3xl sm:text-4xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] font-['Instrument_Serif']"
+          >
+            Release Letters & NOC
+          </AnimatedHeading>
+          <p className="text-sm sm:text-base text-[#55544E] mt-2">
+            Review release documentation for approved requests.
+          </p>
+        </div>
+
+        <div className="rounded-3xl bg-white border border-[#E5DFD5] p-6 sm:p-8 shadow-sm">
+          <div className="text-sm text-[#55544E]">
+            Approved release documents will appear here.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8F5EE] text-[#1C1D1A] py-10 px-4 sm:px-8 max-w-[1340px] mx-auto text-left">
       {/* Top Breadcrumb & Heading */}
       <div className="mb-8">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-3">
           <Sparkles className="w-3.5 h-3.5 text-[#444C3D]" />
-          Clause 6.46 Directed Acyclic Graph (DAG)
+          Example release workflow
         </div>
         <AnimatedHeading
           as="h1"
           className="text-3xl sm:text-4xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] font-['Instrument_Serif']"
         >
-          ( Clause 6.46 *Release & Sanction Workflow* )
+          ( *Release review* )
         </AnimatedHeading>
         <p className="text-sm sm:text-base text-[#55544E] mt-2 max-w-3xl">
-          Multi-desk statutory clearance pipeline before releasing joint FDR liens. Verifies PGRC, Vigilance, Financial Grants, and Tenor Served under AICTE regulations.
+          Review the clearances required before a deposit can be released.
         </p>
       </div>
 
@@ -67,7 +96,7 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
               <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold ${
                 allClear ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
               }`}>
-                {allClear ? 'ELIGIBLE FOR RELEASE' : 'BLOCKED PENDING CLEARANCE'}
+                {allClear ? 'CLEARANCES COMPLETE' : 'CLEARANCE PENDING'}
               </span>
             </div>
 
@@ -81,8 +110,9 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
                   <div className="text-[11px] font-mono text-[#706E66]">Maturity: 15-Aug-2034 · Clause 6.46(a)</div>
                 </div>
                 <button
-                  onClick={() => setTermServed(!termServed)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                  onClick={() => canEditClearances && setTermServed(!termServed)}
+                  disabled={!canEditClearances}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition ${canEditClearances ? 'cursor-pointer' : 'cursor-default'} ${
                     termServed ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
                   }`}
                 >
@@ -97,8 +127,9 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
                   <div className="text-[11px] font-mono text-[#706E66]">No pending student fee refund complaints</div>
                 </div>
                 <button
-                  onClick={() => setPgrcCleared(!pgrcCleared)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                  onClick={() => canEditClearances && setPgrcCleared(!pgrcCleared)}
+                  disabled={!canEditClearances}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition ${canEditClearances ? 'cursor-pointer' : 'cursor-default'} ${
                     pgrcCleared ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
                   }`}
                 >
@@ -113,8 +144,9 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
                   <div className="text-[11px] font-mono text-[#706E66]">No active inquiry or disciplinary embargo</div>
                 </div>
                 <button
-                  onClick={() => setVigilanceCleared(!vigilanceCleared)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                  onClick={() => canEditClearances && setVigilanceCleared(!vigilanceCleared)}
+                  disabled={!canEditClearances}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition ${canEditClearances ? 'cursor-pointer' : 'cursor-default'} ${
                     vigilanceCleared ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
                   }`}
                 >
@@ -129,8 +161,9 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
                   <div className="text-[11px] font-mono text-[#706E66]">MODROBS, RPS, Margdarshan utilization certificates submitted</div>
                 </div>
                 <button
-                  onClick={() => setGrantsCleared(!grantsCleared)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                  onClick={() => canEditClearances && setGrantsCleared(!grantsCleared)}
+                  disabled={!canEditClearances}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition ${canEditClearances ? 'cursor-pointer' : 'cursor-default'} ${
                     grantsCleared ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
                   }`}
                 >
@@ -145,8 +178,9 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
                   <div className="text-[11px] font-mono text-[#706E66]">No judicial restraint on encashment / release</div>
                 </div>
                 <button
-                  onClick={() => setCourtInjunctionClear(!courtInjunctionClear)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                  onClick={() => canEditClearances && setCourtInjunctionClear(!courtInjunctionClear)}
+                  disabled={!canEditClearances}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition ${canEditClearances ? 'cursor-pointer' : 'cursor-default'} ${
                     courtInjunctionClear ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
                   }`}
                 >
@@ -163,10 +197,10 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
           <div className="rounded-3xl bg-white border border-[#E5DFD5] p-6 sm:p-8 shadow-sm space-y-6">
             <div>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#706E66] block">
-                Statutory Execution
+                Clearance review
               </span>
               <h3 className="text-xl font-normal text-[#1C1D1A] font-['Instrument_Serif']">
-                Multi-Signatory Hierarchy
+                Example approval steps
               </h3>
             </div>
 
@@ -175,7 +209,7 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
               <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] flex items-center justify-between">
                 <div>
                   <span className="text-[#706E66] block text-[10px]">1. Dealing Officer (Maker)</span>
-                  <span className="font-bold text-[#1C1D1A]">Scrutinized & Recommended</span>
+                  <span className="font-bold text-[#1C1D1A]">Recommended for review</span>
                 </div>
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
@@ -183,7 +217,7 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
               <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] flex items-center justify-between">
                 <div>
                   <span className="text-[#706E66] block text-[10px]">2. Regional Director (Checker)</span>
-                  <span className="font-bold text-[#1C1D1A]">Portfolio Health Attested</span>
+                  <span className="font-bold text-[#1C1D1A]">Review complete</span>
                 </div>
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
@@ -191,7 +225,7 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
               <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] flex items-center justify-between">
                 <div>
                   <span className="text-[#706E66] block text-[10px]">3. Approving Authority (HQ)</span>
-                  <span className="font-bold text-[#1C1D1A]">Clause 6.46 Final Sanction</span>
+                  <span className="font-bold text-[#1C1D1A]">Awaiting final decision</span>
                 </div>
                 {sanctionIssued ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -202,38 +236,39 @@ export function ReleaseGraphPage({ onNavigate, currentRole = 'COMPETENT_AUTHORIT
             </div>
 
             {/* Action Button */}
-            {!sanctionIssued ? (
+            {canApproveSanction && !sanctionIssued ? (
               <button
                 onClick={() => setSanctionIssued(true)}
                 disabled={!allClear}
                 className="w-full py-3.5 px-6 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white font-medium text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
               >
-                Approve & Issue Sanction Order (Clause 6.46) <ArrowRight className="w-4 h-4" />
+                Preview approval state <ArrowRight className="w-4 h-4" />
               </button>
-            ) : (
+            ) : sanctionIssued ? (
               <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-left space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-emerald-800">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Official Release Order #RO-AICTE-2026-081 Generated
+                  Approval preview
                 </div>
-                <p className="text-[11px] text-emerald-900 leading-relaxed font-mono">
-                  State Bank of India is authorized to release lien on FDR #SBI/PUN/2024/998214 in favour of Symbiosis Institute of Technology.
+                <p className="text-[11px] text-amber-950 leading-relaxed">
+                  Review the release request and supporting clearances.
                 </p>
                 <div className="pt-2 flex items-center gap-2">
                   <button
-                    onClick={() => window.print()}
-                    className="px-3.5 py-1.5 rounded-lg bg-[#444C3D] text-white text-[11px] font-mono font-medium flex items-center gap-1.5 cursor-pointer shadow-sm"
-                  >
-                    <Printer className="w-3.5 h-3.5" /> Print Sanction Order
-                  </button>
-                  <button
                     onClick={() => onNavigate('audit')}
+                    hidden={currentRole !== 'COMPETENT_AUTHORITY'}
                     className="px-3.5 py-1.5 rounded-lg border border-[#DDD6C9] bg-white text-[#1C1D1A] text-[11px] font-mono font-medium cursor-pointer"
                   >
                     View in Audit Chain →
                   </button>
                 </div>
               </div>
+            ) : (
+              <p className="text-xs text-[#706E66]">
+                {currentRole === 'ACCOUNTS'
+                  ? 'Release letters are available after the Competent Authority issues the final sanction.'
+                  : 'Final release sanction is restricted to the Competent Authority.'}
+              </p>
             )}
           </div>
         </div>

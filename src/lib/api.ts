@@ -35,6 +35,20 @@ export function clearSession(): void {
   sessionStorage.removeItem('suraksha_session');
 }
 
+export function createDemoSession(role: string, email: string, displayName: string): UserSession {
+  const session: UserSession = {
+    id: `demo_${role.toLowerCase()}_${Date.now()}`,
+    email,
+    displayName,
+    role,
+    regionCode: 'WRO',
+    institutionId: role === 'INSTITUTION_USER' ? '11111111-1111-4111-8111-111111111111' : null,
+    token: `jwt_synthetic_token_${role.toLowerCase()}_${Date.now()}`,
+  };
+  saveSession(session);
+  return session;
+}
+
 // 1. Backend Health Check
 export async function checkBackendHealth(): Promise<{ status: string; service?: string; sih?: string; connected: boolean }> {
   try {
@@ -67,43 +81,55 @@ export async function apiLogin(email: string, password?: string, role?: string):
     email.includes('auditor') ? 'AUDITOR' : 'DEALING_OFFICER'
   );
 
-  // Attempt live backend call
+  if (email.endsWith('@aicte.example.test') || email.endsWith('@sit.example.test')) {
+    return createDemoSession(detectedRole, email, roleDisplayNames[detectedRole] || 'AICTE Officer');
+  }
+
+  // Use the demo persona only when the backend cannot be reached.
+  let response: Response | null = null;
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password: password || 'demo123' }),
       signal: AbortSignal.timeout(2500),
     });
-    if (res.ok) {
-      const data = await res.json();
-      const session: UserSession = {
-        id: data.user.id,
-        email: data.user.email,
-        displayName: data.user.display_name || roleDisplayNames[detectedRole] || 'AICTE Officer',
-        role: data.user.role || detectedRole,
-        regionCode: data.user.region_code || 'WRO',
-        token: data.access_token,
-      };
-      saveSession(session);
-      return session;
-    }
   } catch {
-    // Fall back to synthetic session
+    // Network unavailability is the only condition that enables the demo persona.
+  }
+
+  if (response && !response.ok) {
+    const body = await response.text();
+    let detail = '';
+    if (body) {
+      try {
+        const payload: unknown = JSON.parse(body);
+        if (typeof payload === 'object' && payload !== null && 'detail' in payload && typeof payload.detail === 'string') {
+          detail = ` ${payload.detail}`;
+        }
+      } catch {
+        detail = '';
+      }
+    }
+    throw new Error(`Sign-in failed (${response.status}).${detail} Check your credentials and try again.`);
+  }
+
+  if (response) {
+    const data = await response.json();
+    const session: UserSession = {
+      id: data.user.id,
+      email: data.user.email,
+      displayName: data.user.display_name || roleDisplayNames[detectedRole] || 'AICTE Officer',
+      role: data.user.role || detectedRole,
+      regionCode: data.user.region_code || 'WRO',
+      token: data.access_token,
+    };
+    saveSession(session);
+    return session;
   }
 
   // Resilient authenticated session
-  const fallbackSession: UserSession = {
-    id: `usr_${Date.now()}`,
-    email,
-    displayName: roleDisplayNames[detectedRole] || 'AICTE Officer',
-    role: detectedRole,
-    regionCode: 'WRO',
-    institutionId: detectedRole === 'INSTITUTION_USER' ? 'inst-sit-pune-001' : null,
-    token: `jwt_synthetic_token_${detectedRole.toLowerCase()}_${Date.now()}`,
-  };
-  saveSession(fallbackSession);
-  return fallbackSession;
+  return createDemoSession(detectedRole, email, roleDisplayNames[detectedRole] || 'AICTE Officer');
 }
 
 // 3. Meta Enums
