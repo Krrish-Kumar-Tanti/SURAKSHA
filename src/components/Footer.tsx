@@ -1,7 +1,36 @@
 import React from 'react';
 import { Shield, ExternalLink, CheckCircle } from 'lucide-react';
 
-export function Footer() {
+interface FooterProps {
+  currentRole?: string;
+}
+
+const roleCapabilities: Record<string, string[]> = {
+  INSTITUTION_USER: ['My deposit portfolio', 'FDR submission', 'Own-deposit provenance', 'Policy information', 'Own release requests'],
+  DEALING_OFFICER: ['Regional portfolio', 'FDR provenance verification', 'Policy trace', 'Release processing'],
+  DIRECTOR_RB: ['Regional portfolio', 'Pledge and risk oversight', 'Release review', 'Forecast and time machine'],
+  COMPETENT_AUTHORITY: ['Portfolio', 'Final release approval', 'Forecast', 'Audit read'],
+  ACCOUNTS: ['Release letters', 'NOC and sanction documents', 'Reports'],
+  AUDITOR: ['Portfolio read', 'Audit read and export', 'Pledge graph read'],
+  ADMIN: ['User management', 'System configuration', 'Demo reset', 'Time machine'],
+};
+
+const publicCapabilities = [
+  '1. Login & Persona Switcher',
+  '2. Executive Portfolio Dashboard',
+  '3. FDR Submission Wizard',
+  '4. Three-Way Provenance Scanner',
+  '5. Policy Trace & APH Calculator',
+  '6. Clause 6.46 Release DAG',
+  '7. Time Machine & Countdown',
+  '8. Cryptographic Audit Verifier',
+  '9. Cross-Institution Pledge Radar',
+  '10. Maturity Cash-Flow Forecast',
+];
+
+export function Footer({ currentRole }: FooterProps) {
+  const capabilities = currentRole ? roleCapabilities[currentRole] ?? [] : publicCapabilities;
+
   return (
     <footer className="border-t border-[#DFD8CB] bg-[#EFEAE1] pt-16 pb-12 px-6 lg:px-10 text-xs text-[#706E66] relative z-10">
       <div className="max-w-[1376px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-[#DFD8CB]">
@@ -40,18 +69,11 @@ export function Footer() {
 
         {/* System Capabilities */}
         <div>
-          <div className="font-bold text-[#1C1D1A] uppercase text-[11px] font-mono tracking-wider mb-3">10 Platform Screens</div>
+          <div className="font-bold text-[#1C1D1A] uppercase text-[11px] font-mono tracking-wider mb-3">
+            {currentRole ? 'Your Workspace' : '10 Platform Screens'}
+          </div>
           <ul className="space-y-2 text-[#55544E] text-[11px]">
-            <li>1. Login & Persona Switcher</li>
-            <li>2. Executive Portfolio Dashboard</li>
-            <li>3. FDR Submission Wizard</li>
-            <li>4. Three-Way Provenance Scanner</li>
-            <li>5. Policy Trace & APH Calculator</li>
-            <li>6. Clause 6.46 Release DAG</li>
-            <li>7. Time Machine & Countdown</li>
-            <li>8. Cryptographic Audit Verifier</li>
-            <li>9. Cross-Institution Pledge Radar</li>
-            <li>10. Maturity Cash-Flow Forecast</li>
+            {capabilities.map((capability) => <li key={capability}>{capability}</li>)}
           </ul>
         </div>
       </div>

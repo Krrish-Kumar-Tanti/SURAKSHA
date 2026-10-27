@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
-from typing import Optional, List, Dict, Any, Union
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
 from datetime import datetime, timezone
 from app.db.session import get_db
+from app.core.deps import get_current_dealing_officer, get_current_director_rb, get_current_competent_authority
 from app.models.instrument import Instrument
 from app.models.release_request import ReleaseRequest
 from app.models.clearance import Clearance
-from app.models.finding import Finding
+from app.models.findings import Finding
 from app.schemas.release import (
     ReleaseRequestCreate,
     ReleaseRequestUpdate,
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/release-requests", tags=["release-requests"])
 @router.post("/", response_model=ReleaseRequestResponse)
 async def create_release_request(
     payload: ReleaseRequestCreate,
-    current_user: dict = Depends(lambda: {"id": "user", "role": "DEALING_OFFICER"}),
+    current_user: dict = Depends(get_current_dealing_officer),
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new release request."""
@@ -89,7 +89,7 @@ async def create_release_request(
         release_request.status = "PENDING_SOURCE"
 
     # Emit audit events
-    from app.models.audit_event import AuditEvent
+    from app.models.audit import AuditEvent
     from sqlalchemy.dialects.postgresql import UUID as PGUUID
 
     # Audit: RELEASE_REQUEST_CREATED
@@ -176,6 +176,7 @@ async def get_release_request(
 async def get_eligibility(
     request_id: str,
     db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_dealing_officer),
 ):
     """Get the eligibility evaluation for a release request, including all clearance nodes."""
     from uuid import UUID
@@ -240,6 +241,7 @@ async def update_clearance(
     request_id: str,
     clearance_type: str,
     payload: dict,
+    current_user: dict = Depends(get_current_director_rb),
     db: AsyncSession = Depends(get_db),
 ):
     """Update a single clearance status for a release request."""
@@ -304,8 +306,8 @@ async def update_clearance(
 @router.post("/{request_id}/decision", response_model=ReleaseRequestResponse)
 async def make_decision(
     request_id: str,
-    action: str = ...,
-    current_user: dict = Depends(lambda: {"id": "user", "role": "COMPETENT_AUTHORITY"}),
+    action: str,
+    current_user: dict = Depends(get_current_competent_authority),
     db: AsyncSession = Depends(get_db),
 ):
     """Make a final decision on a release request."""
@@ -382,7 +384,7 @@ async def make_decision(
         raise HTTPException(status_code=400, detail=f"Unknown action: {action}")
 
     # Emit audit event
-    from app.models.audit_event import AuditEvent
+    from app.models.audit import AuditEvent
     await AuditEvent.emit_audit_event(
         db=db,
         event_type="RELEASE_DECISION",

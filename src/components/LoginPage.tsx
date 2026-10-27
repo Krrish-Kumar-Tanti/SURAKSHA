@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Lock, UserCheck, ArrowRight, CheckCircle2, AlertCircle, Building2, Scale, KeyRound, Sparkles } from 'lucide-react';
+import { Shield, Lock, UserCheck, ArrowRight, CheckCircle2, AlertCircle, Building2, Scale, KeyRound, Sparkles, FileText } from 'lucide-react';
 import { apiLogin, checkBackendHealth, UserSession } from '../lib/api';
 import { AnimatedHeading } from './AnimatedHeading';
 
@@ -9,8 +9,8 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
-  const [email, setEmail] = useState('dealing.officer@aicte.gov.in');
-  const [password, setPassword] = useState('demo123');
+  const [email, setEmail] = useState('officer@aicte.example.test');
+  const [password, setPassword] = useState('demo-password');
   const [selectedRole, setSelectedRole] = useState('DEALING_OFFICER');
   const [loading, setLoading] = useState(false);
   const [backendStatus, setBackendStatus] = useState<{ connected: boolean; service?: string }>({ connected: false });
@@ -21,33 +21,64 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
       id: 'INSTITUTION_USER',
       label: 'College Registrar',
       org: 'SIT Pune (1-1092847291)',
-      email: 'registrar@sitpune.edu.in',
+      email: 'registrar@sit.example.test',
       desc: 'Submit FDR, track 3-way match, request release',
       icon: Building2,
+      password: 'demo-password',
     },
     {
       id: 'DEALING_OFFICER',
       label: 'Dealing Officer',
       org: 'AICTE Western Regional Office',
-      email: 'dealing.officer@aicte.gov.in',
+      email: 'officer@aicte.example.test',
       desc: 'Verify OCR vs CBS, check Table 1.4 norms',
       icon: Shield,
+      password: 'demo-password',
     },
     {
       id: 'DIRECTOR_RB',
       label: 'Regional Director',
       org: 'AICTE Approval Bureau',
-      email: 'director.rb@aicte.gov.in',
+      email: 'director@aicte.example.test',
       desc: 'Waive minor discrepancies, portfolio risk oversight',
       icon: Scale,
+      password: 'demo-password',
     },
     {
       id: 'COMPETENT_AUTHORITY',
       label: 'Approving Authority',
       org: 'AICTE Headquarters (New Delhi)',
-      email: 'approving.authority@aicte.gov.in',
+      email: 'ca@aicte.example.test',
       desc: 'Final Clause 6.46 release sanction order & NOC',
       icon: KeyRound,
+      password: 'demo-password',
+    },
+    {
+      id: 'ACCOUNTS',
+      label: 'Accounts',
+      org: 'AICTE Finance Desk',
+      email: 'accounts@aicte.example.test',
+      desc: 'Release letters, NOC and sanction documents',
+      icon: FileText,
+      password: 'demo-password',
+    },
+    {
+      id: 'AUDITOR',
+      label: 'Central Auditor',
+      org: 'Audit & Compliance',
+      email: 'auditor@aicte.example.test',
+      desc: 'Read-only portfolio, pledge and audit review',
+      icon: Shield,
+      password: 'demo-password',
+    },
+    {
+      id: 'ADMIN',
+      label: 'System Administrator',
+      org: 'AICTE Headquarters',
+      email: 'admin@aicte.example.test',
+      desc: 'User management, configuration and demo reset',
+      icon: KeyRound,
+      password: 'demo-password',
     },
   ];
 
@@ -60,7 +91,7 @@ export function LoginPage({ onLoginSuccess, onCancel }: LoginPageProps) {
   const handleSelectPersona = (p: typeof personas[0]) => {
     setSelectedRole(p.id);
     setEmail(p.email);
-    setPassword('demo123');
+    setPassword(p.password);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

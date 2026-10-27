@@ -15,6 +15,7 @@ import {
   X
 } from 'lucide-react';
 import { AnimatedHeading } from '../AnimatedHeading';
+import { canResolveDiscrepancies, isScreenAllowed } from '../../lib/roleAccess';
 interface ProvenancePageProps {
   onNavigate: (screen: string) => void;
   currentRole?: string;
@@ -23,7 +24,6 @@ interface ProvenancePageProps {
 export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: ProvenancePageProps) {
 
   const [waived, setWaived] = useState(false);
-  const [selectedInst, setSelectedInst] = useState('SIT Pune (1-1092847291)');
   const [activeCheck, setActiveCheck] = useState<'match' | 'discrepant'>('match');
 
   return (
@@ -51,11 +51,13 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
           <span className="text-xs font-mono text-[#706E66]">Inspecting Record:</span>
           <select 
             value={activeCheck}
-            onChange={(e) => setActiveCheck(e.target.value as any)}
+            onChange={(e) => setActiveCheck(e.target.value === 'discrepant' ? 'discrepant' : 'match')}
             className="text-xs font-semibold bg-[#FAF8F5] border border-[#DDD6C9] px-3 py-2 rounded-lg text-[#1C1D1A]"
           >
             <option value="match">SBI/PUN/2024/998214 — SIT Pune (Full 3-Way Match)</option>
-            <option value="discrepant">CAN/ERD/2022/102948 — Bannari Amman Inst (Lien Mismatch)</option>
+            {currentRole !== 'INSTITUTION_USER' && (
+              <option value="discrepant">CAN/ERD/2022/102948 — Bannari Amman Inst (Lien Mismatch)</option>
+            )}
           </select>
         </div>
 
@@ -185,7 +187,8 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
       </div>
 
       {/* Discrepancy Resolution Action Banner */}
-      <div className="rounded-3xl bg-white border border-[#E5DFD5] p-6 sm:p-8 shadow-sm flex flex-wrap items-center justify-between gap-6">
+      {canResolveDiscrepancies(currentRole) && activeCheck === 'discrepant' && (
+        <div className="rounded-3xl bg-white border border-[#E5DFD5] p-6 sm:p-8 shadow-sm flex flex-wrap items-center justify-between gap-6">
         <div>
           <span className="text-xs font-mono text-[#444C3D] font-bold bg-[#EFEAE1] border border-[#DDD6C9] px-3 py-1 rounded-full">
             Statutory Resolution Panel
@@ -209,14 +212,15 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
           >
             {waived ? '✓ Discrepancy Waived by Director' : 'Waive Discrepancy (Director RB)'}
           </button>
-          <button
+          {isScreenAllowed(currentRole, 'policy') && <button
             onClick={() => onNavigate('policy')}
             className="px-5 py-2.5 rounded-lg border border-[#DDD6C9] bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#1C1D1A] text-xs font-medium cursor-pointer"
           >
             Inspect Policy Rules →
-          </button>
+          </button>}
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
