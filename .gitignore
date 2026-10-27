@@ -12,3 +12,4 @@ Thumbs.db
 .vite/
 __pycache__/
 *.pyc
+public/photos/
