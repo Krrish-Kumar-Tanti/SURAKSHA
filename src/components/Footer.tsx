@@ -1,31 +1,28 @@
 import React from 'react';
-import { Shield, ExternalLink, CheckCircle } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 interface FooterProps {
   currentRole?: string;
 }
 
 const roleCapabilities: Record<string, string[]> = {
-  INSTITUTION_USER: ['My deposit portfolio', 'FDR submission', 'Own-deposit provenance', 'Policy information', 'Own release requests'],
-  DEALING_OFFICER: ['Regional portfolio', 'FDR provenance verification', 'Policy trace', 'Release processing'],
-  DIRECTOR_RB: ['Regional portfolio', 'Pledge and risk oversight', 'Release review', 'Forecast and time machine'],
-  COMPETENT_AUTHORITY: ['Portfolio', 'Final release approval', 'Forecast', 'Audit read'],
-  ACCOUNTS: ['Release letters', 'NOC and sanction documents', 'Reports'],
-  AUDITOR: ['Portfolio read', 'Audit read and export', 'Pledge graph read'],
-  ADMIN: ['User management', 'System configuration', 'Demo reset', 'Time machine'],
+  INSTITUTION_USER: ['Portfolio', 'FDR submission', 'Bank records', 'Policy estimate', 'Release workflow'],
+  DEALING_OFFICER: ['Portfolio', 'Bank records', 'Policy estimate', 'Release workflow'],
+  DIRECTOR_RB: ['Portfolio', 'Bank records', 'Release workflow'],
+  COMPETENT_AUTHORITY: ['Portfolio', 'Release workflow', 'Audit'],
+  ACCOUNTS: ['Release letters'],
+  AUDITOR: ['Portfolio', 'Bank records', 'Audit'],
+  ADMIN: ['Service reachability check', 'Administration feature availability'],
 };
 
 const publicCapabilities = [
-  '1. Login & Persona Switcher',
-  '2. Executive Portfolio Dashboard',
-  '3. FDR Submission Wizard',
-  '4. Three-Way Provenance Scanner',
-  '5. Policy Trace & APH Calculator',
-  '6. Clause 6.46 Release DAG',
-  '7. Time Machine & Countdown',
-  '8. Cryptographic Audit Verifier',
-  '9. Cross-Institution Pledge Radar',
-  '10. Maturity Cash-Flow Forecast',
+  'Role-specific workspaces',
+  'Portfolio and policy tools',
+  'FDR submission',
+  'Bank record review',
+  'Release workflow',
+  'Audit history',
+  'System administration',
 ];
 
 export function Footer({ currentRole }: FooterProps) {
@@ -47,12 +44,8 @@ export function Footer({ currentRole }: FooterProps) {
             </div>
           </div>
           <p className="text-[#55544E] text-xs max-w-md leading-relaxed">
-            Policy-native Security Deposit & FDR Control Tower for the All India Council for Technical Education (AICTE). Defending statutory compliance across every college deposit.
+            Security-deposit submission, review, and release workflows for institutions and AICTE staff.
           </p>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#DDD6C9] text-[11px] text-[#444C3D] font-mono">
-            <CheckCircle className="w-3.5 h-3.5 text-[#444C3D]" />
-            <span>Prototype Environment · All Data Synthetic</span>
-          </div>
         </div>
 
         {/* Regulatory Anchors */}
@@ -70,7 +63,7 @@ export function Footer({ currentRole }: FooterProps) {
         {/* System Capabilities */}
         <div>
           <div className="font-bold text-[#1C1D1A] uppercase text-[11px] font-mono tracking-wider mb-3">
-            {currentRole ? 'Your Workspace' : '10 Platform Screens'}
+            {currentRole ? 'Your workspace' : 'Platform features'}
           </div>
           <ul className="space-y-2 text-[#55544E] text-[11px]">
             {capabilities.map((capability) => <li key={capability}>{capability}</li>)}
@@ -82,11 +75,16 @@ export function Footer({ currentRole }: FooterProps) {
         <div>
           © 2026 SURAKSHA Control Tower · Built for Smart India Hackathon (SIH26265) · AICTE Theme
         </div>
-        <div className="flex items-center gap-6">
-          <span className="hover:text-[#1C1D1A] transition">FastAPI + PostgreSQL</span>
-          <span className="hover:text-[#1C1D1A] transition">React + Vite + TypeScript</span>
-          <span className="hover:text-[#1C1D1A] transition">GSAP + Lenis Engine</span>
-        </div>
+        {currentRole === 'ADMIN' && (
+          <div className="flex items-center gap-6">
+            <span>API: FastAPI</span>
+            <span>Data store: PostgreSQL</span>
+            <span>Web client: React + TypeScript</span>
+          </div>
+        )}
+      </div>
+      <div className="max-w-[1376px] mx-auto mt-6 border-t border-[#DFD8CB] pt-4 text-[10px] text-[#706E66]">
+        Demonstration build · Dashboard records and workflow outcomes are illustrative.
       </div>
     </footer>
   );

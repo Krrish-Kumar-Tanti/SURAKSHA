@@ -1,4 +1,4 @@
-export type AppScreen = 'home' | 'portfolio' | 'wizard' | 'provenance' | 'policy' | 'release' | 'audit';
+export type AppScreen = 'home' | 'portfolio' | 'wizard' | 'provenance' | 'policy' | 'release' | 'audit' | 'admin';
 export type CockpitTab = 'portfolio' | 'provenance' | 'calculator' | 'graph';
 
 const roleScreens: Record<string, readonly AppScreen[]> = {
@@ -8,7 +8,7 @@ const roleScreens: Record<string, readonly AppScreen[]> = {
   COMPETENT_AUTHORITY: ['home', 'portfolio', 'release', 'audit'],
   ACCOUNTS: ['home', 'release'],
   AUDITOR: ['home', 'portfolio', 'provenance', 'audit'],
-  ADMIN: ['home'],
+  ADMIN: ['admin'],
 };
 
 const defaultScreens: Record<string, AppScreen> = {
@@ -18,7 +18,7 @@ const defaultScreens: Record<string, AppScreen> = {
   COMPETENT_AUTHORITY: 'release',
   ACCOUNTS: 'release',
   AUDITOR: 'audit',
-  ADMIN: 'home',
+  ADMIN: 'admin',
 };
 
 const cockpitTabs: Record<string, readonly CockpitTab[]> = {
@@ -44,11 +44,11 @@ export function getCockpitTabs(role: string): readonly CockpitTab[] {
 }
 
 export function canResolveDiscrepancies(role: string): boolean {
-  return role === 'DIRECTOR_RB' || role === 'COMPETENT_AUTHORITY';
+  return role === 'DIRECTOR_RB';
 }
 
 export function canSetReleaseClearances(role: string): boolean {
-  return role === 'DEALING_OFFICER' || role === 'DIRECTOR_RB' || role === 'COMPETENT_AUTHORITY';
+  return role === 'DEALING_OFFICER' || role === 'DIRECTOR_RB';
 }
 
 export function canIssueReleaseSanction(role: string): boolean {

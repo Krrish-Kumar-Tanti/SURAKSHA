@@ -27,13 +27,13 @@ export function Navbar({
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
 
   const roles = [
-    { id: 'INSTITUTION_USER', label: 'College Registrar', desc: 'SIT Pune / Submit own FDR' },
-    { id: 'DEALING_OFFICER', label: 'Dealing Officer', desc: 'Regional Office Verification' },
-    { id: 'DIRECTOR_RB', label: 'Regional Director', desc: 'Waive & Portfolio Risk' },
-    { id: 'COMPETENT_AUTHORITY', label: 'Approving Authority', desc: 'Release Final Sanction' },
-    { id: 'ACCOUNTS', label: 'Accounts', desc: 'Release letters & NOC' },
-    { id: 'AUDITOR', label: 'Central Auditor', desc: 'Cryptographic Hash Verification' },
-    { id: 'ADMIN', label: 'System Administrator', desc: 'Administrative functions' },
+    { id: 'INSTITUTION_USER', label: 'College Registrar', desc: 'Own FDR submission preview' },
+    { id: 'DEALING_OFFICER', label: 'Dealing Officer', desc: 'Review and process regional records' },
+    { id: 'DIRECTOR_RB', label: 'Regional Director', desc: 'Regional oversight and critical review' },
+    { id: 'COMPETENT_AUTHORITY', label: 'Approving Authority', desc: 'Final release decision' },
+    { id: 'ACCOUNTS', label: 'Accounts', desc: 'Release document examples' },
+    { id: 'AUDITOR', label: 'Central Auditor', desc: 'Read-only portfolio and audit examples' },
+    { id: 'ADMIN', label: 'System Administrator', desc: 'System status and administration availability' },
   ];
 
   const canSwitchDemoRole = userSession?.token.startsWith('jwt_synthetic_token_') ?? false;
@@ -69,10 +69,11 @@ export function Navbar({
             { screen: 'home', label: 'Overview' },
             { screen: 'portfolio', label: 'Portfolio' },
             { screen: 'wizard', label: 'FDR Submission' },
-            { screen: 'provenance', label: 'Provenance' },
-            { screen: 'policy', label: 'Policy' },
+            { screen: 'provenance', label: 'Bank records' },
+            { screen: 'policy', label: 'Policy estimate' },
             { screen: 'release', label: currentRole === 'ACCOUNTS' ? 'Release Letters' : 'Release' },
             { screen: 'audit', label: 'Audit' },
+            { screen: 'admin', label: 'Administration' },
           ].filter(({ screen }) => !isAuthenticated ? screen === 'home' : isScreenAllowed(currentRole, screen)).map(({ screen, label }) => (
             <button
               key={screen}

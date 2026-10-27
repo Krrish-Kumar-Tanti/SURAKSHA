@@ -5,44 +5,44 @@ import { AnimatedHeading } from './AnimatedHeading';
 export function FeaturesBento() {
   const pillars = [
     {
-      tag: 'PILLAR 01 · INTEGRITY',
-      title: 'Three-Way Provenance',
-      desc: 'Reconciles institution declarations, high-resolution document OCR with bounding-box coordinate tracking, and bank sandbox confirmation field-by-field.',
+      tag: 'DEPOSIT REVIEW',
+      title: 'Bank Record Review',
+      desc: 'Compare institution details, receipt information, and bank records to identify differences that need review.',
       image: '/photos/09_provenance_scanner_3d.jpg',
       icon: FileSearch,
       accent: 'from-teal-500/20 to-teal-900/10',
       border: 'hover:border-teal-500/50',
-      badge: 'Zero Hallucinations',
+      badge: 'Record comparison',
     },
     {
-      tag: 'PILLAR 02 · ACCURACY',
-      title: 'Deterministic Policy Engine',
-      desc: 'Calculates statutory security deposits directly against AICTE APH 2024–27 Table 1.4, integrating 2026–27 50% regional concessions and 2.0× leased land multipliers.',
+      tag: 'DEPOSIT ESTIMATE',
+      title: 'Policy Estimate',
+      desc: 'Estimate deposit requirements using programme, concession, and premises details.',
       image: '/photos/02_fdr_certificate_3d.jpg',
       icon: Scale,
       accent: 'from-blue-500/20 to-blue-900/10',
       border: 'hover:border-blue-500/50',
-      badge: 'Table 1.4 Native',
+      badge: 'Illustrative estimate',
     },
     {
-      tag: 'PILLAR 03 · FRAUD SHIELD',
-      title: 'Continuous Pledge Radar',
-      desc: 'Detects cross-institution duplicate pledging in real-time. Prevents multiple colleges under the same trust from recycling identical FDR certificates or receipt hashes.',
+      tag: 'RECORD REVIEW',
+      title: 'Duplicate Pledge Review',
+      desc: 'Review receipt numbers and document fingerprints across institutions to identify possible duplicate pledges.',
       image: '/photos/07_pledge_graph_radar.jpg',
       icon: GitMerge,
       accent: 'from-indigo-500/20 to-indigo-900/10',
       border: 'hover:border-indigo-500/50',
-      badge: 'Anti-Collusion',
+      badge: 'Duplicate review',
     },
     {
-      tag: 'PILLAR 04 · COMPLIANCE',
-      title: 'Clause 6.46 Release DAG',
-      desc: 'Enforces statutory clearance checks across PGRC student complaints, Vigilance probes, Grants cell dues, and 10-year holding terms with atomic HTTP 422 locks.',
+      tag: 'RELEASE WORKFLOW',
+      title: 'Release Clearances',
+      desc: 'Bring required clearances together so reviewers can assess a release request before a final decision.',
       image: '/photos/05_release_clearance_graph.jpg',
       icon: ShieldCheck,
       accent: 'from-emerald-500/20 to-emerald-900/10',
       border: 'hover:border-emerald-500/50',
-      badge: 'Maker-Checker Segregated',
+      badge: 'Workflow preview',
     },
   ];
 
@@ -50,16 +50,16 @@ export function FeaturesBento() {
     <section className="py-24 px-6 lg:px-10 max-w-[1376px] mx-auto relative z-10">
       <div className="text-center max-w-2xl mx-auto mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-4">
-          Regulatory Architecture
+          Security-deposit workflows
         </div>
         <AnimatedHeading
           as="h2"
           className="text-3xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] leading-tight"
         >
-          The 4 Pillars That Defend Every *Security Deposit*
+          Tools for Every *Security Deposit*
         </AnimatedHeading>
         <p className="text-[#55544E] text-sm md:text-base mt-4 leading-relaxed">
-          Most systems merely upload PDFs to storage buckets. SURAKSHA builds the verifiable compliance engine that defends every release against CAG and vigilance scrutiny.
+          Explore the tools available for deposit submission, review, policy estimates, and release workflows.
         </p>
       </div>
 

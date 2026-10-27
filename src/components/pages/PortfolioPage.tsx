@@ -43,6 +43,13 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
   const formatAmount = (amountLakhs: number) => amountLakhs >= 100
     ? `₹${(amountLakhs / 100).toFixed(2)} Cr`
     : `₹${amountLakhs} Lakhs`;
+  const statusLabels: Record<string, string> = {
+    ALL: 'All examples',
+    COMPLIANT: 'Marked clear',
+    DEFICIT: 'Below estimate',
+    FLAGGED: 'Flagged example',
+    RENEWAL_DUE: 'Maturity example',
+  };
 
   const filtered = visibleInstitutions.filter((inst) => {
     const matchesSearch = inst.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -58,7 +65,7 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
       <div className="mb-8">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-3">
           <Sparkles className="w-3.5 h-3.5 text-[#444C3D]" />
-          {isInstitutionUser ? 'Institution Deposit Workspace' : 'Regional Bureau Executive Portfolio'}
+          {isInstitutionUser ? 'Institution deposit examples' : 'Regional portfolio examples'}
         </div>
         <AnimatedHeading
           as="h1"
@@ -68,8 +75,8 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
         </AnimatedHeading>
         <p className="text-sm sm:text-base text-[#55544E] mt-2 max-w-2xl">
           {isInstitutionUser
-            ? 'Your institution’s security deposit, verification status, and maturity information.'
-            : 'Live monitoring of regional security deposits under APH Table 1.4 mandates.'}
+            ? 'Review deposit details, status, and maturity information for your institution.'
+            : 'Review deposit totals, status, and maturity information across the regional portfolio.'}
         </p>
       </div>
 
@@ -77,7 +84,7 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="p-5 rounded-2xl bg-white border border-[#E5DFD5] shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#706E66] mb-2">
-            <span>{isInstitutionUser ? 'Your Deposit Pledged' : 'Total Value Pledged'}</span>
+            <span>Example value pledged</span>
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
           </div>
           <div className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif']">{formatAmount(totalPledgedLakhs)}</div>
@@ -86,34 +93,34 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
 
         <div className="p-5 rounded-2xl bg-white border border-[#E5DFD5] shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#706E66] mb-2">
-            <span>Active Instruments</span>
+            <span>Example instruments</span>
             <span className="text-xs font-bold text-[#444C3D]">{visibleInstitutions.length} Total</span>
           </div>
-          <div className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif']">{compliantCount} Compliant</div>
-          <div className="text-xs text-emerald-700 mt-1 font-mono">
-            {visibleInstitutions.length ? Math.round((compliantCount / visibleInstitutions.length) * 100) : 0}% Clean Provenance
+          <div className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif']">{compliantCount} Marked clear</div>
+          <div className="text-xs text-[#55544E] mt-1 font-mono">
+            Example status only — no verification performed
           </div>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-[#E5DFD5] shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#706E66] mb-2">
-            <span>Discrepancies Flagged</span>
+            <span>Example records flagged</span>
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
           </div>
           <div className="text-3xl font-normal text-amber-700 font-['Instrument_Serif']">{flaggedCount} Flagged</div>
           <div className="text-xs text-[#55544E] mt-1 font-mono">
-            {flaggedCount ? 'Requires Officer Resolution' : 'No flagged deposits'}
+            {flaggedCount ? 'Example requires review' : 'No example flagged'}
           </div>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-[#E5DFD5] shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#706E66] mb-2">
-            <span>Maturity &lt; 90 Days</span>
+            <span>Example maturity dates</span>
             <span className="text-xs text-[#444C3D] font-mono">Clause 6.46</span>
           </div>
           <div className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif']">{maturityDueCount} Due</div>
           <div className="text-xs text-[#55544E] mt-1 font-mono">
-            {maturityDueCount ? 'Maturity follow-up required' : 'No upcoming maturity flags'}
+            {maturityDueCount ? 'Example follow-up status' : 'No example maturity flags'}
           </div>
         </div>
       </div>
@@ -126,7 +133,7 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by Institution Name, AICTE ID, or Bank IFSC..."
+            placeholder="Search institution name, ID, or bank name..."
             className="w-full pl-10 pr-4 py-2 text-sm rounded-lg bg-[#FAF8F5] border border-[#DDD6C9] focus:outline-none focus:border-[#444C3D] text-[#1C1D1A]"
           />
         </div>
@@ -143,7 +150,7 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
                   : 'bg-[#ECE7DE] text-[#55544E] hover:text-[#1C1D1A]'
               }`}
             >
-              {st}
+              {statusLabels[st]}
             </button>
           ))}
           {isScreenAllowed(currentRole, 'wizard') && <button
@@ -155,6 +162,8 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
         </div>
       </div>
 
+      <p className="mb-3 text-xs text-[#706E66]">Portfolio overview</p>
+
       {/* Institution Table View */}
       <div className="rounded-2xl bg-white border border-[#E5DFD5] shadow-sm overflow-hidden mb-12">
         <div className="overflow-x-auto">
@@ -165,7 +174,7 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
                 <th className="py-3.5 px-4">Programme & Tenure</th>
                 <th className="py-3.5 px-4">Deposit (Req / Pledged)</th>
                 <th className="py-3.5 px-4">Bank & Instrument</th>
-                <th className="py-3.5 px-4">Compliance Status</th>
+                <th className="py-3.5 px-4">Example status</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -215,7 +224,7 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
                         inst.status === 'COMPLIANT' ? 'bg-emerald-600' :
                         inst.status === 'FLAGGED' ? 'bg-amber-600' : 'bg-red-600'
                       }`} />
-                      {inst.status}
+                      {statusLabels[inst.status] ?? 'Sample status'}
                     </span>
                   </td>
                   <td className="py-4 px-4 text-right">
@@ -226,7 +235,7 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
                       }}
                       className="px-3 py-1.5 rounded-lg border border-[#DDD6C9] bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#444C3D] font-medium text-xs inline-flex items-center gap-1 cursor-pointer"
                     >
-                      {isScreenAllowed(currentRole, 'provenance') ? 'Inspect' : 'Release'} <ChevronRight className="w-3.5 h-3.5" />
+                      {isScreenAllowed(currentRole, 'provenance') ? 'View examples' : 'Release examples'} <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </td>
                 </tr>
@@ -270,11 +279,11 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
               </div>
 
               <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] space-y-1">
-                <span className="text-[#706E66] font-mono block">Bank Verification Status</span>
+                <span className="text-[#706E66] font-mono block">Bank and receipt details</span>
                 <div className="font-semibold text-sm text-[#1C1D1A]">{selectedInst.bankName}</div>
                 <div className="text-[11px] font-mono text-[#55544E]">Receipt: {selectedInst.fdrReceipt}</div>
-                <div className="text-[11px] font-mono text-emerald-700 flex items-center gap-1 mt-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Core Banking Joint Account Lien Pledged to AICTE
+                <div className="text-[11px] font-mono text-[#55544E] flex items-center gap-1 mt-1">
+                  Bank record status
                 </div>
               </div>
             </div>
@@ -293,7 +302,7 @@ export function PortfolioPage({ onNavigate, currentRole = 'DEALING_OFFICER' }: P
                 }}
                 className="px-5 py-2 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
-                Verify 3-Way Provenance <ArrowRight className="w-3.5 h-3.5" />
+                View bank record examples <ArrowRight className="w-3.5 h-3.5" />
               </button>}
             </div>
           </div>

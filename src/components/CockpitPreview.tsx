@@ -88,7 +88,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                 <span>Active Role: <strong className="font-mono text-[#1C1D1A]">{getRoleLabel(currentRole)}</strong></span>
               </div>
               <span className="text-xs text-[#706E66] hidden sm:inline font-mono">
-                Simulated Sandbox
+                Demonstration preview
               </span>
             </div>
 
@@ -100,7 +100,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   visibleTab === 'portfolio' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
-                1. Executive Portfolio
+                1. Portfolio examples
               </button>}
               {allowedTabs.includes('provenance') && <button
                 onClick={() => setActiveTab('provenance')}
@@ -108,7 +108,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   visibleTab === 'provenance' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
-                2. 3-Way Provenance
+                2. Bank record examples
               </button>}
               {allowedTabs.includes('calculator') && <button
                 onClick={() => setActiveTab('calculator')}
@@ -116,7 +116,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   visibleTab === 'calculator' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
-                3. Policy Engine
+                3. Policy estimate
               </button>}
               {allowedTabs.includes('graph') && <button
                 onClick={() => setActiveTab('graph')}
@@ -124,7 +124,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   visibleTab === 'graph' ? 'bg-[#444C3D] text-white shadow-sm font-semibold' : 'text-[#55544E] hover:text-[#1C1D1A]'
                 }`}
               >
-                4. Clause 6.46 Graph
+                4. Release workflow
               </button>}
             </div>
           </div>
@@ -132,6 +132,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
           {/* Tab 1: Executive Portfolio */}
           {visibleTab === 'portfolio' && (
             <div className="p-6 lg:p-8 space-y-6 bg-white">
+              <p className="text-xs text-[#706E66]">Portfolio overview</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
                   <div className="text-[11px] font-mono uppercase text-[#706E66]">Total ₹ Held</div>
@@ -152,7 +153,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
                   <div className="text-[11px] font-mono uppercase text-[#706E66]">Expiring in 90 Days</div>
                   <div className="text-2xl font-black text-[#B45309] mt-1 font-['Instrument_Serif'] text-3xl">{isRegionScoped ? '1 FDR' : '12 FDRs'}</div>
-                  <div className="text-[11px] text-[#706E66] mt-1">T-Minus Automated Alerts</div>
+                  <div className="text-[11px] text-[#706E66] mt-1">Example count; alerts are not sent</div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
@@ -172,11 +173,11 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-[#1C1D1A] text-sm">SIT Pune (1-1092847291)</span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#FEE2E2] text-[#B91C1C] font-bold">
-                        CRITICAL_AMOUNT_MISMATCH
+                        Sample discrepancy
                       </span>
                     </div>
                     <p className="text-xs text-[#55544E] mt-1">
-                      Declared ₹70,00,000 vs Bank Sandbox confirmed balance of ₹35,00,000. Release is blocked.
+                      Example declared amount ₹70,00,000 vs bank record ₹35,00,000.
                     </p>
                   </div>
                 </div>
@@ -195,14 +196,14 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
             <div className="p-6 lg:p-8 space-y-6 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Three-Way Provenance Reconciliation</h4>
-                  <p className="text-xs text-[#706E66]">Instrument: FDR-SIT-2016-001 · State Bank of India</p>
+                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Example record comparison</h4>
+                  <p className="text-xs text-[#706E66]">Sample instrument: FDR-SIT-2016-001 · State Bank of India</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-2.5 py-1 rounded-full text-xs font-mono font-bold ${
                     dispositionWaived ? 'bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]' : 'bg-[#FEE2E2] text-[#B91C1C] border border-[#FCA5A5]'
                   }`}>
-                    {dispositionWaived ? 'WAIVED_BY_DIRECTOR' : 'CRITICAL_DISCREPANT'}
+                    {dispositionWaived ? 'SAMPLE WAIVER PREVIEW' : 'SAMPLE DIFFERENCE'}
                   </span>
                 </div>
               </div>
@@ -213,19 +214,19 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                     <tr>
                       <th className="py-3 px-4">Field</th>
                       <th className="py-3 px-4">1. Declared (College)</th>
-                      <th className="py-3 px-4">2. Document (OCR Evidence)</th>
-                      <th className="py-3 px-4">3. Bank Sandbox (Simulated)</th>
-                      <th className="py-3 px-4">Match Status</th>
+                      <th className="py-3 px-4">2. Example receipt value</th>
+                      <th className="py-3 px-4">3. Example bank value</th>
+                      <th className="py-3 px-4">Example comparison</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E5DFD5] font-mono">
                     <tr className="bg-[#FDF2F2]">
                       <td className="py-3 px-4 font-bold text-[#1C1D1A]">Amount (₹)</td>
                       <td className="py-3 px-4 text-[#55544E]">₹70,00,000</td>
-                      <td className="py-3 px-4 text-[#55544E]">₹70,00,000 (Conf: 99.1%)</td>
+                      <td className="py-3 px-4 text-[#55544E]">₹70,00,000 (example receipt value)</td>
                       <td className="py-3 px-4 text-[#B91C1C] font-bold">₹35,00,000</td>
                       <td className="py-3 px-4 text-[#B91C1C] font-bold flex items-center gap-1.5">
-                        <AlertTriangle className="w-3.5 h-3.5" /> MISMATCH (-₹35L)
+                        <AlertTriangle className="w-3.5 h-3.5" /> Example difference
                       </td>
                     </tr>
                     <tr>
@@ -234,7 +235,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                       <td className="py-3 px-4 text-[#55544E]">FDR-SIT-2016-001</td>
                       <td className="py-3 px-4 text-[#55544E]">FDR-SIT-2016-001</td>
                       <td className="py-3 px-4 text-[#444C3D] font-bold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> EXACT_MATCH
+                        <CheckCircle className="w-3.5 h-3.5" /> Example match
                       </td>
                     </tr>
                     <tr>
@@ -243,7 +244,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                       <td className="py-3 px-4 text-[#55544E]">Jointly to AICTE</td>
                       <td className="py-3 px-4 text-[#55544E]">Confirmed (Lien-AICTE-10Y)</td>
                       <td className="py-3 px-4 text-[#444C3D] font-bold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> EXACT_MATCH
+                        <CheckCircle className="w-3.5 h-3.5" /> Example match
                       </td>
                     </tr>
                     <tr>
@@ -252,7 +253,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                       <td className="py-3 px-4 text-[#55544E]">01-Nov-2026</td>
                       <td className="py-3 px-4 text-[#55544E]">01-Nov-2026</td>
                       <td className="py-3 px-4 text-[#444C3D] font-bold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> EXACT_MATCH
+                        <CheckCircle className="w-3.5 h-3.5" /> Example match
                       </td>
                     </tr>
                   </tbody>
@@ -262,7 +263,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
               {/* Action Control */}
               <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                 <div className="text-xs text-[#706E66]">
-                  Active designation: <strong className="text-[#1C1D1A]">{getRoleLabel(currentRole)}</strong>. Every action is recorded in the SHA-256 audit ledger.
+                  Current role: <strong className="text-[#1C1D1A]">{getRoleLabel(currentRole)}</strong>.
                 </div>
                 <div className="flex items-center gap-3">
                   {canResolveDiscrepancies(currentRole) && <button
@@ -273,14 +274,14 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                         : 'bg-[#B45309] hover:bg-[#92400E] text-white shadow-sm'
                     }`}
                   >
-                    {dispositionWaived ? 'Undo Waiver (Reset to Blocked)' : 'Waive Discrepancy with Audit Note'}
+                    {dispositionWaived ? 'Reset sample waiver' : 'Preview waiver label'}
                   </button>}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Tab 3: Policy Engine Live Calculator */}
+          {/* Tab 3: Policy estimate */}
           {visibleTab === 'calculator' && (
             <div className="p-6 lg:p-8 space-y-6 bg-white">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -377,18 +378,18 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
             <div className="p-6 lg:p-8 space-y-6 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Clause 6.46 Multi-Clearance Release Graph</h4>
-                  <p className="text-xs text-[#706E66]">Release cannot execute until every required clearance node resolves green</p>
+                  <h4 className="font-bold text-[#1C1D1A] font-['Instrument_Serif'] text-xl">Example release prerequisites</h4>
+                  <p className="text-xs text-[#706E66]">Review the listed clearance statuses for this release request.</p>
                 </div>
 
                 <div className="text-xs font-mono">
-                  Overall State:{' '}
+                  Sample state:{' '}
                   <span className={`px-2.5 py-1 rounded-full font-bold ${
                     pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived
                       ? 'bg-[#EAF3E7] text-[#2D5A27] border border-[#BBD7B5]'
                       : 'bg-[#FEE2E2] text-[#B91C1C] border border-[#FCA5A5]'
                   }`}>
-                    {pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived ? 'ELIGIBLE_FOR_RELEASE' : 'BLOCKED_BY_POLICY'}
+                    {pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived ? 'SAMPLE ITEMS CLEAR' : 'SAMPLE ITEM PENDING'}
                   </span>
                 </div>
               </div>
@@ -453,25 +454,21 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                   </div>
                   <div className="font-bold text-sm text-[#1C1D1A]">10-Year Hold Complete</div>
                   <div className="text-[11px] text-[#706E66] mt-1">Maturity date 01-Nov-2026 reached</div>
-                  <div className="text-[10px] text-[#2D5A27] mt-2 font-mono font-semibold">Verified via Time Machine</div>
+                  <div className="text-[10px] text-[#55544E] mt-2 font-mono font-semibold">Tenor status</div>
                 </div>
               </div>
 
               {/* Approval Execution Action */}
               <div className="pt-2 flex flex-wrap items-center justify-between gap-4">
                 <div className="text-xs text-[#706E66]">
-                  Backend guard clause rejects with HTTP 422 if any node is blocked. Maker-checker segregated.
+                  Review each clearance before the final decision.
                 </div>
                 {canIssueReleaseSanction(currentRole) && <button
-                  disabled={!(pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived)}
-                  className={`px-6 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
-                    pgrcCleared && vigilanceCleared && grantsCleared && dispositionWaived
-                      ? 'bg-[#444C3D] hover:bg-[#353C2F] text-white shadow-sm cursor-pointer'
-                      : 'bg-[#E5DFD5] text-[#8C8A82] cursor-not-allowed'
-                  }`}
+                  disabled
+                  className="px-6 py-2.5 rounded-lg text-xs font-bold bg-[#E5DFD5] text-[#8C8A82] cursor-not-allowed"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  Execute Release Sanction Order (Clause 6.46)
+                  Release approval unavailable in demo
                 </button>}
                 {!canIssueReleaseSanction(currentRole) && (
                   <span className="text-xs text-[#706E66]">Final sanction is restricted to the Competent Authority.</span>
@@ -488,7 +485,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
             <div>
               <div className="font-semibold text-sm text-[#1C1D1A]">Want to test your own deposit?</div>
               <div className="text-xs text-[#55544E]">
-                Submit your FDR certificate to run live 3-way reconciliation against simulated CBS adapters.
+                Enter FDR details and review the submission steps.
               </div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -496,7 +493,7 @@ export function CockpitPreview({ currentRole = 'DEALING_OFFICER', onNavigate }: 
                 onClick={() => setActiveTab('provenance')}
                 className="px-5 py-2.5 bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium rounded-lg shadow-sm transition-all cursor-pointer"
               >
-                View Your 3-Way Match
+                View bank record examples
               </button>
               <button
                 onClick={() => setActiveTab('calculator')}

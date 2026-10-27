@@ -32,16 +32,16 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
       <div className="mb-8">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-3">
           <Sparkles className="w-3.5 h-3.5 text-[#444C3D]" />
-          Autonomous 3-Way Reconciliation Engine
+          Sample verification view
         </div>
         <AnimatedHeading
           as="h1"
           className="text-3xl sm:text-4xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] font-['Instrument_Serif']"
         >
-          ( 3-Way Provenance & *Discrepancy Resolver* )
+          ( *Bank Record Verification* )
         </AnimatedHeading>
         <p className="text-sm sm:text-base text-[#55544E] mt-2 max-w-3xl">
-          Triangulating Bank Core Banking Feed (CBS), Institution OCR Document Scan, and AICTE Statutory Ledger to eliminate forged or encashed deposits.
+          Compare bank-record fields, receipt details, and submitted information to identify differences.
         </p>
       </div>
 
@@ -62,10 +62,9 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-[#706E66]">Adapter Sync:</span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            Core Banking Realtime
+          <span className="text-xs font-mono text-[#706E66]">Data source:</span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-amber-50 text-amber-900 border border-amber-200">
+            Example records
           </span>
         </div>
       </div>
@@ -78,10 +77,10 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
           <div className="flex items-center justify-between pb-4 border-b border-[#E5DFD5] mb-4">
             <div>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#706E66] block">Source 1</span>
-              <h3 className="text-lg font-bold text-[#1C1D1A]">Bank CBS Feed</h3>
+              <h3 className="text-lg font-bold text-[#1C1D1A]">Example bank record</h3>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-[#EFEAE1] text-[#444C3D] text-[11px] font-mono font-bold">
-              SBI SFTP Gateway
+              Sample data
             </span>
           </div>
 
@@ -98,8 +97,8 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
 
             <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
               <span className="text-[#706E66] block text-[10px]">Lien Clause Status</span>
-              <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> AICTE Joint Lien Active
+              <span className="text-xs font-bold text-[#55544E] flex items-center gap-1">
+                Example lien status
               </span>
             </div>
 
@@ -115,10 +114,10 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
           <div className="flex items-center justify-between pb-4 border-b border-[#E5DFD5] mb-4">
             <div>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#706E66] block">Source 2</span>
-              <h3 className="text-lg font-bold text-[#1C1D1A]">OCR Extracted Scan</h3>
+              <h3 className="text-lg font-bold text-[#1C1D1A]">Example receipt details</h3>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-[#EFEAE1] text-[#444C3D] text-[11px] font-mono font-bold">
-              PDF Document AI
+              Receipt details
             </span>
           </div>
 
@@ -130,19 +129,19 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
 
             <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
               <span className="text-[#706E66] block text-[10px]">Extracted Value</span>
-              <span className="text-sm font-bold text-emerald-700">₹70,00,000 (Confidence 99.4%)</span>
+              <span className="text-sm font-bold text-[#1C1D1A]">₹70,00,000 (example value)</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
               <span className="text-[#706E66] block text-[10px]">Pledge Statement</span>
-              <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Regional Officer AICTE Pledged
+              <span className="text-xs font-bold text-[#55544E] flex items-center gap-1">
+                Pledge details
               </span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
-              <span className="text-[#706E66] block text-[10px]">Cryptographic SHA-256</span>
-              <span className="text-[10px] text-[#706E66] truncate block">e3b0c44298fc1c149afbf4c8996fb92427...</span>
+              <span className="text-[#706E66] block text-[10px]">File fingerprint</span>
+              <span className="text-[10px] text-[#706E66] truncate block">Example fingerprint</span>
             </div>
           </div>
         </div>
@@ -152,7 +151,7 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
           <div className="flex items-center justify-between pb-4 border-b border-[#E5DFD5] mb-4">
             <div>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#706E66] block">Source 3</span>
-              <h3 className="text-lg font-bold text-[#1C1D1A]">AICTE Central Ledger</h3>
+              <h3 className="text-lg font-bold text-[#1C1D1A]">Example system record</h3>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-[#EFEAE1] text-[#444C3D] text-[11px] font-mono font-bold">
               APH Table 1.4 Mandate
@@ -167,19 +166,19 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
 
             <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
               <span className="text-[#706E66] block text-[10px]">Provenance Verdict</span>
-              <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> 3-Way Triangulation Match (100%)
+              <span className="text-xs font-bold text-[#1C1D1A] flex items-center gap-1">
+                Example comparison
               </span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
               <span className="text-[#706E66] block text-[10px]">Audit Block Sequence</span>
-              <span className="text-xs font-bold text-[#1C1D1A]">Block #10480 (Immutable)</span>
+              <span className="text-xs font-bold text-[#1C1D1A]">Example block reference</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5]">
               <span className="text-[#706E66] block text-[10px]">Dealing Officer Sign-Off</span>
-              <span className="text-xs font-bold text-[#444C3D]">Verified & Active</span>
+              <span className="text-xs font-bold text-[#55544E]">Example officer status</span>
             </div>
           </div>
         </div>
@@ -197,7 +196,7 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
             Discrepancy Waiver & Officer Attestation
           </h3>
           <p className="text-xs text-[#55544E] max-w-xl mt-1">
-            Dealing Officers and Regional Directors can waive minor OCR optical noise or require bank re-verification under AICTE compliance guidelines.
+            Review the discrepancy details and available resolution options.
           </p>
         </div>
 
@@ -210,7 +209,7 @@ export function ProvenancePage({ onNavigate, currentRole = 'AUDITOR' }: Provenan
                 : 'bg-[#444C3D] hover:bg-[#353C2F] text-white'
             }`}
           >
-            {waived ? '✓ Discrepancy Waived by Director' : 'Waive Discrepancy (Director RB)'}
+            {waived ? 'Waiver preview selected' : 'Preview waiver'}
           </button>
           {isScreenAllowed(currentRole, 'policy') && <button
             onClick={() => onNavigate('policy')}

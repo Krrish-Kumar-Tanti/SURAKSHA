@@ -9,62 +9,62 @@ export function LifecycleTabs() {
     {
       id: 'creation',
       label: 'Phase 1: Creation & Sizing',
-      title: 'Statutory Deposit Creation at LoA',
-      subtitle: 'Mandatory FDR creation prior to issuance of Letter of Approval (LoA)',
+      title: 'Submit deposit details',
+      subtitle: 'Planned intake steps for a new fixed deposit receipt',
       bullets: [
-        'Table 1.4 baseline calculation (Engineering UG: ₹35 Lakhs).',
-        '2026–27 Addendum Item 10: 50% concession applied for special categories.',
-        'Addendum Item 11: 2.0× multiplier applied for leased land/buildings.',
-        'Joint FDR wording verified: Secretary of the Trust AND Regional Officer, AICTE.',
+        'The intended calculator uses programme details to estimate a deposit amount.',
+        'Eligible concessions and leased premises are inputs in the planned calculation.',
+        'The institution would provide the receipt and pledge details for review.',
+        'Review the joint pledge wording shown on the FDR receipt.',
       ],
       image: '/photos/01_security_deposit_vault.jpg',
       stat: '₹35L – ₹70L',
-      statLabel: 'Statutory Range',
+      statLabel: 'Example amounts',
     },
     {
       id: 'custody',
       label: 'Phase 2: 10-Year Custody',
-      title: 'Continuous Custody & Interest Retention',
-      subtitle: 'Statutory 10-year holding period under Clause 1.12(iv)',
+      title: 'Track a deposit while it is held',
+      subtitle: 'Planned custody and interest information',
       bullets: [
-        'Continuous lien marking to AICTE validated via bank sandbox adapters.',
-        'Quarterly interest retention: Clause 1.12(iv) retains interest for AICTE corpus.',
-        'Cross-institution duplicate pledge radar continuously scans for collateral reuse.',
-        'Encrypted document vault stores raw scans with SHA-256 verifiable checksums.',
+        'Track the AICTE lien status for each deposit.',
+        'The applicable interest rules should be confirmed against current official guidance.',
+        'Check for duplicate receipts across institutions.',
+        'Keep receipt documents and their fingerprints with the deposit record.',
       ],
       image: '/photos/06_time_machine_chronometer.jpg',
       stat: '10 Years',
-      statLabel: 'Holding Period',
+      statLabel: 'Example period',
     },
     {
       id: 'renewal',
       label: 'Phase 3: Maturity & Renewal',
-      title: 'Automated Maturity Alert Engine',
-      subtitle: 'Time machine countdown and auto-escalations at T-90, T-30, T-0',
+      title: 'Plan for maturity and renewal',
+      subtitle: 'Planned reminders and follow-up steps',
       bullets: [
-        'T-90, T-60, T-30, T-7 days automated notifications dispatched to institution.',
-        'L1, L2, L3 auto-escalations to Regional Officer and Central Approving Authority.',
-        'Successor FDR linking preserves multi-decade lineage for institutional expansion.',
-        'Clause 2.25(f) late deposit penalties (10% to 20%) calculated automatically.',
+        'Notify users before a deposit matures.',
+        'Escalate overdue follow-up to the appropriate reviewer.',
+        'Link renewed receipts to preserve the deposit history.',
+        'Calculate applicable late-deposit penalties.',
       ],
       image: '/photos/10_control_tower_command.jpg',
       stat: 'T-90 to T-0',
-      statLabel: 'Alert Timeline',
+      statLabel: 'Planned reminder window',
     },
     {
       id: 'release',
       label: 'Phase 4: Clause 6.46 Release',
-      title: 'Statutory Release & Clearance DAG',
-      subtitle: 'Atomic multi-desk verification before principal refund',
+      title: 'Review a release request',
+      subtitle: 'Planned checks before a deposit is returned',
       bullets: [
-        'PGRC Desk: verifies zero active student or faculty capitation fee complaints.',
-        'Vigilance Bureau: verifies zero active CBI/CVC/State police disciplinary probes.',
-        'Grants Cell: verifies zero unutilized or un-refunded AICTE development grants.',
-        'Ed25519 digitally signed release sanction order and NOC dispatched directly to bank.',
+        'Review student grievance clearance.',
+        'Review vigilance and grant clearances.',
+        'Confirm all required conditions before approving a release.',
+        'Prepare the release order and related bank instruction.',
       ],
       image: '/photos/08_aicte_regulatory_emblem.jpg',
-      stat: '100% Audit',
-      statLabel: 'CAG Defense',
+      stat: 'Preview',
+      statLabel: 'Not an approval',
     },
   ];
 
@@ -72,7 +72,7 @@ export function LifecycleTabs() {
     <section className="py-24 px-6 lg:px-10 max-w-[1376px] mx-auto relative z-10">
       <div className="text-center max-w-2xl mx-auto mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-4">
-          Lifecycle Management
+          Planned lifecycle
         </div>
         <AnimatedHeading
           as="h2"
@@ -81,7 +81,7 @@ export function LifecycleTabs() {
           The 4 Phases of an AICTE *Security Deposit*
         </AnimatedHeading>
         <p className="text-[#55544E] text-sm md:text-base mt-4">
-          Explore how SURAKSHA manages deposits across their entire 10-year lifecycle from creation to safe refund.
+          Follow the planned deposit lifecycle from submission and custody through maturity and release.
         </p>
       </div>
 
