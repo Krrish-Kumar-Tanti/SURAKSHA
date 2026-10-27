@@ -9,10 +9,10 @@ app = FastAPI(
     description="Security Deposit / FDR Control Tower — SIH26265",
 )
 
-# Enable CORS for frontend applications (Vite port 3000 and 5173)
+# Enable CORS for configured frontend origins.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

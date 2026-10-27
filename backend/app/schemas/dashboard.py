@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
 
 
@@ -57,7 +57,7 @@ class PledgeNode(BaseModel):
 
 class PledgeEdge(BaseModel):
     id: str
-    from: str
+    from_: str = Field(..., alias="from")
     to: str
     type: str  # PLEDGED_FOR, RENEWED_FROM, SAME_NUMBER, SAME_HASH, SAME_ACCOUNT, SAME_SIGNATORY
     label: str

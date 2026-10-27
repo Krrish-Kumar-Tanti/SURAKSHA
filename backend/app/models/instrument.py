@@ -56,9 +56,8 @@ class Instrument(Base):
     findings = relationship("Finding", back_populates="instrument", cascade="all, delete-orphan")
     obligations = relationship("Obligation", back_populates="instrument", cascade="all, delete-orphan")
     bank_verifications = relationship("BankVerification", back_populates="instrument", cascade="all, delete-orphan")
+    alerts = relationship("Alert", back_populates="instrument", cascade="all, delete-orphan")
+    release_requests = relationship("ReleaseRequest", back_populates="instrument")
     pledge_edges_from = relationship(
         "PledgeEdge", foreign_keys="PledgeEdge.from_instrument_id", back_populates="from_instrument", cascade="all, delete-orphan"
-    )
-    pledge_edges_to = relationship(
-        "PledgeEdge", foreign_keys="PledgeEdge.to_entity_id", back_populates="to_entity", cascade="all, delete-orphan"
     )

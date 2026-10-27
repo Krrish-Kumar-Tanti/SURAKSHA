@@ -8,7 +8,7 @@ from app.core.deps import get_current_dealing_officer, get_current_director_rb, 
 from app.models.instrument import Instrument
 from app.models.release_request import ReleaseRequest
 from app.models.clearance import Clearance
-from app.models.findings import Finding
+from app.models.finding import Finding
 from app.schemas.release import (
     ReleaseRequestCreate,
     ReleaseRequestUpdate,

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, CheckConstraint, UUID, JSON, ForeignKey, DateTime
+from sqlalchemy import Column, String, CheckConstraint, UUID, JSON, ForeignKey, DateTime, Numeric
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 import uuid
 from datetime import datetime, timezone
@@ -33,9 +33,4 @@ class PledgeEdge(Base):
         "Instrument",
         foreign_keys=[from_instrument_id],
         back_populates="pledge_edges_from",
-    )
-    to_instrument = relationship(
-        "Instrument",
-        foreign_keys=[to_entity_id],
-        back_populates="pledge_edges_to",
     )

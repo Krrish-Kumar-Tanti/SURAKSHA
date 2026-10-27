@@ -18,12 +18,18 @@ npm run dev
 Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ### 2. Start the FastAPI Backend (Port 8000)
-```bash
+```powershell
 # In a second terminal window:
 cd backend
-pip install -r requirements.txt
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+py -3.13 -m pip install -r requirements.txt
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+# Set GEMINI_API_KEY in .env and create a unique DOCUMENT_MASTER_KEY.
+py -3.13 run.py
 ```
+- Use Python 3.12 or newer. Generate a document key with:
+  `py -3.13 -c "import base64,secrets; print(base64.b64encode(secrets.token_bytes(32)).decode())"`
+- The registrar wizard uploads PDFs, PNGs, and JPEGs to the backend. Files are encrypted at rest before the backend sends their contents to Gemini for OCR.
+- If upload reports that the backend is unreachable, verify `http://localhost:8000/health` and start this backend terminal. Keep the Gemini key in `backend/.env`; never put it in frontend configuration.
 - Live Backend Health: **[http://localhost:8000/health](http://localhost:8000/health)**
 - Interactive OpenAPI Docs: **[http://localhost:8000/docs](http://localhost:8000/docs)**
 

@@ -17,6 +17,101 @@ export interface UserSession {
   token: string;
 }
 
+export interface FdrInstrumentPayload {
+  institution_id: string;
+  programme_id: string;
+  type: 'FDR';
+  instrument_number: string;
+  bank_name: string;
+  branch: string;
+  ifsc: string;
+  amount_paise: number;
+  issue_date: string;
+  maturity_date: string;
+  tenure_months: number;
+  interest_rate: number | null;
+  depositor_name: string;
+  lien_in_favour: string;
+}
+
+export interface UploadedDocument {
+  id: string;
+  instrument_id: string;
+  file_name: string;
+  sha256: string;
+  size_bytes: number;
+  ocr_status: string;
+}
+
+export interface ExtractedDocumentField {
+  field_name: string;
+  document_value: string;
+  confidence: number;
+  page: number | null;
+  bbox: { x: number; y: number; w: number; h: number } | null;
+}
+
+export interface DocumentExtraction {
+  instrument_id: string;
+  document_id: string;
+  ocr_status: string;
+  fields: ExtractedDocumentField[];
+}
+
+async function requestApi<T>(path: string, init: RequestInit): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, init);
+  } catch (error) {
+    const reason = error instanceof Error ? ` ${error.message}` : '';
+    throw new Error(
+      `The SURAKSHA backend is unreachable at ${API_BASE_URL}. Start the FastAPI backend on port 8000 and retry.${reason}`,
+    );
+  }
+
+  if (!response.ok) {
+    const body = await response.text();
+    let detail = '';
+    if (body) {
+      try {
+        const payload: unknown = JSON.parse(body);
+        if (typeof payload === 'object' && payload !== null && 'detail' in payload && typeof payload.detail === 'string') {
+          detail = payload.detail;
+        }
+      } catch {
+        detail = '';
+      }
+    }
+    throw new Error(detail || `Request failed (${response.status} ${response.statusText}).`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+export function createFdrInstrument(payload: FdrInstrumentPayload): Promise<{ id: string }> {
+  return requestApi('/instruments/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function uploadFdrDocument(instrumentId: string, file: File): Promise<UploadedDocument> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return requestApi(
+    `/instruments/${encodeURIComponent(instrumentId)}/documents?document_type=FDR_CERTIFICATE`,
+    { method: 'POST', body: formData },
+  );
+}
+
+export function extractFdrDocument(instrumentId: string, documentId: string): Promise<DocumentExtraction> {
+  return requestApi(
+    `/instruments/${encodeURIComponent(instrumentId)}/extract?document_id=${encodeURIComponent(documentId)}`,
+    { method: 'POST' },
+  );
+}
+
 // Stored session helpers
 export function getSavedSession(): UserSession | null {
   try {
@@ -52,7 +147,8 @@ export function createDemoSession(role: string, email: string, displayName: stri
 // 1. Backend Health Check
 export async function checkBackendHealth(): Promise<{ status: string; service?: string; sih?: string; connected: boolean }> {
   try {
-    const res = await fetch('http://localhost:8000/health', { signal: AbortSignal.timeout(2000) });
+    const backendUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
+    const res = await fetch(`${backendUrl}/health`, { signal: AbortSignal.timeout(2000) });
     if (res.ok) {
       const data = await res.json();
       return { ...data, connected: true };

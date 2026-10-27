@@ -42,5 +42,9 @@ class ReleaseRequest(Base):
 
     institution = relationship("Institution", back_populates="release_requests")
     instrument = relationship("Instrument", back_populates="release_requests")
-    requester = relationship("User", back_populates="release_requests_created")
+    requester = relationship(
+        "User",
+        back_populates="release_requests_created",
+        foreign_keys=[requested_by],
+    )
     clearances = relationship("Clearance", back_populates="release_request", cascade="all, delete-orphan")
