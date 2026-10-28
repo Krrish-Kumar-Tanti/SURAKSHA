@@ -1,3 +1,4 @@
+from __future__ import annotations
 from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
@@ -9,8 +10,7 @@ from sqlalchemy import select
 from app.models.institution import Institution
 from app.models.programme import Programme
 from app.models.policy_pack import PolicyPack
-from app.models.policy_rule import PolicyRule
-from app.models.requirements import Requirement
+from app.models.requirement import Requirement
 from app.schemas.policy import PolicyCalculateRequest, PolicyCalculateResponse
 
 

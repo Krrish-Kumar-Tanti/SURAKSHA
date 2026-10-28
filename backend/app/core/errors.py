@@ -1,3 +1,4 @@
+from __future__ import annotations
 from fastapi import HTTPException, Request as FastAPIRequest
 from fastapi.responses import JSONResponse
 from starlette import status

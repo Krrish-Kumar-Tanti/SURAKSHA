@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
+from enum import Enum
 
 
 class KPIs(BaseModel):
@@ -57,11 +58,15 @@ class PledgeNode(BaseModel):
 
 class PledgeEdge(BaseModel):
     id: str
-    from: str
+    from_: str = Field(..., alias="from")
     to: str
     type: str  # PLEDGED_FOR, RENEWED_FROM, SAME_NUMBER, SAME_HASH, SAME_ACCOUNT, SAME_SIGNATORY
     label: str
     confidence: float
+
+    class Config:
+        populate_by_name = True
+        allow_population_by_field_name = True
 
 
 class GraphPledgeResponse(BaseModel):
@@ -69,7 +74,7 @@ class GraphPledgeResponse(BaseModel):
     edges: List[PledgeEdge]
 
 
-class ReportType(str):
+class ReportType(str, Enum):
     active = "active"
     expiring = "expiring"
     matured = "matured"

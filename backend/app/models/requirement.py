@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, BigInteger, UUID, CheckConstraint, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, BigInteger, UUID, CheckConstraint, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 import uuid

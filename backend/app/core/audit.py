@@ -1,10 +1,11 @@
+from __future__ import annotations
 import json
 import hashlib
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.core.config import settings
-from app.models.base import AuditEvent, AuditChainVerifier
+from app.models.audit_event import AuditEvent
 
 # Genesis hash for the audit chain
 GENESIS_HASH = "0" * 64

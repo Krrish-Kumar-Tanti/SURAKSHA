@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import event
+from sqlalchemy import event, text
 from app.core.config import settings
 
 # Create async engine
@@ -31,7 +31,7 @@ async def db_health() -> bool:
     """Simple DB liveness probe."""
     try:
         async with SessionLocal() as session:
-            await session.execute("SELECT 1")
+            await session.execute(text("SELECT 1"))
         return True
     except Exception:
         return False
