@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SURAKSHA - SIH 2026 Presentation Slide 1 (Team Parity)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      background: #FDFBF7;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0F172A;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 80px 32px 80px;
+    }
+
+    /* Ambient atmospheric background curves */
+    .sky-glow {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 800px;
+      height: 450px;
+      background: radial-gradient(circle at 100% 0%, rgba(20, 110, 138, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top Header Row */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* SIH 2026 Branding */
+    .sih-branding {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .sih-icon-box {
+      width: 88px;
+      height: 88px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sih-logo-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .sih-text-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sih-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: #385663;
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+      text-transform: uppercase;
+    }
+
+    .sih-year {
+      font-size: 36px;
+      font-weight: 900;
+      color: #176B87;
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+
+    /* Team Title: Team Parity */
+    .team-title-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-right: 80px;
+    }
+
+    .team-name {
+      font-size: 88px;
+      font-weight: 900;
+      color: #1A365D;
+      letter-spacing: -0.03em;
+      position: relative;
+      display: inline-block;
+      line-height: 1;
+    }
+
+    .team-name-underline {
+      width: 100%;
+      height: 7px;
+      background: #1A365D;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+
+    /* Main Content Area */
+    .main-body {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      max-width: 1460px;
+      margin-left: 180px;
+      position: relative;
+      z-index: 10;
+      margin-top: -15px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+    }
+
+    .chevron-prefix {
+      font-size: 28px;
+      font-weight: 900;
+      color: #334155;
+      letter-spacing: -0.06em;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .label-box {
+      min-width: 260px;
+      position: relative;
+    }
+
+    .field-label {
+      font-size: 32px;
+      font-weight: 800;
+      color: #0F172A;
+      text-decoration: underline;
+      text-decoration-thickness: 3.5px;
+      text-underline-offset: 7px;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .colon-separator {
+      font-size: 32px;
+      font-weight: 800;
+      color: #0F172A;
+      margin-left: 8px;
+    }
+
+    .field-value {
+      font-size: 29px;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+    }
+
+    .field-value.highlight {
+      font-weight: 800;
+      color: #0F172A;
+    }
+
+    .ps-code-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 36px;
+      font-weight: 800;
+      color: #176B87;
+      background: #E0F2FE;
+      border: 2px solid #BAE6FD;
+      padding: 4px 18px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    /* Bottom Unique Institutional Showcase Banner */
+    .bottom-institutional-stage {
+      width: 100%;
+      height: 220px;
+      background: linear-gradient(135deg, #10627C 0%, #0E566E 50%, #093B4C 100%);
+      border-radius: 28px;
+      border: 3px solid #1F7F9E;
+      box-shadow: 0 16px 40px rgba(14, 86, 110, 0.22);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      position: relative;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    /* Live photo preview inside banner */
+    .banner-photo-card {
+      width: 320px;
+      height: 175px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2.5px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .banner-photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .banner-photo-tag {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      right: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+    }
+
+    /* Center Middle Metrics */
+    .banner-center-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+    .metrics-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .metrics-grid {
+      display: flex;
+      gap: 16px;
+    }
+    .metric-pill {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      padding: 10px 18px;
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: #A5F3FC;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .metric-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: #E2E8F0;
+      margin-top: 2px;
+    }
+
+    /* Right Official Badges */
+    .banner-right-badges {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .statutory-badge {
+      background: #FEF9C3;
+      border: 2px solid #EAB308;
+      color: #713F12;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tech-stack-row {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #BAE6FD;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sky glow -->
+  <div class="sky-glow"></div>
+
+  <!-- Top Header Row -->
+  <div class="top-header">
+    <!-- SIH 2026 Branding -->
+    <div class="sih-branding">
+      <div class="sih-icon-box">
+        <svg class="sih-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 12C38 12 30 20 30 32C24 33 18 38 18 45C18 50 21 54 25 56C23 60 23 65 25 70C28 77 35 82 43 83C45 83 48 83 50 83C52 83 55 83 57 83C65 82 72 77 75 70C77 65 77 60 75 56C79 54 82 50 82 45C82 38 76 33 70 32C70 20 62 12 50 12Z" fill="#E2E8F0" stroke="#EA580C" stroke-width="4"/>
+          <path d="M50 16C40 16 33 23 33 33C28 34 22 39 22 46C22 51 25 55 28 57C26 61 26 66 28 70C31 77 38 81 46 82C47.5 82.2 49 82.2 50 82.2V16Z" fill="#F97316"/>
+          <path d="M50 16V82.2C51 82.2 52.5 82.2 54 82C62 81 69 77 72 70C74 66 74 61 72 57C75 55 78 51 78 46C78 39 72 34 67 33C67 23 60 16 50 16Z" fill="#10B981"/>
+          <text x="54" y="32" fill="#FFFFFF" font-size="7" font-family="monospace" font-weight="bold">1010</text>
+          <text x="54" y="44" fill="#FFFFFF" font-size="7" font-family="monospace" font-weight="bold">0101</text>
+          <text x="54" y="56" fill="#FFFFFF" font-size="7" font-family="monospace" font-weight="bold">1100</text>
+          <text x="54" y="68" fill="#FFFFFF" font-size="7" font-family="monospace" font-weight="bold">0011</text>
+        </svg>
+      </div>
+      <div class="sih-text-block">
+        <div class="sih-title">SMART INDIA<br>HACKATHON</div>
+        <div class="sih-year">2026</div>
+      </div>
+    </div>
+
+    <!-- Team Parity (Underlined) -->
+    <div class="team-title-box">
+      <div class="team-name">Team Parity</div>
+      <div class="team-name-underline"></div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-body">
+
+    <!-- Row 1: Problem Title -->
+    <div class="info-row">
+      <div class="chevron-prefix">&gt;&gt;&gt;</div>
+      <div class="label-box">
+        <span class="field-label">Problem Title</span><span class="colon-separator">:-</span>
+      </div>
+      <div class="field-value">
+        Development of a Digital System for Management and Tracking of Security Deposits (FDRs) of AICTE Approved Institutions
+      </div>
+    </div>
+
+    <!-- Row 2: PS Code -->
+    <div class="info-row">
+      <div class="chevron-prefix">&gt;&gt;&gt;</div>
+      <div class="label-box">
+        <span class="field-label">PS Code</span><span class="colon-separator">:-</span>
+      </div>
+      <div class="field-value">
+        <span class="ps-code-badge">SIH26265</span>
+      </div>
+    </div>
+
+    <!-- Row 3: Solution -->
+    <div class="info-row">
+      <div class="chevron-prefix">&gt;&gt;&gt;</div>
+      <div class="label-box">
+        <span class="field-label">Solution</span><span class="colon-separator">:-</span>
+      </div>
+      <div class="field-value highlight">
+        "SURAKSHA" — Autonomous Security Deposit & 10-Year FDR Custody Control Tower
+      </div>
+    </div>
+
+    <!-- Row 4: Organization -->
+    <div class="info-row">
+      <div class="chevron-prefix">&gt;&gt;&gt;</div>
+      <div class="label-box">
+        <span class="field-label">Organization</span><span class="colon-separator">:-</span>
+      </div>
+      <div class="field-value">
+        All India Council for Technical Education (AICTE), Ministry of Education
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Unique Institutional Showcase Stage -->
+  <div class="bottom-institutional-stage">
+    
+    <!-- Real Live Demo Photo Card 1: Control Tower Command -->
+    <div class="banner-photo-card">
+      <img src="./photos/03_maturity_renewal_chronometer.jpg" alt="SURAKSHA Cockpit UI">
+      <div class="banner-photo-tag">SURAKSHA CONTROL TOWER UI</div>
+    </div>
+
+    <!-- Real Live Demo Photo Card 2: 3D FDR Certificate -->
+    <div class="banner-photo-card">
+      <img src="./photos/01_deposit_intake_certificate.jpg" alt="FDR Certificate 3D">
+      <div class="banner-photo-tag">SHA-256 FDR SEALING ENGINE</div>
+    </div>
+
+    <!-- Center Live System Metrics -->
+    <div class="banner-center-metrics">
+      <div class="metrics-title">
+        <span>🛡️ National Statutory Coverage</span>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-pill">
+          <span class="metric-num">10,240+</span>
+          <span class="metric-sub">Institutions Active</span>
+        </div>
+        <div class="metric-pill">
+          <span class="metric-num">₹15,480 Cr</span>
+          <span class="metric-sub">Pledge Volume Protected</span>
+        </div>
+        <div class="metric-pill">
+          <span class="metric-num">100% Zero-Lag</span>
+          <span class="metric-sub">Core Banking Sync</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Official Badges -->
+    <div class="banner-right-badges">
+      <div class="statutory-badge">
+        <span>🏛️ AICTE Approval Process Handbook (APH 2024–27)</span>
+      </div>
+      <div class="tech-stack-row">
+        SHA-256 CRYPTO • 3-WAY PROVENANCE • CLAUSE 6.46 DAG
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SURAKSHA — Welcome & Platform Architecture (SIH 26265 | Team Parity)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #F8F5EE;
+      --surface: #FFFFFF;
+      --card-tint: #F3EFE6;
+      --sand-border: #E5DFD5;
+      --sand-border-dark: #DDD6C9;
+      --ink: #1C1D1A;
+      --body: #55544E;
+      --muted: #828077;
+      --olive: #444C3D;
+      --olive-dark: #353C2F;
+      --olive-light: #EFEAE1;
+      --emerald: #1F6F50;
+      --emerald-bg: #EAF4EE;
+      --amber: #B45309;
+      --amber-bg: #FEF3C7;
+      --ruby: #B91C1C;
+      --ruby-bg: #FEE2E2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      background-color: var(--canvas);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--ink);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 32px 54px 28px 54px;
+      justify-content: space-between;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle fine-art noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* Editorial architectural lines */
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(229, 223, 213, 0.45) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(229, 223, 213, 0.45) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+      z-index: 0;
+      mask-image: radial-gradient(ellipse at 50% 50%, black 40%, transparent 80%);
+    }
+
+    .ambient-glow {
+      position: absolute;
+      top: -150px;
+      right: 10%;
+      width: 600px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(217, 185, 126, 0.18) 0%, rgba(248, 245, 238, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top Navigation & Badges */
+    .header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--sand-border);
+      padding-bottom: 18px;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .eyebrow-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: var(--olive-light);
+      border: 1px solid var(--sand-border-dark);
+      color: var(--olive);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--emerald);
+      box-shadow: 0 0 8px rgba(31, 111, 80, 0.5);
+    }
+
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+    }
+
+    .main-title {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 46px;
+      line-height: 1.05;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+
+    .main-title em {
+      font-style: italic;
+      color: var(--olive);
+      font-family: 'Instrument Serif', Georgia, serif;
+    }
+
+    .title-tagline {
+      font-size: 15px;
+      color: var(--body);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .team-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      background: var(--surface);
+      border: 1px solid var(--sand-border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(28, 29, 26, 0.04);
+    }
+
+    .team-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+
+    .team-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Main Grid Split: 58% Left (Cockpit Live Mockup) + 42% Right (Feature Pillars) */
+    .content-stage {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 26px;
+      align-items: stretch;
+      margin: 18px 0;
+      height: 770px;
+    }
+
+    /* LEFT: Cockpit Window Interface */
+    .cockpit-window {
+      background: var(--surface);
+      border: 1px solid var(--sand-border);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px -12px rgba(28, 29, 26, 0.08), 0 0 0 1px rgba(229, 223, 213, 0.8);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Cockpit Window Header */
+    .window-chrome {
+      background: var(--card-tint);
+      border-bottom: 1px solid var(--sand-border);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #FF5F56; }
+    .dot-yellow { background: #FFBD2E; }
+    .dot-green { background: #27C93F; }
+
+    .window-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--body);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .window-role-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      background: var(--olive);
+      color: #FFFFFF;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* Cockpit Body */
+    .cockpit-body {
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+      background: #FFFFFF;
+      overflow: hidden;
+    }
+
+    /* Metric KPI Row */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .kpi-card {
+      background: var(--canvas);
+      border: 1px solid var(--sand-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .kpi-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .kpi-sub {
+      font-size: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .text-emerald { color: var(--emerald); }
+    .text-amber { color: var(--amber); }
+
+    /* Live Feed / Verification Split Area */
+    .cockpit-center-split {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+      flex: 1;
+    }
+
+    /* Instrument Live Card */
+    .panel-box {
+      border: 1px solid var(--sand-border);
+      border-radius: 10px;
+      background: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: var(--card-tint);
+      border-bottom: 1px solid var(--sand-border);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .panel-content {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    /* FDR Certificate Details preview */
+    .fdr-preview-strip {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--canvas);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--sand-border);
+    }
+
+    .fdr-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--sand-border);
+    }
+
+    .fdr-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .fdr-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .fdr-inst {
+      font-size: 11px;
+      color: var(--body);
+      font-weight: 500;
+    }
+
+    .fdr-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag-sm {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .tag-emerald { background: var(--emerald-bg); color: var(--emerald); }
+    .tag-amber { background: var(--amber-bg); color: var(--amber); }
+
+    /* Verification Status Matrix */
+    .field-matrix {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: #FAFAFA;
+      border: 1px solid #F0EEEA;
+    }
+
+    .field-name {
+      color: var(--body);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .check-icon {
+      color: var(--emerald);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    /* Hash-Chain Verification Footer inside Cockpit */
+    .cockpit-footer-banner {
+      background: var(--card-tint);
+      border: 1px solid var(--sand-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chain-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--olive);
+    }
+
+    .hash-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* RIGHT: 4 Bento Pillars matching website */
+    .pillars-container {
+      display: grid;
+      grid-template-rows: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .pillar-card {
+      background: var(--surface);
+      border: 1px solid var(--sand-border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 16px;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(28, 29, 26, 0.03);
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pillar-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--olive);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .pillar-card:hover::before {
+      opacity: 1;
+    }
+
+    .pillar-img-box {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--sand-border);
+      position: relative;
+    }
+
+    .pillar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .pillar-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pillar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pillar-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--olive);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: var(--olive-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .pillar-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .pillar-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .pillar-desc {
+      font-size: 12px;
+      color: var(--body);
+      line-height: 1.4;
+      font-weight: 400;
+    }
+
+    /* Bottom Summary Ticker / Metrics Strip */
+    .footer-strip {
+      position: relative;
+      z-index: 10;
+      border-top: 1px solid var(--sand-border);
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .footer-metric {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--olive);
+    }
+
+    .footer-metric-text {
+      font-size: 12px;
+      color: var(--body);
+      font-weight: 500;
+    }
+
+    .footer-metric-text strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .footer-right {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background elements -->
+  <div class="bg-grid"></div>
+  <div class="ambient-glow"></div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="eyebrow-row">
+        <span class="badge-pill">
+          <span class="pulse-dot"></span>
+          AICTE Central Repository // SIH 26265
+        </span>
+        <span class="badge-pill">
+          Role-Based Tripartite Architecture
+        </span>
+      </div>
+      <div class="title-row">
+        <h1 class="main-title">SURAKSHA <em>Control Tower</em></h1>
+        <span class="title-tagline">Autonomous Security Deposit Oversight & Tamper-Evident FDR Verification</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="team-badge">
+        <span class="team-name">TEAM PARITY</span>
+        <span class="team-sub">Smart India Hackathon 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN STAGE -->
+  <div class="content-stage">
+
+    <!-- LEFT: Authentic SURAKSHA Cockpit UI -->
+    <div class="cockpit-window">
+      <!-- Mac-style Chrome Bar -->
+      <div class="window-chrome">
+        <div class="window-dots">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <div class="window-title">
+          <span>PORTFOLIO COCKPIT</span>
+          <span>•</span>
+          <span style="color: var(--muted);">WRO REGIONAL DESK (MAKER-CHECKER)</span>
+        </div>
+        <div class="window-role-pill">REGIONAL DIRECTOR DESK</div>
+      </div>
+
+      <!-- Cockpit Body -->
+      <div class="cockpit-body">
+
+        <!-- 4 Key Metric Cards -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <span class="kpi-label">Active Corpus</span>
+            <span class="kpi-value">₹15,480 Cr</span>
+            <span class="kpi-sub text-emerald">● 100% Locked in Joint Lien</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Active Pledges</span>
+            <span class="kpi-value">10,482</span>
+            <span class="kpi-sub text-emerald">● All AICTE Approved Inst.</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Maturity Radar (90d)</span>
+            <span class="kpi-value">₹248.5 Cr</span>
+            <span class="kpi-sub text-amber">▲ 42 Instruments Expiring</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Anti-Fraud Violations</span>
+            <span class="kpi-value">0 Breaches</span>
+            <span class="kpi-sub text-emerald">✔ Graph Radar Active</span>
+          </div>
+        </div>
+
+        <!-- Middle Live Verification Inspector -->
+        <div class="cockpit-center-split">
+          
+          <!-- Live Instrument Record -->
+          <div class="panel-box">
+            <div class="panel-header">
+              <span class="panel-title">LIVE INSTRUMENT AUDIT</span>
+              <span class="tag-sm tag-emerald">PROVENANCE VERIFIED</span>
+            </div>
+            <div class="panel-content">
+              <div class="fdr-preview-strip">
+                <img src="photos/01_deposit_intake_certificate.jpg" class="fdr-thumb" alt="FDR">
+                <div class="fdr-details">
+                  <div class="fdr-num">FDR/2026/SBI-98421</div>
+                  <div class="fdr-inst">Savitribai Phule Institute of Technology (Pune)</div>
+                  <div class="fdr-tags">
+                    <span class="tag-sm tag-emerald">Principal: ₹35,00,000</span>
+                    <span class="tag-sm tag-amber">10-Yr Lock-in</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Field Confidence Matrix -->
+              <div class="field-matrix">
+                <div class="field-row">
+                  <span class="field-name"><span class="check-icon">✔</span> Joint Holder Match</span>
+                  <span class="field-val">AICTE & College Trust (100%)</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-name"><span class="check-icon">✔</span> Bank SFTP Confirmation</span>
+                  <span class="field-val">State Bank of India (Confirmed)</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-name"><span class="check-icon">✔</span> OCR Text Confidence</span>
+                  <span class="field-val">99.4% (Tesseract OCR Engine)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Autonomous Release Graph Checklist -->
+          <div class="panel-box">
+            <div class="panel-header">
+              <span class="panel-title">13-GATE RELEASE DAG</span>
+              <span class="tag-sm tag-amber">CLEARANCE CHECK</span>
+            </div>
+            <div class="panel-content">
+              <div class="field-matrix">
+                <div class="field-row">
+                  <span class="field-name"><span class="check-icon">✔</span> 10-Year Term Served</span>
+                  <span class="field-val" style="color: var(--emerald);">COMPLIANT</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-name"><span class="check-icon">✔</span> PGRC Student Grievance</span>
+                  <span class="field-val" style="color: var(--emerald);">NO DISPUTES</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-name"><span class="check-icon">✔</span> Vigilance & Disciplinary</span>
+                  <span class="field-val" style="color: var(--emerald);">CLEAR</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-name"><span class="check-icon">✔</span> Bank Lien Cancellation</span>
+                  <span class="field-val" style="color: var(--emerald);">PENDING SIGN-OFF</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-name"><span class="check-icon">✔</span> RTGS Sanction Order</span>
+                  <span class="field-val" style="color: var(--olive);">AUTOMATED DRAFT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Hash Chain Footer -->
+        <div class="cockpit-footer-banner">
+          <div class="chain-status">
+            <span class="pulse-dot"></span>
+            <span>SHA-256 GENESIS-CHAINED AUDIT TRAIL // VERIFIED</span>
+          </div>
+          <div class="hash-code">
+            HEAD HASH: e4a899bc87df92...0a3f9c2d (Seq #18,492)
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: 4 Bento Pillars matching website -->
+    <div class="pillars-container">
+
+      <!-- Pillar 1: Provenance Scanner -->
+      <div class="pillar-card">
+        <div class="pillar-img-box">
+          <img src="photos/05_provenance_verification_loupe.jpg" class="pillar-img" alt="Scanner">
+        </div>
+        <div class="pillar-content">
+          <div class="pillar-header">
+            <span class="pillar-tag">OCR & VERIFICATION</span>
+            <span class="pillar-badge">2-Tier Extraction</span>
+          </div>
+          <h3 class="pillar-title">Provenance OCR Scanner</h3>
+          <p class="pillar-desc">Extracts key fields, cross-checks with Core Banking SFTP, and flags any discrepancy between physical receipts and digital submissions.</p>
+        </div>
+      </div>
+
+      <!-- Pillar 2: Dynamic Policy Engine -->
+      <div class="pillar-card">
+        <div class="pillar-img-box">
+          <img src="photos/01_deposit_intake_certificate.jpg" class="pillar-img" alt="Policy">
+        </div>
+        <div class="pillar-content">
+          <div class="pillar-header">
+            <span class="pillar-tag">POLICY ENGINE</span>
+            <span class="pillar-badge">APH Rules Matrix</span>
+          </div>
+          <h3 class="pillar-title">Dynamic Deposit Calculator</h3>
+          <p class="pillar-desc">Calculates statutory requirements automatically based on programme, leased land multiplier, minority status, and regional concessions.</p>
+        </div>
+      </div>
+
+      <!-- Pillar 3: Duplicate Pledge Radar -->
+      <div class="pillar-card">
+        <div class="pillar-img-box">
+          <img src="photos/02_custody_ledger_vault.jpg" class="pillar-img" alt="Radar">
+        </div>
+        <div class="pillar-content">
+          <div class="pillar-header">
+            <span class="pillar-tag">ANTI-FRAUD RADAR</span>
+            <span class="pillar-badge">Cross-College Graph</span>
+          </div>
+          <h3 class="pillar-title">Duplicate Pledge Graph</h3>
+          <p class="pillar-desc">Detects multi-pledge fraud instantly across 10,000+ colleges using receipt fingerprints, account numbers, and signatory mapping.</p>
+        </div>
+      </div>
+
+      <!-- Pillar 4: Autonomous Release DAG -->
+      <div class="pillar-card">
+        <div class="pillar-img-box">
+          <img src="photos/04_release_clearance_noc.jpg" class="pillar-img" alt="Release">
+        </div>
+        <div class="pillar-content">
+          <div class="pillar-header">
+            <span class="pillar-tag">RELEASE ENGINE</span>
+            <span class="pillar-badge">13-Gate Dependency DAG</span>
+          </div>
+          <h3 class="pillar-title">Autonomous Release Clearances</h3>
+          <p class="pillar-desc">Coordinates student grievances (PGRC), vigilance, and dues clearances autonomously before generating digital NOC & Sanction Orders.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- FOOTER SUMMARY STRIP -->
+  <footer class="footer-strip">
+    <div class="footer-left">
+      <div class="footer-metric">
+        <div class="metric-dot"></div>
+        <span class="footer-metric-text"><strong>100% Elimination</strong> of Physical Paper Files</span>
+      </div>
+      <div class="footer-metric">
+        <div class="metric-dot"></div>
+        <span class="footer-metric-text"><strong>Sub-Second</strong> Bank Lien & SFTP Verification</span>
+      </div>
+      <div class="footer-metric">
+        <div class="metric-dot"></div>
+        <span class="footer-metric-text"><strong>Tamper-Proof</strong> Cryptographic Audit Trail</span>
+      </div>
+      <div class="footer-metric">
+        <div class="metric-dot"></div>
+        <span class="footer-metric-text"><strong>₹15,000+ Crore</strong> National Public Corpus Protected</span>
+      </div>
+    </div>
+    <div class="footer-right">
+      SURAKSHA PLATFORM // SIH 26265
+    </div>
+  </footer>
+
+</body>
+</html>
