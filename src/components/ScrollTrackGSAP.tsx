@@ -12,6 +12,48 @@ const TOKEN_DEFAULT_SHADOW = '0 0 12px rgba(68, 76, 61, 0.5)';
 const GOLDEN_BORDER = 'rgba(251, 191, 36, 0.95)';
 const INACTIVE_CARD_BORDER = 'rgba(229, 223, 213, 0.7)';
 
+// Botanical SVG line-art illustrations matching warm linen theme
+function BotanicalBranch({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 160 32" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 16 Q 40 14, 80 16 T 156 16" stroke="#444C3D" strokeWidth="1" strokeLinecap="round" strokeOpacity="0.6" />
+      <path d="M24 15 C 22 8, 14 6, 12 10 C 17 13, 21 14, 24 15 Z" fill="#444C3D" fillOpacity="0.25" stroke="#444C3D" strokeWidth="0.75" />
+      <path d="M36 17 C 38 24, 46 26, 48 22 C 43 19, 39 18, 36 17 Z" fill="#444C3D" fillOpacity="0.25" stroke="#444C3D" strokeWidth="0.75" />
+      <path d="M56 15 C 54 7, 46 5, 44 9 C 49 13, 53 14, 56 15 Z" fill="#444C3D" fillOpacity="0.25" stroke="#444C3D" strokeWidth="0.75" />
+      <path d="M72 17 C 74 25, 82 27, 84 23 C 79 20, 75 19, 72 17 Z" fill="#444C3D" fillOpacity="0.25" stroke="#444C3D" strokeWidth="0.75" />
+      <path d="M96 15 C 94 8, 86 6, 84 10 C 89 14, 93 15, 96 15 Z" fill="#444C3D" fillOpacity="0.25" stroke="#444C3D" strokeWidth="0.75" />
+      <path d="M112 17 C 114 24, 122 25, 124 21 C 119 19, 115 18, 112 17 Z" fill="#444C3D" fillOpacity="0.25" stroke="#444C3D" strokeWidth="0.75" />
+      <path d="M136 15 C 134 9, 128 7, 126 11 C 130 14, 133 15, 136 15 Z" fill="#444C3D" fillOpacity="0.25" stroke="#444C3D" strokeWidth="0.75" />
+      <circle cx="30" cy="11" r="1.5" fill="#D4AF37" fillOpacity="0.7" />
+      <circle cx="66" cy="11" r="1.5" fill="#D4AF37" fillOpacity="0.7" />
+      <circle cx="106" cy="11" r="1.5" fill="#D4AF37" fillOpacity="0.7" />
+    </svg>
+  );
+}
+
+function GuillocheCorner({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 30 V 10 C 2 5.58 5.58 2 10 2 H 30" stroke="#444C3D" strokeWidth="1" strokeOpacity="0.4" />
+      <path d="M5 30 V 12 C 5 8.13 8.13 5 12 5 H 30" stroke="#DDD6C9" strokeWidth="0.75" />
+      <circle cx="12" cy="12" r="2.5" fill="#D4AF37" fillOpacity="0.35" stroke="#444C3D" strokeWidth="0.7" />
+    </svg>
+  );
+}
+
+function BotanicalWatermark({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 100 100" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 90 C 20 60, 45 40, 90 10" stroke="#444C3D" strokeWidth="1.2" strokeOpacity="0.12" strokeLinecap="round" />
+      <path d="M40 65 C 30 55, 20 60, 22 72 C 32 72, 38 68, 40 65 Z" fill="#444C3D" fillOpacity="0.08" stroke="#444C3D" strokeWidth="0.8" strokeOpacity="0.15" />
+      <path d="M60 48 C 52 38, 42 42, 44 54 C 54 54, 58 50, 60 48 Z" fill="#444C3D" fillOpacity="0.08" stroke="#444C3D" strokeWidth="0.8" strokeOpacity="0.15" />
+      <path d="M78 32 C 72 20, 62 24, 64 36 C 72 38, 76 34, 78 32 Z" fill="#444C3D" fillOpacity="0.08" stroke="#444C3D" strokeWidth="0.8" strokeOpacity="0.15" />
+      <circle cx="34" cy="58" r="2" fill="#D4AF37" fillOpacity="0.2" />
+      <circle cx="54" cy="42" r="2" fill="#D4AF37" fillOpacity="0.2" />
+    </svg>
+  );
+}
+
 export function ScrollTrackGSAP() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const beaconRef = useRef<HTMLDivElement | null>(null);
@@ -192,7 +234,7 @@ export function ScrollTrackGSAP() {
 
   const stages = [
     {
-      posStyle: { left: '56%', top: '6%' },
+      posStyle: { left: '56%', top: '5%' },
       dockSide: 'left',
       title: 'Add receipt details',
       subtitle: 'Planned intake step',
@@ -203,9 +245,19 @@ export function ScrollTrackGSAP() {
       accent: 'text-indigo-400',
       border: 'border-indigo-500/30',
       pill: 'Sample fingerprint only',
+      paired: {
+        posStyle: { left: '6%', top: '5%' },
+        tag: 'STATUTORY MANDATE // REGULATION 1.4',
+        title: 'Tripartite Security Deposit Pledge',
+        quote: 'Every technical institution seeking approval must establish an irrevocable tripartite fixed deposit jointly with AICTE, ensuring institutional corpus custody before admissions commence.',
+        citation: 'AICTE Act §10(1) · APH Regulation 1.4',
+        seal: 'INVIOLABLE PLEDGE',
+        sealSub: 'Corpus Secured',
+        pill: 'Joint Lien Form 1A',
+      },
     },
     {
-      posStyle: { left: '6%', top: '22%' },
+      posStyle: { left: '6%', top: '21%' },
       dockSide: 'right',
       title: 'Estimate the deposit amount',
       subtitle: 'Simplified demo calculation',
@@ -216,9 +268,19 @@ export function ScrollTrackGSAP() {
       accent: 'text-sky-400',
       border: 'border-sky-500/30',
       pill: 'Estimated amount',
+      paired: {
+        posStyle: { left: '56%', top: '21%' },
+        tag: 'DETERMINISTIC SIZING // MULTIPLIER 2.0×',
+        title: 'Table 1.4 Sizing Matrix',
+        quote: 'Base deposit obligations scale strictly by programme capacity, doubled by a 2.0× multiplier for leased educational campuses, calibrated against statutory concessions.',
+        citation: 'Table 1.4 Regulatory Schedule · Gazette 2026–27',
+        seal: 'CALCULUS CERTIFIED',
+        sealSub: 'Zero Ambiguity',
+        pill: 'APH Multiplier Applied',
+      },
     },
     {
-      posStyle: { left: '56%', top: '38%' },
+      posStyle: { left: '56%', top: '37%' },
       dockSide: 'left',
       title: 'Compare receipt and bank details',
       subtitle: 'Planned verification step',
@@ -229,9 +291,19 @@ export function ScrollTrackGSAP() {
       accent: 'text-teal-400',
       border: 'border-teal-500/30',
       pill: 'Compare submitted, receipt, and bank details',
+      paired: {
+        posStyle: { left: '6%', top: '37%' },
+        tag: 'DIRECT CORE BANKING // SFTP LEDGER',
+        title: 'Two-Way Inter-Bank Validation',
+        quote: 'Physical receipt declarations are reconciled field-by-field against Core Banking System SFTP records, eliminating counterfeit instruments and forged seals.',
+        citation: 'RBI-AICTE Inter-Bank Clearing Protocol',
+        seal: '99.4% OCR MATCH',
+        sealSub: 'Bank CBS Confirmed',
+        pill: 'Cryptographic Hash Match',
+      },
     },
     {
-      posStyle: { left: '6%', top: '54%' },
+      posStyle: { left: '6%', top: '53%' },
       dockSide: 'right',
       title: 'Track a deposit and its maturity',
       subtitle: 'Planned tracking step',
@@ -242,9 +314,19 @@ export function ScrollTrackGSAP() {
       accent: 'text-amber-400',
       border: 'border-amber-500/30',
       pill: 'Tenor and lien status',
+      paired: {
+        posStyle: { left: '56%', top: '53%' },
+        tag: 'SOVEREIGN TENURE // 10-YEAR LOCK-IN',
+        title: '120-Month Custody Sentinel',
+        quote: 'Deposits remain locked under sovereign lien for 120 continuous calendar months. Automated maturity sentinels prevent premature liquidation or unauthorized trust encashment.',
+        citation: 'Clause 6.46 Custody Framework',
+        seal: '120-MONTH TENURE',
+        sealSub: 'CAG Audit Bound',
+        pill: 'Active Sovereign Lien',
+      },
     },
     {
-      posStyle: { left: '56%', top: '70%' },
+      posStyle: { left: '56%', top: '69%' },
       dockSide: 'left',
       title: 'Review a release request',
       subtitle: 'Planned review step',
@@ -255,9 +337,19 @@ export function ScrollTrackGSAP() {
       accent: 'text-purple-400',
       border: 'border-purple-500/30',
       pill: 'No clearance recorded',
+      paired: {
+        posStyle: { left: '6%', top: '69%' },
+        tag: 'AUTONOMOUS CONSENSUS // 13-GATE DAG',
+        title: '13-Gate Clearance Graph',
+        quote: 'Release requests traverse an autonomous directed acyclic graph, verifying student grievances, vigilance investigations, and institutional liabilities before clearance.',
+        citation: 'Autonomous Clearance DAG §8.2',
+        seal: '13-GATE CLEARANCE',
+        sealSub: 'Zero Disputes',
+        pill: 'Concurrence Matrix Clear',
+      },
     },
     {
-      posStyle: { left: '6%', top: '86%' },
+      posStyle: { left: '6%', top: '85%' },
       dockSide: 'right',
       title: 'Record a release decision',
       subtitle: 'Planned final step',
@@ -268,35 +360,53 @@ export function ScrollTrackGSAP() {
       accent: 'text-emerald-400',
       border: 'border-emerald-500/30',
       pill: 'No release order created',
+      paired: {
+        posStyle: { left: '56%', top: '85%' },
+        tag: 'FINAL SETTLEMENT // DIGITAL SANCTION',
+        title: 'Digital Sanction Order & NOC',
+        quote: 'Upon unanimous multi-role sign-off, an automated RTGS sanction order and cryptographically signed Digital NOC are transmitted to the depository bank.',
+        citation: 'RPGF Release & Settlement Order §14',
+        seal: 'DIGITAL NOC ISSUED',
+        sealSub: 'SHA-256 Sealed',
+        pill: 'RTGS Instruction Active',
+      },
     },
   ];
 
   return (
-    <section className="my-36 relative z-10">
-      <div className="text-center max-w-2xl mx-auto px-6 mb-40">
+    <section className="my-28 relative z-10">
+      {/* Editorial Section Header with Botanical Flourish */}
+      <div className="text-center max-w-2xl mx-auto px-6 mb-16">
+        <BotanicalBranch className="w-36 h-6 mx-auto mb-3 text-[#444C3D]" />
+        
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-semibold mb-4 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-[#444C3D] animate-spin" style={{ animationDuration: '6s' }} />
           Planned process
         </div>
+        
         <AnimatedHeading
           as="h2"
           className="text-3xl sm:text-4xl md:text-5xl font-normal text-[#1C1D1A] tracking-[-0.02em] mb-4"
         >
           The deposit *lifecycle*
         </AnimatedHeading>
+        
         <p className="text-[#55544E] text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
           Explore the stages from entering receipt details to reviewing a release.
         </p>
+        
         <div className="inline-flex items-center gap-2 text-xs font-mono text-[#444C3D] bg-[#EFEAE1] border border-[#DDD6C9] px-4 py-2 rounded-full">
           <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
           <span>Scroll to explore the six example stages</span>
         </div>
       </div>
 
+      {/* GSAP Circuit Track with Paired Editorial Panels */}
       <div
         ref={trackRef}
-        className="relative h-[380vh] max-w-[1540px] mx-auto px-4 sm:px-8 bg-[#F8F5EE]"
+        className="relative h-[280vh] max-w-[1540px] mx-auto px-4 sm:px-8 bg-[#F8F5EE]"
       >
+        {/* Dynamic Circuit SVG Trace */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none z-10 opacity-50"
           viewBox="0 0 100 100"
@@ -321,6 +431,7 @@ export function ScrollTrackGSAP() {
           />
         </svg>
 
+        {/* Floating GSAP Beacon */}
         <div
           ref={beaconRef}
           className="absolute z-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-[#444C3D] border-2 border-amber-400/90 transition-colors duration-200 shadow-md"
@@ -331,68 +442,112 @@ export function ScrollTrackGSAP() {
           </div>
         </div>
 
+        {/* Dual Paired Spread: Stage Card + Editorial Botanical Panel */}
         {stages.map((stg, idx) => {
           const Icon = stg.icon;
-          return (
-            <div
-              key={idx}
-              style={stg.posStyle}
-              className="absolute w-[92%] sm:w-[420px] md:w-[460px] lg:w-[490px] z-20"
-            >
-              <div
-                id={`dock-node-${idx}`}
-                className={`absolute -top-3.5 ${
-                  stg.dockSide === 'left' ? '-left-3.5' : '-right-3.5'
-                } w-7 h-7 rounded-full border border-[#444C3D] bg-white flex items-center justify-center z-30 shadow-md pointer-events-none transition-transform`}
-              >
-                <div className="w-2.5 h-2.5 rounded-full bg-[#444C3D]" />
-              </div>
+          const paired = stg.paired;
 
+          return (
+            <React.Fragment key={idx}>
+              {/* Paired Editorial Botanical Panel (Fills the Opposite Side) */}
               <div
-                id={`station-card-${idx}`}
-                className="w-full rounded-2xl bg-white border border-[#E5DFD5] p-6 sm:p-7 flex flex-col justify-between text-left cursor-default shadow-sm transition-transform duration-300"
+                style={paired.posStyle}
+                className="hidden md:flex absolute w-[92%] sm:w-[420px] md:w-[460px] lg:w-[490px] z-10 flex-col justify-between rounded-2xl bg-[#FAF8F5]/90 backdrop-blur-sm border border-[#E5DFD5] p-6 sm:p-7 text-left shadow-xs transition-all duration-300 hover:border-[#DDD6C9] hover:bg-white overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-3.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-[#444C3D] font-bold tracking-wider">
-                      STAGE {stg.step}
+                {/* Guilloche Corner Accents */}
+                <GuillocheCorner className="absolute top-2 left-2 w-5 h-5 pointer-events-none opacity-60" />
+                <GuillocheCorner className="absolute top-2 right-2 w-5 h-5 pointer-events-none opacity-60 rotate-90" />
+                <GuillocheCorner className="absolute bottom-2 left-2 w-5 h-5 pointer-events-none opacity-60 -rotate-90" />
+                <GuillocheCorner className="absolute bottom-2 right-2 w-5 h-5 pointer-events-none opacity-60 rotate-180" />
+
+                {/* Subtle Botanical Watermark */}
+                <BotanicalWatermark className="absolute -bottom-6 -right-6 w-32 h-32 pointer-events-none" />
+
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-mono font-bold text-[#444C3D] tracking-wider uppercase">
+                      {paired.tag}
                     </span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#DDD6C9]" />
-                    <span className="text-[11px] font-mono text-[#706E66] uppercase tracking-wider">
-                      Statutory Checkpoint
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-white border border-[#E5DFD5] text-[#706E66]">
+                      {paired.seal}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#FAF8F5] text-[#55544E] font-medium border border-[#E5DFD5]">
-                    {stg.badge}
-                  </span>
+
+                  <h5 className="font-normal text-[#1C1D1A] font-['Instrument_Serif'] text-xl tracking-tight mb-2">
+                    {paired.title}
+                  </h5>
+
+                  <blockquote className="text-xs sm:text-[13px] text-[#55544E] italic font-serif leading-relaxed pl-3 border-l-2 border-[#D4AF37]/50 my-3">
+                    "{paired.quote}"
+                  </blockquote>
                 </div>
 
-                <div className="mb-3.5">
-                  <div className="flex items-center gap-3.5 mb-1.5">
-                    <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] shrink-0 text-[#444C3D]">
-                      <Icon className="w-5 h-5 text-[#444C3D]" />
-                    </div>
-                    <div>
-                      <h4 className="font-normal text-[#1C1D1A] font-['Instrument_Serif'] text-2xl tracking-tight leading-snug">
-                        {stg.title}
-                      </h4>
-                      <span className="text-[11px] text-[#706E66] font-mono font-medium block mt-0.5">
-                        {stg.subtitle}
+                <div className="pt-3 border-t border-[#E5DFD5] flex items-center justify-between text-[11px] font-mono mt-2">
+                  <span className="text-[#8F8D84]">{paired.citation}</span>
+                  <span className="text-[#1F6F50] font-semibold">{paired.sealSub}</span>
+                </div>
+              </div>
+
+              {/* Active Interactive Stage Card */}
+              <div
+                style={stg.posStyle}
+                className="absolute w-[92%] sm:w-[420px] md:w-[460px] lg:w-[490px] z-20"
+              >
+                <div
+                  id={`dock-node-${idx}`}
+                  className={`absolute -top-3.5 ${
+                    stg.dockSide === 'left' ? '-left-3.5' : '-right-3.5'
+                  } w-7 h-7 rounded-full border border-[#444C3D] bg-white flex items-center justify-center z-30 shadow-md pointer-events-none transition-transform`}
+                >
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#444C3D]" />
+                </div>
+
+                <div
+                  id={`station-card-${idx}`}
+                  className="w-full rounded-2xl bg-white border border-[#E5DFD5] p-6 sm:p-7 flex flex-col justify-between text-left cursor-default shadow-sm transition-transform duration-300"
+                >
+                  <div className="flex items-center justify-between mb-3.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-[#444C3D] font-bold tracking-wider">
+                        STAGE {stg.step}
+                      </span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#DDD6C9]" />
+                      <span className="text-[11px] font-mono text-[#706E66] uppercase tracking-wider">
+                        Statutory Checkpoint
                       </span>
                     </div>
+                    <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#FAF8F5] text-[#55544E] font-medium border border-[#E5DFD5]">
+                      {stg.badge}
+                    </span>
+                  </div>
+
+                  <div className="mb-3.5">
+                    <div className="flex items-center gap-3.5 mb-1.5">
+                      <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] shrink-0 text-[#444C3D]">
+                        <Icon className="w-5 h-5 text-[#444C3D]" />
+                      </div>
+                      <div>
+                        <h4 className="font-normal text-[#1C1D1A] font-['Instrument_Serif'] text-2xl tracking-tight leading-snug">
+                          {stg.title}
+                        </h4>
+                        <span className="text-[11px] text-[#706E66] font-mono font-medium block mt-0.5">
+                          {stg.subtitle}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-[#55544E] leading-relaxed mb-5 font-normal">
+                    {stg.desc}
+                  </p>
+
+                  <div className="pt-3.5 border-t border-[#E5DFD5] flex items-center justify-between text-xs font-mono">
+                    <span className="text-[#706E66]">Ledger Artifact:</span>
+                    <span className="text-[#444C3D] font-bold">{stg.pill}</span>
                   </div>
                 </div>
-
-                <p className="text-xs sm:text-sm text-[#55544E] leading-relaxed mb-5 font-normal">
-                  {stg.desc}
-                </p>
-
-                <div className="pt-3.5 border-t border-[#E5DFD5] flex items-center justify-between text-xs font-mono">
-                  <span className="text-[#706E66]">Ledger Artifact:</span>
-                  <span className="text-[#444C3D] font-bold">{stg.pill}</span>
-                </div>
               </div>
-            </div>
+            </React.Fragment>
           );
         })}
       </div>
