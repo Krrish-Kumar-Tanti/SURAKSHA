@@ -4,6 +4,8 @@ dist/
 agent_talking.md
 agents.talking
 competitor/
+unnati_output/
+build/
 *.sqlite3
 .DS_Store
 Thumbs.db
@@ -12,4 +14,5 @@ Thumbs.db
 .vite/
 __pycache__/
 *.pyc
+
 

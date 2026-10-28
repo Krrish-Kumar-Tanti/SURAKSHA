@@ -224,9 +224,12 @@ SURAKSHA/
 │   ├── Dockerfile             # Production container definition
 │   ├── init_db.py             # Database table bootstrapping utility
 │   └── requirements.txt       # Production Python dependencies
+├── docs/                      # Architectural Blueprints & Regulatory Specifications
+│   └── architecture.md        # Comprehensive multi-body operational blueprint
 ├── public/                    # Static Assets & Presentation Media
-│   ├── photos/                # 3D generated architectural assets
-│   ├── slide2_welcome_features.html  # 1920x1080 Welcome Slide
+│   ├── photos/                # Bespoke warm-linen editorial photo assets
+│   ├── slide1_sih_intro.html  # 1920x1080 Introduction Slide
+│   ├── slide2_welcome_features.html  # 1920x1080 Welcome Features Slide
 │   └── suraksha_flow_diagram.html    # 1920x1080 Interactive Architecture Flow
 ├── src/                       # React Frontend Application
 │   ├── components/            # UI components (CockpitPreview, Bento, etc.)
