@@ -52,7 +52,8 @@ export function createDemoSession(role: string, email: string, displayName: stri
 // 1. Backend Health Check
 export async function checkBackendHealth(): Promise<{ status: string; service?: string; sih?: string; connected: boolean }> {
   try {
-    const res = await fetch('http://localhost:8000/health', { signal: AbortSignal.timeout(2000) });
+    const healthUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '') + '/health';
+    const res = await fetch(healthUrl, { signal: AbortSignal.timeout(3000) });
     if (res.ok) {
       const data = await res.json();
       return { ...data, connected: true };
