@@ -18,7 +18,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health endpoint
+# Root & Health endpoints
+@app.get("/")
+def root():
+    return {
+        "service": "SURAKSHA Control Tower Backend",
+        "sih": "SIH26265",
+        "status": "online",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "SURAKSHA Control Tower Backend", "sih": "SIH26265"}
