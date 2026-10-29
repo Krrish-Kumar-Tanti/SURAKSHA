@@ -10,10 +10,12 @@ import {
   Key, 
   Clock, 
   AlertCircle,
-  FileText
+  FileText,
+  ArrowLeft
 } from 'lucide-react';
 import { AnimatedHeading } from '../AnimatedHeading';
-import { calculatePolicyDeposit } from '../../lib/api';
+import { submitFdrSubmission } from '../../lib/api';
+import { extractDocumentFields, readDocumentText, type ExtractedDocumentFields } from '../../lib/documentOcr';
 
 interface FdrWizardPageProps {
   onNavigate: (screen: string) => void;
@@ -23,6 +25,7 @@ interface FdrWizardPageProps {
 export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: FdrWizardPageProps) {
   const [step, setStep] = useState(1);
   const [bankName, setBankName] = useState('State Bank of India');
+  const [branchName, setBranchName] = useState('');
   const [ifsc, setIfsc] = useState('SBIN0001482');
   const [fdrNumber, setFdrNumber] = useState('FDR-SBI-2026-9921');
   const [depositAmount, setDepositAmount] = useState('3500000'); // ₹35 Lakhs
@@ -34,8 +37,17 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
   const [isConcession, setIsConcession] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
   const [generatedHash, setGeneratedHash] = useState('');
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
+  const [ocrStatus, setOcrStatus] = useState<'idle' | 'complete' | 'partial' | 'no_text' | 'error'>('idle');
+  const [ocrMethod, setOcrMethod] = useState('');
+  const [ocrError, setOcrError] = useState('');
+  const [extractedFields, setExtractedFields] = useState<ExtractedDocumentFields | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formError, setFormError] = useState('');
+  const [submissionError, setSubmissionError] = useState('');
+  const [isSavingSubmission, setIsSavingSubmission] = useState(false);
+  const [savedSubmission, setSavedSubmission] = useState<{ instrument_id: string; document_id: string } | null>(null);
 
   // File Upload Handlers
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -64,6 +76,14 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
     setSelectedFile(file);
     setUploadDone(false);
     setGeneratedHash('');
+    setIsProcessingFile(true);
+    setOcrProgress(0);
+    setOcrStatus('idle');
+    setOcrMethod('');
+    setOcrError('');
+    setExtractedFields(null);
+    e.target.value = '';
+
     try {
       const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
       const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -72,13 +92,95 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
     } catch {
       setFormError('The browser could not calculate a file fingerprint. Try another file or browser.');
       setSelectedFile(null);
-      e.target.value = '';
+      setIsProcessingFile(false);
+      return;
+    }
+
+    try {
+      const { text, method } = await readDocumentText(file, setOcrProgress);
+      const fields = extractDocumentFields(text);
+      const fieldCount = Object.values(fields).filter((value) => value !== null).length;
+      setExtractedFields(fields);
+      setOcrMethod(method);
+      setOcrStatus(fieldCount >= 5 ? 'complete' : fieldCount > 0 ? 'partial' : 'no_text');
+
+      if (fields.instrumentNumber) setFdrNumber(fields.instrumentNumber);
+      if (fields.amount) setDepositAmount(fields.amount);
+      if (fields.issueDate) setIssueDate(fields.issueDate);
+      if (fields.maturityDate) setMaturityDate(fields.maturityDate);
+      if (fields.bankName) setBankName(fields.bankName);
+      if (fields.branch) setBranchName(fields.branch);
+      if (fields.ifsc) setIfsc(fields.ifsc);
+    } catch (error) {
+      setOcrStatus('error');
+      setOcrError(error instanceof Error ? error.message : 'The document could not be read.');
+    } finally {
+      setIsProcessingFile(false);
     }
   };
 
   const parsedAmountLakhs = parseFloat(depositAmount || '0') / 100000;
   const requiredAmountLakhs = (programme === 'Engineering UG' ? 35 : 15) * (isConcession ? 0.5 : 1.0) * (isLeased ? 2.0 : 1.0);
   const isCompliant = Number.isFinite(parsedAmountLakhs) && parsedAmountLakhs >= requiredAmountLakhs;
+
+  const handleSubmit = async () => {
+    if (!selectedFile || !uploadDone) {
+      setSubmissionError('Select and read the receipt file before submitting.');
+      return;
+    }
+    if (!branchName.trim() || !/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(ifsc.trim())) {
+      setSubmissionError('Enter the receipt branch and a valid 11-character IFSC code.');
+      setStep(1);
+      return;
+    }
+    if (!fdrNumber.trim() || !Number.isFinite(Number(depositAmount)) || Number(depositAmount) <= 0) {
+      setSubmissionError('Enter a valid receipt number and deposit amount.');
+      setStep(2);
+      return;
+    }
+
+    setSubmissionError('');
+    setIsSavingSubmission(true);
+    try {
+      const saved = await submitFdrSubmission(
+        {
+          instrument_number: fdrNumber.trim(),
+          bank_name: bankName.trim(),
+          branch: branchName.trim(),
+          ifsc: ifsc.trim().toUpperCase(),
+          amount_paise: Math.round(Number(depositAmount) * 100),
+          issue_date: issueDate,
+          maturity_date: maturityDate,
+          tenure_months: Number(tenorYears) * 12,
+          programme: programme === 'Engineering UG'
+            ? 'ENGINEERING'
+            : programme === 'Management'
+              ? 'MANAGEMENT'
+              : 'COMPUTER_APPLICATIONS',
+          ocr_fields: extractedFields
+            ? {
+              amount: extractedFields.amount,
+              instrumentNumber: extractedFields.instrumentNumber,
+              issueDate: extractedFields.issueDate,
+              maturityDate: extractedFields.maturityDate,
+              bankName: extractedFields.bankName,
+              branch: extractedFields.branch,
+              ifsc: extractedFields.ifsc,
+              depositor: extractedFields.depositor,
+              lien: extractedFields.lien,
+            }
+            : {},
+        },
+        selectedFile,
+      );
+      setSavedSubmission(saved);
+      setIsSubmitted(true);
+    } catch (error) {
+      setSubmissionError(error instanceof Error ? error.message : 'The submission could not be saved.');
+    } finally {
+      setIsSavingSubmission(false);
+    }
+  };
 
   const validateBankDetails = () => {
     if (!/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(ifsc.trim())) {
@@ -116,6 +218,16 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
 
   return (
     <div className="min-h-screen bg-[#F8F5EE] text-[#1C1D1A] py-10 px-4 sm:px-8 max-w-[1100px] mx-auto text-left">
+      {/* Back button */}
+      <div className="mb-4">
+        <button
+          onClick={() => onNavigate('portfolio')}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#DDD6C9] bg-white hover:bg-[#FAF8F5] text-xs font-medium text-[#444C3D] transition cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Portfolio
+        </button>
+      </div>
+
       {/* Top Breadcrumb & Heading */}
       <div className="mb-8">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-3">
@@ -140,7 +252,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
           { num: 2, title: 'Instrument Parameters' },
           { num: 3, title: 'Choose document' },
           { num: 4, title: 'Review estimate' },
-          { num: 5, title: 'Demo preview' },
+          { num: 5, title: 'Submission preview' },
         ].map((s) => (
           <div key={s.num} className="flex items-center gap-2 px-3 shrink-0">
             <span
@@ -169,6 +281,11 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
               {formError}
             </div>
           )}
+          {submissionError && (
+            <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+              {submissionError}
+            </div>
+          )}
           
           {/* STEP 1: Bank & Branch Adapter */}
           {step === 1 && (
@@ -182,7 +299,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-mono text-[#55544E] mb-1.5">Bank name</label>
                   <select
@@ -205,6 +322,16 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                     value={ifsc}
                     onChange={(e) => setIfsc(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-lg bg-[#FAF8F5] border border-[#DDD6C9] text-sm text-[#1C1D1A] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-[#55544E] mb-1.5">Branch name</label>
+                  <input
+                    type="text"
+                    value={branchName}
+                    onChange={(e) => setBranchName(e.target.value)}
+                    placeholder="As printed on the receipt"
+                    className="w-full px-4 py-2.5 rounded-lg bg-[#FAF8F5] border border-[#DDD6C9] text-sm text-[#1C1D1A]"
                   />
                 </div>
               </div>
@@ -324,7 +451,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                   Step 3: Select a receipt file
                 </h3>
                 <p className="text-xs text-[#55544E] mt-1 font-mono">
-                  Select the receipt file to calculate its SHA-256 fingerprint.
+                  Text reading runs locally. When you submit, the receipt is encrypted and saved to your institution’s record for authorized review.
                 </p>
               </div>
 
@@ -334,24 +461,111 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept=".pdf,.png,.jpg,.jpeg,.tiff"
+                disabled={isProcessingFile}
                 className="hidden"
               />
 
               {/* Clickable Drag/Drop & File Selection Zone */}
               <div 
-                onClick={handleUploadClick}
-                className={`p-8 rounded-2xl border-2 border-dashed transition-all text-center cursor-pointer ${
+                onClick={isProcessingFile ? undefined : handleUploadClick}
+                className={`p-8 rounded-2xl border-2 border-dashed transition-all text-center ${
+                  isProcessingFile ? 'cursor-wait opacity-80' : 'cursor-pointer'
+                } ${
                   uploadDone ? 'border-emerald-500 bg-emerald-50/40' : 'border-[#DDD6C9] bg-[#FAF8F5] hover:border-[#444C3D]'
                 }`}
               >
-                <Upload className={`w-8 h-8 mx-auto mb-2 ${uploadDone ? 'text-emerald-600' : 'text-[#706E66]'}`} />
+                {isProcessingFile ? (
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-[#444C3D] animate-pulse" />
+                ) : (
+                  <Upload className={`w-8 h-8 mx-auto mb-2 ${uploadDone ? 'text-emerald-600' : 'text-[#706E66]'}`} />
+                )}
                 <div className="font-semibold text-sm text-[#1C1D1A]">
-                  {selectedFile ? `FDR Certificate Selected (${selectedFile.name})` : 'Click to Upload FDR Certificate (PDF / TIFF / JPG)'}
+                  {isProcessingFile
+                    ? `Reading ${selectedFile?.name ?? 'receipt'}...`
+                    : selectedFile
+                      ? `FDR Certificate Selected (${selectedFile.name})`
+                      : 'Click to Upload FDR Certificate (PDF / TIFF / JPG / PNG)'}
                 </div>
                 <div className="text-xs text-[#706E66] mt-1 font-mono">
-                  {uploadDone ? 'File fingerprint calculated.' : 'Maximum file size: 25 MB'}
+                  {isProcessingFile
+                    ? `Extracting document text: ${ocrProgress}%`
+                    : uploadDone
+                      ? 'Fingerprint calculated; document reading finished.'
+                      : 'Maximum file size: 25 MB'}
                 </div>
+                {isProcessingFile && (
+                  <div className="mt-4 h-2 rounded-full bg-[#E5DFD5] overflow-hidden">
+                    <div
+                      className="h-full bg-[#444C3D] transition-all"
+                      style={{ width: `${ocrProgress}%` }}
+                    />
+                  </div>
+                )}
               </div>
+
+              {ocrStatus !== 'idle' && !isProcessingFile && (
+                <div
+                  role={ocrStatus === 'error' ? 'alert' : 'status'}
+                  className={`p-4 rounded-xl border text-xs ${
+                    ocrStatus === 'complete'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                      : 'bg-amber-50 border-amber-200 text-amber-900'
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    {ocrStatus === 'complete'
+                      ? <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+                      : <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
+                    <div className="space-y-1">
+                      <p className="font-semibold">
+                        {ocrStatus === 'complete'
+                          ? `Found ${Object.values(extractedFields ?? {}).filter(Boolean).length} of 9 receipt fields using ${ocrMethod}.`
+                          : ocrStatus === 'partial'
+                            ? `Only ${Object.values(extractedFields ?? {}).filter(Boolean).length} of 9 receipt fields were recognized.`
+                            : ocrStatus === 'no_text'
+                              ? 'No receipt fields were recognized.'
+                              : 'Document reading failed.'}
+                      </p>
+                      <p>
+                        {ocrStatus === 'error'
+                          ? `${ocrError} You can continue and enter the details manually.`
+                          : ocrStatus === 'partial' || ocrStatus === 'no_text'
+                            ? 'Try a brighter, sharper photo with the receipt flat, fully in frame, and the camera parallel. Avoid shadows and glare. You can also review and enter the receipt details manually; manual entries are not OCR-verified.'
+                            : 'Check the values below and correct them if needed. OCR results are not verified.'}
+                      </p>
+                    </div>
+                  </div>
+                  {extractedFields && Object.values(extractedFields).some((value) => value !== null) && (
+                    <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 border-t border-current/15 pt-3">
+                      {([
+                        ['FDR number', extractedFields.instrumentNumber],
+                        ['Amount (₹)', extractedFields.amount],
+                        ['Issue date', extractedFields.issueDate],
+                        ['Maturity date', extractedFields.maturityDate],
+                        ['Bank', extractedFields.bankName],
+                        ['Branch', extractedFields.branch],
+                        ['IFSC', extractedFields.ifsc],
+                        ['Depositor', extractedFields.depositor],
+                        ['Lien in favour of', extractedFields.lien],
+                      ] as const).filter(([, value]) => value).map(([label, value]) => (
+                        <div key={label} className="min-w-0">
+                          <dt className="opacity-70">{label}</dt>
+                          <dd className="font-medium break-words">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {(ocrStatus === 'partial' || ocrStatus === 'no_text' || ocrStatus === 'error') && (
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="mt-3 rounded-lg border border-current/30 px-3 py-2 font-semibold hover:bg-black/5"
+                    >
+                      Review and enter details manually
+                    </button>
+                  )}
+                </div>
+              )}
 
               {uploadDone && (
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] space-y-2 text-xs">
@@ -376,7 +590,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                 <button
                   type="button"
                   onClick={() => setStep(4)}
-                  disabled={!uploadDone}
+                  disabled={!uploadDone || isProcessingFile}
                   className="px-6 py-2.5 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-40"
                 >
                   Review policy estimate <ArrowRight className="w-4 h-4" />
@@ -407,7 +621,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                   >
                     <option value="Engineering UG">Engineering UG (Base ₹35L)</option>
                     <option value="Management">Management MBA (Base ₹15L)</option>
-                    <option value="Pharmacy">Pharmacy (Base ₹20L)</option>
+                    <option value="Computer Applications">Computer Applications (Base ₹15L)</option>
                   </select>
                 </div>
 
@@ -445,10 +659,10 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#706E66]">
-                      Sample estimate
+                      Policy estimate
                     </span>
                     <h4 className="text-xl font-normal font-['Instrument_Serif'] text-[#1C1D1A] mt-0.5">
-                      {isCompliant ? 'Entered amount meets this demo estimate' : 'Entered amount is below this demo estimate'}
+                      {isCompliant ? 'Entered amount meets this estimate' : 'Entered amount is below this estimate'}
                     </h4>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold ${
@@ -478,11 +692,12 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                   ← Back
                 </button>
                 <button
-                  onClick={() => setIsSubmitted(true)}
-                  disabled={!isCompliant}
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={!isCompliant || !uploadDone || isProcessingFile || isSavingSubmission}
                   className="px-6 py-2.5 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-40"
                 >
-                  Create demo preview <ArrowRight className="w-4 h-4" />
+                  {isSavingSubmission ? 'Saving securely...' : 'Submit FDR for review'} <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -498,13 +713,13 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
 
           <div>
             <span className="text-xs font-mono text-[#444C3D] font-bold bg-[#EFEAE1] border border-[#DDD6C9] px-3 py-1 rounded-full">
-              Submission preview
+              Institution record
             </span>
             <h3 className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif'] mt-3">
-              Review complete
+              FDR submitted
             </h3>
             <p className="text-sm text-[#55544E] max-w-lg mx-auto mt-2">
-              Your entered details are ready for review.
+              The receipt and FDR details were encrypted and saved to your institution’s records for authorized officer review.
             </p>
           </div>
 
@@ -514,6 +729,12 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
               <span className="text-[#444C3D] font-bold">SHA-256</span>
             </div>
             <div className="text-[10px] text-[#706E66] break-all">{generatedHash}</div>
+            {savedSubmission && (
+              <div className="pt-2 border-t border-[#E5DFD5]">
+                <span className="text-[#706E66]">Submission reference:</span>
+                <div className="break-all">{savedSubmission.instrument_id}</div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-center gap-4 pt-4">
@@ -527,7 +748,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
               onClick={() => onNavigate('portfolio')}
               className="px-6 py-3 rounded-lg border border-[#DDD6C9] bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#1C1D1A] text-xs font-medium cursor-pointer"
             >
-              Back to Portfolio
+              View institution records
             </button>
           </div>
         </div>

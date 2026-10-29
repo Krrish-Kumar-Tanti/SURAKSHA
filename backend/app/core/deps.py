@@ -1,33 +1,34 @@
-from typing import Generator
-from fastapi import Depends, Security, HTTPException, status
+from fastapi import Depends, Security, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
-from app.core.config import settings
-from app.core.security import get_token_from_header, decode_access_token
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from uuid import UUID
+from app.core.security import decode_access_token
 from app.db.session import get_db
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
-def get_current_user(
+async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(bearer_scheme),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Get the current authenticated user from JWT token."""
-    token = get_token_from_header(credentials.credentials) if credentials else None
-    if not token:
+    if not credentials:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    payload = decode_access_token(token)
+    payload = decode_access_token(credentials.credentials)
     user_id: str = payload.get("sub")
-    user_role: str = payload.get("role", "")
-    user_region: str = payload.get("region_code", "")
-    user_inst_id: str | None = payload.get("institution_id")
 
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
 
-    # Fetch user from DB to verify existence and active status
     from app.models.user import User
-    user = db.query(User).filter(User.id == user_id).first()
+    try:
+        user_uuid = UUID(user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail="Invalid token payload") from exc
+
+    result = await db.execute(select(User).where(User.id == user_uuid))
+    user = result.scalar_one_or_none()
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User inactive or removed")
 

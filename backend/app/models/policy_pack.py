@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Date, CheckConstraint, Text
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime, timezone
 from app.db.base import Base
@@ -22,3 +23,5 @@ class PolicyPack(Base):
             name="chk_policy_pack_status",
         ),
     )
+
+    requirements = relationship("Requirement", back_populates="policy_pack")

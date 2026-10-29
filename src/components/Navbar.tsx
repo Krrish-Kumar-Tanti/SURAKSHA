@@ -27,12 +27,12 @@ export function Navbar({
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
 
   const roles = [
-    { id: 'INSTITUTION_USER', label: 'College Registrar', desc: 'Own FDR submission preview' },
+    { id: 'INSTITUTION_USER', label: 'College Registrar', desc: 'Own FDR submission & portfolio' },
     { id: 'DEALING_OFFICER', label: 'Dealing Officer', desc: 'Review and process regional records' },
-    { id: 'DIRECTOR_RB', label: 'Regional Director', desc: 'Regional oversight and critical review' },
-    { id: 'COMPETENT_AUTHORITY', label: 'Approving Authority', desc: 'Final release decision' },
-    { id: 'ACCOUNTS', label: 'Accounts', desc: 'Release document examples' },
-    { id: 'AUDITOR', label: 'Central Auditor', desc: 'Read-only portfolio and audit examples' },
+    { id: 'DIRECTOR_RB', label: 'Regional Director', desc: 'Regional oversight & discrepancy waiver' },
+    { id: 'COMPETENT_AUTHORITY', label: 'Approving Authority', desc: 'Final Clause 6.46 release decision' },
+    { id: 'ACCOUNTS', label: 'Accounts', desc: 'Release letters & disbursements' },
+    { id: 'AUDITOR', label: 'Central Auditor', desc: 'Cryptographic ledger & zero-trust audit' },
     { id: 'ADMIN', label: 'System Administrator', desc: 'System status and administration availability' },
   ];
 
@@ -40,7 +40,6 @@ export function Navbar({
 
   const handleNavClick = (screen: string) => {
     if (!isAuthenticated && screen !== 'home') {
-      // If user tries to open an internal cockpit tool while logged out, take to login
       onLoginClick();
       return;
     }
@@ -69,16 +68,16 @@ export function Navbar({
             { screen: 'home', label: 'Overview' },
             { screen: 'portfolio', label: 'Portfolio' },
             { screen: 'wizard', label: 'FDR Submission' },
-            { screen: 'provenance', label: 'Bank records' },
-            { screen: 'policy', label: 'Policy estimate' },
-            { screen: 'release', label: currentRole === 'ACCOUNTS' ? 'Release Letters' : 'Release' },
-            { screen: 'audit', label: 'Audit' },
+            { screen: 'provenance', label: 'Provenance' },
+            { screen: 'policy', label: 'Policy Trace' },
+            { screen: 'release', label: currentRole === 'ACCOUNTS' ? 'Release Letters' : 'Release Graph' },
+            { screen: 'audit', label: 'Audit Chain' },
             { screen: 'admin', label: 'Administration' },
           ].filter(({ screen }) => !isAuthenticated ? screen === 'home' : isScreenAllowed(currentRole, screen)).map(({ screen, label }) => (
             <button
               key={screen}
               onClick={() => handleNavClick(screen)}
-              className={`px-4 py-2 rounded-full bg-[#EFEAE1]/30 backdrop-blur-md border border-[#DDD6C9]/30 hover:bg-[#EFEAE1]/60 hover:scale-[1.1] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer whitespace-nowrap ${activeScreen === screen ? 'text-[#1C1D1A] font-bold bg-[#EFEAE1]/80 border-[#DDD6C9]/60' : 'text-[#55544E]'}`}
+              className={`px-4 py-2 rounded-full bg-[#EFEAE1]/30 backdrop-blur-md border border-[#DDD6C9]/30 hover:bg-[#EFEAE1]/60 hover:scale-[1.05] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer whitespace-nowrap ${activeScreen === screen ? 'text-[#1C1D1A] font-bold bg-[#EFEAE1]/80 border-[#DDD6C9]/60' : 'text-[#55544E]'}`}
             >
               {label}
             </button>
@@ -86,17 +85,17 @@ export function Navbar({
         </nav>
 
        {/* Right Tools */}
-  <div className="flex items-center gap-2 shrink-0">
-    <div className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1]/40 text-[#444C3D] text-[11px] font-mono font-medium backdrop-blur-sm">
-      <Clock className="w-3 h-3 text-[#444C3D]" />
-      <span>
-        {new Date().toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        })}
-      </span>
-    </div>
+       <div className="flex items-center gap-2 shrink-0">
+         <div className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1]/40 text-[#444C3D] text-[11px] font-mono font-medium backdrop-blur-sm">
+           <Clock className="w-3 h-3 text-[#444C3D]" />
+           <span>
+             {new Date().toLocaleDateString('en-GB', {
+               day: '2-digit',
+               month: 'short',
+               year: 'numeric',
+             })}
+           </span>
+         </div>
           {!isAuthenticated ? (
             <button
               onClick={onLoginClick}
@@ -117,13 +116,13 @@ export function Navbar({
                   <ChevronDown className="w-3 h-3 text-white/70" />
                 </button>
                 {roleMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#F8F5EE]/90 backdrop-blur-xl border border-[#DDD6C9] shadow-2xl p-2 z-50 text-left">
+                  <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#F8F5EE]/95 backdrop-blur-xl border border-[#DDD6C9] shadow-2xl p-2 z-50 text-left">
                     <div className="text-[10px] font-mono uppercase text-[#706E66] px-3 py-1 font-bold">Switch Demo Role</div>
                     {roles.map((r) => (
                       <button
                         key={r.id}
                         onClick={() => { onRoleChange(r.id); setRoleMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-start justify-between transition-colors cursor-pointer hover:scale-[1.03] duration-150 ${currentRole === r.id ? 'bg-[#ECE7DE] text-[#444C3D] font-bold' : 'text-[#444C3D] hover:bg-[#EFEAE1]'}`}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-start justify-between transition-colors cursor-pointer hover:scale-[1.02] duration-150 ${currentRole === r.id ? 'bg-[#ECE7DE] text-[#444C3D] font-bold' : 'text-[#444C3D] hover:bg-[#EFEAE1]'}`}
                       >
                         <div>
                           <div className="font-semibold text-[#1C1D1A]">{r.label}</div>
