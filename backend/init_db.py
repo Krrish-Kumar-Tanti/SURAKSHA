@@ -12,7 +12,7 @@ from app.models.user import User
 from app.models.institution import Institution
 from app.models.programme import Programme
 from app.models.instrument import Instrument
-from app.models.document import Document
+from app.models.document import Document, DocumentContent
 from app.models.bank_verification import BankVerification
 from app.models.provenance_field import ProvenanceField
 from app.models.obligation import Obligation

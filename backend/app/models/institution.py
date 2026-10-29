@@ -69,14 +69,13 @@ class Institution(Base):
 
     users = relationship(
         "User",
-        primaryjoin="Institution.id == foreign(User.institution_id)",
         back_populates="institution",
+        primaryjoin="Institution.id == foreign(User.institution_id)",
+        foreign_keys="User.institution_id",
         cascade="all, delete-orphan",
     )
     programmes = relationship("Programme", back_populates="institution", cascade="all, delete-orphan")
-    instruments = relationship(
-        "Instrument", back_populates="institution", cascade="all, delete-orphan"
-    )
-    obligations = relationship("Obligation", back_populates="institution")
-    release_requests = relationship("ReleaseRequest", back_populates="institution")
-    requirements = relationship("Requirement", back_populates="institution")
+    instruments = relationship("Instrument", back_populates="institution", cascade="all, delete-orphan")
+    obligations = relationship("Obligation", back_populates="institution", cascade="all, delete-orphan")
+    requirements = relationship("Requirement", back_populates="institution", cascade="all, delete-orphan")
+    release_requests = relationship("ReleaseRequest", back_populates="institution", cascade="all, delete-orphan")

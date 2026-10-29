@@ -16,6 +16,7 @@ import {
   ChevronRight 
 } from 'lucide-react';
 
+import { Breadcrumb } from './components/Breadcrumb';
 import { Navbar } from './components/Navbar';
 import { VantaGlobe } from './components/VantaGlobe';
 import { AnimatedHeading } from './components/AnimatedHeading';
@@ -46,6 +47,7 @@ export default function App() {
   const [currentRole, setCurrentRole] = useState(userSession?.role || 'DEALING_OFFICER');
   const [activeScreen, setActiveScreen] = useState<string>(userSession ? getDefaultScreen(userSession.role) : 'home');
   const [showIntro, setShowIntro] = useState(true);
+  const [navigationHistory, setNavigationHistory] = useState<readonly string[]>([]);
 
   const isAuthenticated = !!userSession;
 
@@ -91,13 +93,24 @@ export default function App() {
   const navigateToScreen = (screen: string) => {
     if (screen === 'login') {
       setActiveScreen(screen);
+      setNavigationHistory((prev) => [...prev, 'home']);
       return;
     }
     if (!isAuthenticated && screen !== 'home') {
       setActiveScreen('login');
+      setNavigationHistory(['home']);
       return;
     }
-    if (isScreenAllowed(currentRole, screen)) {
+    if (screen === 'home' || isScreenAllowed(currentRole, screen)) {
+      setNavigationHistory((prev) => {
+        // If navigating back, trim history up to the target screen
+        const targetIndex = prev.lastIndexOf(screen);
+        if (targetIndex >= 0) {
+          return prev.slice(0, targetIndex);
+        }
+        // Forward navigation: append current screen to history
+        return [...prev, activeScreen as string];
+      });
       setActiveScreen(screen);
     }
   };
@@ -176,7 +189,12 @@ export default function App() {
 
       {visibleScreen === 'admin' && (
         <>
-          <AdminPage />
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
+          <AdminPage onNavigate={navigateToScreen} />
           <Footer currentRole={currentRole} />
         </>
       )}
@@ -184,6 +202,11 @@ export default function App() {
       {/* RENDER DEDICATED SECTIONS */}
       {visibleScreen === 'portfolio' && (
         <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
           <PortfolioPage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
           <Footer currentRole={currentRole} />
         </>
@@ -191,6 +214,11 @@ export default function App() {
 
       {visibleScreen === 'wizard' && (
         <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
           <FdrWizardPage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
           <Footer currentRole={currentRole} />
         </>
@@ -198,6 +226,11 @@ export default function App() {
 
       {visibleScreen === 'provenance' && (
         <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
           <ProvenancePage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
           <Footer currentRole={currentRole} />
         </>
@@ -205,6 +238,11 @@ export default function App() {
 
       {visibleScreen === 'policy' && (
         <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
           <PolicyTracePage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
           <Footer currentRole={currentRole} />
         </>
@@ -212,6 +250,11 @@ export default function App() {
 
       {visibleScreen === 'release' && (
         <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
           <ReleaseGraphPage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
           <Footer currentRole={currentRole} />
         </>
@@ -219,6 +262,11 @@ export default function App() {
 
       {visibleScreen === 'audit' && (
         <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
           <AuditChainPage key={currentRole} currentRole={currentRole} onNavigate={navigateToScreen} />
           <Footer currentRole={currentRole} />
         </>
@@ -266,13 +314,25 @@ export default function App() {
                     onClick={() => navigateToScreen('provenance')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <Activity className="w-3.5 h-3.5 text-[#444C3D]" /> Bank record examples
+                    <Activity className="w-3.5 h-3.5 text-[#444C3D]" /> 3-Way Provenance
+                  </button>}
+                  {isScreenAllowed(currentRole, 'policy') && <button
+                    onClick={() => navigateToScreen('policy')}
+                    className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Scale className="w-3.5 h-3.5 text-[#444C3D]" /> Simulate APH Calculation
                   </button>}
                   {isScreenAllowed(currentRole, 'release') && <button
                     onClick={() => navigateToScreen('release')}
                     className="px-3.5 py-2 rounded-xl bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-1.5 transition shadow-sm cursor-pointer"
                   >
-                    {currentRole === 'ACCOUNTS' ? 'Release letter examples' : 'Release workflow'} <ChevronRight className="w-3.5 h-3.5" />
+                    {currentRole === 'ACCOUNTS' ? 'Release Letters' : 'Release Graph DAG'} <ChevronRight className="w-3.5 h-3.5" />
+                  </button>}
+                  {isScreenAllowed(currentRole, 'audit') && <button
+                    onClick={() => navigateToScreen('audit')}
+                    className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#444C3D]" /> Audit Chain
                   </button>}
                 </div>
               </div>

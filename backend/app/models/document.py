@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Text, BigInteger, UUID, CheckConstraint, ForeignKey, JSON, Integer
+from sqlalchemy import Column, String, DateTime, Text, BigInteger, UUID, CheckConstraint, ForeignKey, JSON, Integer, LargeBinary
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 import uuid
 from datetime import datetime, timezone
@@ -33,3 +33,17 @@ class Document(Base):
 
     instrument = relationship("Instrument", back_populates="documents")
     uploader = relationship("User", back_populates="uploaded_documents")
+    content = relationship("DocumentContent", back_populates="document", uselist=False, cascade="all, delete-orphan")
+
+
+class DocumentContent(Base):
+    __tablename__ = "document_contents"
+
+    document_id = Column(
+        PGUUID(as_uuid=True),
+        ForeignKey("documents.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    ciphertext = Column(LargeBinary, nullable=False)
+
+    document = relationship("Document", back_populates="content")

@@ -1,52 +1,375 @@
-import asyncio
-import hashlib
-import re
-from datetime import datetime, timezone
-from decimal import Decimal, InvalidOperation
-from pathlib import Path
+from fastapi import APIRouter, Depends, UploadFile, File, Query, Form, HTTPException, Response
 from typing import Optional, List, Dict, Any, Union
-
-from fastapi import APIRouter, Depends, UploadFile, File, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from uuid import UUID, uuid4
+from uuid import UUID
 import json
+import hashlib
+import re
+from decimal import Decimal
+from pydantic import ValidationError
 from app.db.session import get_db
-from app.core.config import settings
 from app.models.instrument import Instrument
-from app.models.document import Document
+from app.models.document import Document, DocumentContent
+from app.models.institution import Institution
+from app.models.programme import Programme
 from app.models.provenance_field import ProvenanceField
 from app.models.finding import Finding
+from app.core.deps import get_current_user
+from app.services.document_storage import encrypt_document, decrypt_document
+from app.schemas.document import (
+    FdrSubmissionCreate,
+    StoredDocumentResponse,
+    StoredInstrumentResponse,
+    SubmissionResponse,
+)
 from app.schemas.instrument import (
     InstrumentCreate,
     InstrumentUpdate,
     InstrumentResponse,
     InstrumentProvenanceResponse,
     InstrumentListResponse,
-    DocumentUploadResponse,
-    DocumentExtractionResponse,
 )
 from app.schemas.common import EnumsResponse
-from app.services.document_ocr import (
-    OCRConfigurationError,
-    extract_document_fields,
-)
-from app.services.document_storage import (
-    DocumentStorageConfigurationError,
-    DocumentStorageError,
-    store_encrypted_document,
-)
-from app.services.gemini_document_ocr import GeminiOCRError
 
 
 router = APIRouter(prefix="/instruments", tags=["instruments"])
 MAX_DOCUMENT_SIZE = 25 * 1024 * 1024
-DOCUMENT_MIME_TYPES = {
-    ".pdf": ("application/pdf", b"%PDF-"),
-    ".png": ("image/png", b"\x89PNG\r\n\x1a\n"),
-    ".jpg": ("image/jpeg", b"\xff\xd8\xff"),
-    ".jpeg": ("image/jpeg", b"\xff\xd8\xff"),
+ALLOWED_DOCUMENT_TYPES = {
+    ".pdf": "application/pdf",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".tif": "image/tiff",
+    ".tiff": "image/tiff",
 }
+
+
+def _validate_document(content: bytes, filename: str) -> str:
+    if not content:
+        raise HTTPException(status_code=400, detail="The uploaded document is empty.")
+    if len(content) > MAX_DOCUMENT_SIZE:
+        raise HTTPException(status_code=413, detail="Documents must be 25 MB or smaller.")
+
+    extension = "." + filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    mime_type = ALLOWED_DOCUMENT_TYPES.get(extension)
+    if not mime_type:
+        raise HTTPException(status_code=415, detail="Upload a PDF, PNG, JPG, or TIFF document.")
+    return mime_type
+
+
+async def _ensure_instrument_access(
+    instrument: Instrument,
+    current_user: dict,
+    db: AsyncSession,
+) -> None:
+    role = current_user["role"]
+    if role == "INSTITUTION_USER":
+        if current_user["institution_id"] != instrument.institution_id:
+            raise HTTPException(status_code=404, detail="Instrument not found.")
+        return
+
+    if role in ("DEALING_OFFICER", "DIRECTOR_RB"):
+        institution_result = await db.execute(
+            select(Institution).where(Institution.id == instrument.institution_id)
+        )
+        institution = institution_result.scalar_one_or_none()
+        if not institution or institution.region_code != current_user["region_code"]:
+            raise HTTPException(status_code=404, detail="Instrument not found.")
+        return
+
+    if role not in ("COMPETENT_AUTHORITY", "AUDITOR", "ADMIN"):
+        raise HTTPException(status_code=403, detail="You may not access receipt documents.")
+
+
+def _safe_download_filename(filename: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]", "_", filename)
+    return cleaned[:180] or "receipt"
+
+
+@router.post("/submissions", response_model=SubmissionResponse, status_code=201)
+async def submit_fdr(
+    payload: str = Form(...),
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Persist an FDR submission and its encrypted receipt for its institution."""
+    if current_user["role"] != "INSTITUTION_USER" or not current_user["institution_id"]:
+        raise HTTPException(status_code=403, detail="An institution registrar account is required to submit an FDR.")
+
+    try:
+        submission = FdrSubmissionCreate.model_validate_json(payload)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail="Submission details are invalid.") from exc
+
+    if submission.maturity_date <= submission.issue_date:
+        raise HTTPException(status_code=422, detail="Maturity date must be after issue date.")
+    if len(submission.ifsc) != 11:
+        raise HTTPException(status_code=422, detail="Enter a valid 11-character IFSC code.")
+
+    institution_result = await db.execute(
+        select(Institution).where(Institution.id == current_user["institution_id"])
+    )
+    institution = institution_result.scalar_one_or_none()
+    if not institution:
+        raise HTTPException(status_code=403, detail="Your account is not associated with an institution.")
+
+    programme_result = await db.execute(
+        select(Programme).where(
+            Programme.institution_id == institution.id,
+            Programme.programme == submission.programme,
+            Programme.active.is_(True),
+        )
+    )
+    programme = programme_result.scalar_one_or_none()
+    if not programme:
+        raise HTTPException(
+            status_code=422,
+            detail="Select an active approved programme associated with your institution.",
+        )
+
+    existing_number = await db.execute(
+        select(Instrument).where(
+            Instrument.institution_id == institution.id,
+            Instrument.instrument_number == submission.instrument_number.strip(),
+        )
+    )
+    if existing_number.scalar_one_or_none():
+        raise HTTPException(
+            status_code=409,
+            detail="An FDR with this receipt number is already on your institution's record.",
+        )
+
+    file_content = await file.read(MAX_DOCUMENT_SIZE + 1)
+    mime_type = _validate_document(file_content, file.filename or "")
+    file_hash = hashlib.sha256(file_content).hexdigest()
+
+    duplicate_result = await db.execute(
+        select(Document).where(Document.sha256 == file_hash)
+    )
+    duplicate = duplicate_result.scalar_one_or_none()
+    if duplicate:
+        original_finding_result = await db.execute(
+            select(Finding).where(
+                Finding.instrument_id == duplicate.instrument_id,
+                Finding.rule_id == "DUPLICATE_HASH",
+                Finding.disposition == "OPEN",
+            )
+        )
+        if not original_finding_result.scalar_one_or_none():
+            db.add(Finding(
+                id=UUID(),
+                instrument_id=duplicate.instrument_id,
+                rule_id="DUPLICATE_HASH",
+                severity="CRITICAL",
+                reason="The same receipt file was submitted for another FDR.",
+                evidence_json={"sha256": file_hash, "attempted_by": str(current_user["id"])},
+                suggested_action="Review the duplicate receipt and verify the underlying bank deposit.",
+                disposition="OPEN",
+                actor_id=current_user["id"],
+            ))
+            await db.commit()
+        raise HTTPException(
+            status_code=409,
+            detail="This exact receipt file is already associated with another submission. A duplicate-document finding was recorded for review.",
+        )
+
+    instrument_id = UUID()
+    document_id = UUID()
+    encrypted_content, encryption_meta = encrypt_document(document_id, file_content)
+    instrument = Instrument(
+        id=instrument_id,
+        institution_id=institution.id,
+        programme_id=programme.id,
+        type="FDR",
+        instrument_number=submission.instrument_number.strip(),
+        bank_name=submission.bank_name.strip(),
+        branch=submission.branch.strip(),
+        ifsc=submission.ifsc.upper(),
+        amount_paise=submission.amount_paise,
+        issue_date=submission.issue_date,
+        maturity_date=submission.maturity_date,
+        tenure_months=submission.tenure_months,
+        depositor_name=institution.trust_name,
+        lien_in_favour="AICTE",
+        status="SUBMITTED",
+        verification_status="UNVERIFIED",
+        officer_verified=False,
+    )
+    document = Document(
+        id=document_id,
+        instrument_id=instrument_id,
+        type="FDR_RECEIPT",
+        file_name=file.filename or "receipt",
+        sha256=file_hash,
+        storage_key=f"postgresql:document_contents:{document_id}",
+        encryption_meta=encryption_meta,
+        mime_type=mime_type,
+        size_bytes=len(file_content),
+        uploaded_by=current_user["id"],
+        ocr_status="PENDING",
+    )
+    db.add_all([
+        instrument,
+        document,
+        DocumentContent(document_id=document_id, ciphertext=encrypted_content),
+    ])
+
+    declared_fields = {
+        "amount": str(Decimal(submission.amount_paise) / Decimal(100)),
+        "instrument_number": submission.instrument_number.strip(),
+        "issue_date": submission.issue_date.isoformat(),
+        "maturity_date": submission.maturity_date.isoformat(),
+        "bank_name": submission.bank_name.strip(),
+        "branch": submission.branch.strip(),
+        "ifsc": submission.ifsc.upper(),
+        "depositor": institution.trust_name,
+        "lien": "AICTE",
+    }
+    ocr_field_names = {
+        "amount": "amount",
+        "instrument_number": "instrumentNumber",
+        "issue_date": "issueDate",
+        "maturity_date": "maturityDate",
+        "bank_name": "bankName",
+        "branch": "branch",
+        "ifsc": "ifsc",
+        "depositor": "depositor",
+        "lien": "lien",
+    }
+    provided_ocr_fields = submission.ocr_fields
+    recognized_field_count = sum(
+        bool(provided_ocr_fields.get(field_name))
+        for field_name in ocr_field_names.values()
+    )
+    document.ocr_status = "OCR_DONE" if recognized_field_count >= 5 else "NEEDS_REVIEW"
+    db.add_all([
+        ProvenanceField(
+            id=UUID(),
+            instrument_id=instrument_id,
+            field_name=field_name,
+            declared_value=declared_value,
+            document_value=provided_ocr_fields.get(ocr_field_names[field_name]),
+            status=(
+                "MISSING_DOCUMENT"
+                if not provided_ocr_fields.get(ocr_field_names[field_name])
+                else "MATCH"
+                if provided_ocr_fields[ocr_field_names[field_name]].strip().casefold()
+                == declared_value.strip().casefold()
+                else "MISMATCH"
+            ),
+        )
+        for field_name, declared_value in declared_fields.items()
+    ])
+
+    await db.commit()
+    return SubmissionResponse(
+        instrument_id=str(instrument_id),
+        document_id=str(document_id),
+        status="SUBMITTED",
+        message="Receipt and FDR details were saved to your institution's records.",
+    )
+
+
+@router.get("/records", response_model=List[StoredInstrumentResponse])
+async def list_stored_records(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List stored FDR submissions visible to the authenticated role."""
+    role = current_user["role"]
+    query = select(Instrument, Institution.name).join(
+        Institution, Instrument.institution_id == Institution.id
+    )
+
+    if role == "INSTITUTION_USER":
+        if not current_user["institution_id"]:
+            raise HTTPException(status_code=403, detail="Your account is not associated with an institution.")
+        query = query.where(Instrument.institution_id == current_user["institution_id"])
+    elif role in ("DEALING_OFFICER", "DIRECTOR_RB"):
+        query = query.where(Institution.region_code == current_user["region_code"])
+    elif role not in ("COMPETENT_AUTHORITY", "AUDITOR", "ADMIN"):
+        raise HTTPException(status_code=403, detail="You may not view submitted FDR records.")
+
+    rows = (await db.execute(query.order_by(Instrument.created_at.desc()))).all()
+    records = []
+    for instrument, institution_name in rows:
+        documents_result = await db.execute(
+            select(Document).where(Document.instrument_id == instrument.id)
+        )
+        documents = documents_result.scalars().all()
+        records.append(StoredInstrumentResponse(
+            id=str(instrument.id),
+            institution_id=str(instrument.institution_id),
+            institution_name=institution_name,
+            instrument_number=instrument.instrument_number,
+            bank_name=instrument.bank_name,
+            branch=instrument.branch,
+            ifsc=instrument.ifsc,
+            amount_paise=instrument.amount_paise,
+            issue_date=instrument.issue_date,
+            maturity_date=instrument.maturity_date,
+            status=instrument.status,
+            verification_status=instrument.verification_status,
+            created_at=instrument.created_at,
+            documents=[
+                StoredDocumentResponse(
+                    id=str(document.id),
+                    file_name=document.file_name,
+                    mime_type=document.mime_type,
+                    size_bytes=document.size_bytes,
+                    sha256=document.sha256,
+                    ocr_status=document.ocr_status,
+                    uploaded_at=document.uploaded_at,
+                    download_url=f"/instruments/documents/{document.id}/content",
+                )
+                for document in documents
+            ],
+        ))
+    return records
+
+
+@router.get("/documents/{document_id}/content")
+async def download_stored_document(
+    document_id: UUID,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Document).where(Document.id == document_id))
+    document = result.scalar_one_or_none()
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found.")
+
+    instrument_result = await db.execute(
+        select(Instrument).where(Instrument.id == document.instrument_id)
+    )
+    instrument = instrument_result.scalar_one_or_none()
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Document not found.")
+    await _ensure_instrument_access(instrument, current_user, db)
+
+    content_result = await db.execute(
+        select(DocumentContent).where(DocumentContent.document_id == document.id)
+    )
+    stored_content = content_result.scalar_one_or_none()
+    if not stored_content:
+        raise HTTPException(status_code=410, detail="The stored receipt content is unavailable.")
+
+    try:
+        plaintext = decrypt_document(document.id, stored_content.ciphertext, document.encryption_meta)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=500, detail="The stored receipt could not be decrypted.") from exc
+
+    return Response(
+        content=plaintext,
+        media_type=document.mime_type,
+        headers={
+            "Content-Disposition": f'attachment; filename="{_safe_download_filename(document.file_name)}"',
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "private, no-store",
+        },
+    )
 
 
 @router.get("/", response_model=InstrumentListResponse)
@@ -58,12 +381,23 @@ async def list_instruments(
     region: Optional[str] = Query(default=None, description="Filter by institution region"),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
+    current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """List instruments with filtering and pagination."""
     from app.models.programme import Programme as ProgrammeModel
 
     query = select(Instrument)
+    if current_user["role"] == "INSTITUTION_USER":
+        if not current_user["institution_id"]:
+            raise HTTPException(status_code=403, detail="Your account is not associated with an institution.")
+        query = query.where(Instrument.institution_id == current_user["institution_id"])
+    elif current_user["role"] in ("DEALING_OFFICER", "DIRECTOR_RB"):
+        query = query.join(Institution).where(
+            Institution.region_code == current_user["region_code"]
+        )
+    elif current_user["role"] not in ("COMPETENT_AUTHORITY", "AUDITOR", "ADMIN"):
+        raise HTTPException(status_code=403, detail="You may not view instrument records.")
 
     if status:
         query = query.where(Instrument.status == status)
@@ -91,6 +425,12 @@ async def list_instruments(
     items = result.scalars().all()
 
     total_query = select(Instrument)
+    if current_user["role"] == "INSTITUTION_USER":
+        total_query = total_query.where(Instrument.institution_id == current_user["institution_id"])
+    elif current_user["role"] in ("DEALING_OFFICER", "DIRECTOR_RB"):
+        total_query = total_query.join(Institution).where(
+            Institution.region_code == current_user["region_code"]
+        )
     if status:
         total_query = total_query.where(Instrument.status == status)
     if institution_id:
@@ -134,6 +474,7 @@ async def list_instruments(
 @router.get("/{instrument_id}", response_model=InstrumentResponse)
 async def get_instrument(
     instrument_id: str,
+    current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Get a single instrument by UUID."""
@@ -144,6 +485,7 @@ async def get_instrument(
 
     if not item:
         raise HTTPException(status_code=404, detail="Instrument not found.")
+    await _ensure_instrument_access(item, current_user, db)
 
     return InstrumentResponse(
         id=str(item.id),
@@ -174,9 +516,34 @@ async def get_instrument(
 @router.post("/", response_model=InstrumentResponse)
 async def create_instrument(
     payload: InstrumentCreate,
+    current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new instrument."""
+    from sqlalchemy.dialects.postgresql import UUID
+
+    if current_user["role"] == "INSTITUTION_USER":
+        if payload.institution_id != current_user["institution_id"]:
+            raise HTTPException(status_code=403, detail="You may only submit records for your own institution.")
+    elif current_user["role"] in ("DEALING_OFFICER", "DIRECTOR_RB"):
+        institution_result = await db.execute(
+            select(Institution).where(Institution.id == payload.institution_id)
+        )
+        institution = institution_result.scalar_one_or_none()
+        if not institution or institution.region_code != current_user["region_code"]:
+            raise HTTPException(status_code=404, detail="Institution not found.")
+    else:
+        raise HTTPException(status_code=403, detail="You may not create instruments.")
+
+    programme_result = await db.execute(
+        select(Programme).where(
+            Programme.id == payload.programme_id,
+            Programme.institution_id == payload.institution_id,
+        )
+    )
+    if not programme_result.scalar_one_or_none():
+        raise HTTPException(status_code=422, detail="Programme does not belong to this institution.")
+
     # Check for duplicate instrument number within institution
     result = await db.execute(
         select(Instrument).where(
@@ -197,7 +564,7 @@ async def create_instrument(
         pass
 
     instrument = Instrument(
-        id=uuid4(),
+        id=UUID(),
         institution_id=payload.institution_id,
         programme_id=payload.programme_id,
         type=payload.type,
@@ -222,27 +589,16 @@ async def create_instrument(
     await db.refresh(instrument)
 
     # Create default provenance fields for key fields
+    from sqlalchemy.dialects.postgresql import UUID as PGUUID
     key_fields = [
         "amount", "instrument_number", "issue_date", "maturity_date",
         "bank_name", "branch", "ifsc", "depositor", "lien"
     ]
     for field in key_fields:
-        declared_values = {
-            "amount": str(Decimal(payload.amount_paise) / Decimal(100)),
-            "instrument_number": payload.instrument_number,
-            "issue_date": payload.issue_date.date().isoformat(),
-            "maturity_date": payload.maturity_date.date().isoformat(),
-            "bank_name": payload.bank_name,
-            "branch": payload.branch,
-            "ifsc": payload.ifsc,
-            "depositor": payload.depositor_name,
-            "lien": lien,
-        }
         pf = ProvenanceField(
-            id=uuid4(),
+            id=PGUUID(),
             instrument_id=instrument.id,
             field_name=field,
-            declared_value=declared_values[field],
             status="MISSING_DOCUMENT",  # will be updated after extraction
         )
         db.add(pf)
@@ -275,285 +631,140 @@ async def create_instrument(
     )
 
 
-@router.post("/{instrument_id}/documents", response_model=DocumentUploadResponse)
+@router.post("/{instrument_id}/documents", response_model=InstrumentResponse)
 async def upload_document(
     instrument_id: str,
     file: UploadFile = File(...),
     document_type: str = Query(..., description="Type of document"),
     release_request_id: Optional[str] = Query(default=None, description="Release request ID"),
+    current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Upload a document for an instrument."""
+
     try:
         parsed_instrument_id = UUID(instrument_id)
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail="Invalid instrument ID.") from exc
+        raise HTTPException(status_code=404, detail="Instrument not found.") from exc
 
-    result = await db.execute(
-        select(Instrument).where(Instrument.id == parsed_instrument_id)
-    )
+    result = await db.execute(select(Instrument).where(Instrument.id == parsed_instrument_id))
     instrument = result.scalar_one_or_none()
 
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrument not found.")
-
-    suffix = Path(file.filename or "").suffix.lower()
-    mime_signature = DOCUMENT_MIME_TYPES.get(suffix)
-    if not mime_signature:
-        raise HTTPException(
-            status_code=415,
-            detail="Supported documents are PDF, PNG, and JPEG files.",
-        )
+    await _ensure_instrument_access(instrument, current_user, db)
 
     content = await file.read(MAX_DOCUMENT_SIZE + 1)
-    if not content:
-        raise HTTPException(status_code=400, detail="The uploaded document is empty.")
-    if len(content) > MAX_DOCUMENT_SIZE:
-        raise HTTPException(status_code=413, detail="Document size exceeds 25 MB.")
-
-    mime_type, signature = mime_signature
-    if not content.startswith(signature):
-        raise HTTPException(
-            status_code=400,
-            detail="The file content does not match its filename type.",
-        )
-
-    if not settings.GEMINI_API_KEY:
-        raise HTTPException(
-            status_code=503,
-            detail="Gemini OCR is not configured. Set GEMINI_API_KEY in backend/.env.",
-        )
-
+    mime_type = _validate_document(content, file.filename or "")
     file_hash = hashlib.sha256(content).hexdigest()
 
-    # Check for duplicate hash across instruments (critical finding)
     dup_result = await db.execute(
         select(Document).where(Document.sha256 == file_hash)
     )
-    original_doc = dup_result.scalar_one_or_none()
-    if original_doc and original_doc.instrument_id == parsed_instrument_id:
-        return DocumentUploadResponse(
-            id=str(original_doc.id),
-            instrument_id=str(original_doc.instrument_id),
-            file_name=original_doc.file_name,
-            sha256=original_doc.sha256,
-            size_bytes=original_doc.size_bytes,
-            ocr_status=original_doc.ocr_status,
-        )
+    duplicate = dup_result.scalar_one_or_none()
+    if duplicate:
+        if duplicate.instrument_id != parsed_instrument_id:
+            db.add(Finding(
+                id=UUID(),
+                instrument_id=parsed_instrument_id,
+                rule_id="DUPLICATE_HASH",
+                severity="CRITICAL",
+                reason="The same receipt file was uploaded for multiple instruments.",
+                evidence_json={"uploaded_hash": file_hash, "original_hash": duplicate.sha256},
+                suggested_action="Review the duplicate receipt and verify the underlying bank deposit.",
+                disposition="OPEN",
+                actor_id=current_user["id"],
+            ))
+            await db.commit()
+        raise HTTPException(status_code=409, detail="This receipt file is already stored.")
 
-    if original_doc:
-        # Duplicate hash - create a critical finding
-        from app.models.finding import Finding
-        from app.models.instrument import Instrument as InstModel
-
-        # Find the original instrument with this hash
-        original_inst_result = await db.execute(
-            select(InstModel).where(InstModel.id == original_doc.instrument_id)
-        )
-        original_inst = original_inst_result.scalar_one_or_none()
-
-        # Create a critical finding for the incoming instrument
-        finding = Finding(
-            id=uuid4(),
-            instrument_id=UUID(instrument_id),
-            rule_id="DUPLICATE_HASH",
-            severity="CRITICAL",
-            reason="Duplicate document hash detected; same file uploaded for multiple instruments.",
-            evidence_json={"uploaded_hash": file_hash, "original_hash": original_doc.sha256},
-            suggested_action="Upload a distinct document or provide bank verification for the original.",
-            disposition="OPEN",
-            actor_id=None,
-        )
-        db.add(finding)
-
-        # Also create a finding on the original institution's most recent instrument
-        if original_inst:
-            orig_finding_result = await db.execute(
-                select(Finding).where(
-                    Finding.instrument_id == original_inst.id,
-                    Finding.rule_id == "DUPLICATE_HASH",
-                )
-            )
-            if not orig_finding_result.scalar_one_or_none():
-                orig_finding = Finding(
-                    id=uuid4(),
-                    instrument_id=original_inst.id,
-                    rule_id="DUPLICATE_HASH",
-                    severity="CRITICAL",
-                    reason="Same document hash found across instruments.",
-                    evidence_json={"uploaded_hash": file_hash, "original_hash": original_doc.sha256},
-                    suggested_action="Verify which institution legitimately holds the instrument.",
-                    disposition="OPEN",
-                    actor_id=None,
-                )
-                db.add(orig_finding)
-
-        await db.commit()
-        raise HTTPException(
-            status_code=409,
-            detail="This document was already uploaded for another instrument. A duplicate finding was recorded.",
-        )
-
-    try:
-        storage_key, encryption_meta = await asyncio.to_thread(
-            store_encrypted_document,
-            content,
-            file_hash,
-            settings.DOCUMENT_STORAGE_DIR,
-            settings.DOCUMENT_MASTER_KEY,
-        )
-    except DocumentStorageConfigurationError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-
+    document_id = UUID()
+    encrypted_content, encryption_meta = encrypt_document(document_id, content)
     document = Document(
-        id=uuid4(),
+        id=document_id,
         instrument_id=parsed_instrument_id,
         release_request_id=UUID(release_request_id) if release_request_id else None,
         type=document_type,
-        file_name=file.filename or "unknown",
+        file_name=file.filename or "receipt",
         sha256=file_hash,
-        storage_key=storage_key,
+        storage_key=f"postgresql:document_contents:{document_id}",
         encryption_meta=encryption_meta,
         mime_type=mime_type,
         size_bytes=len(content),
-        uploaded_by=UUID("00000000-0000-0000-0000-000000000001"),  # placeholder - will be set from auth
-        uploaded_at=datetime.now(timezone.utc),
+        uploaded_by=current_user["id"],
+        uploaded_at=datetime.now(__import__("datetime").timezone.utc),
         version=1,
         ocr_status="PENDING",
     )
+    db.add_all([
+        document,
+        DocumentContent(document_id=document_id, ciphertext=encrypted_content),
+    ])
+    await db.commit()
+    await db.refresh(instrument)
 
-    db.add(document)
-    await db.flush()
-    await db.refresh(document)
-
-    return DocumentUploadResponse(
-        id=str(document.id),
-        instrument_id=str(document.instrument_id),
-        file_name=document.file_name,
-        sha256=document.sha256,
-        size_bytes=document.size_bytes,
-        ocr_status=document.ocr_status,
+    return InstrumentResponse(
+        id=str(instrument.id),
+        institution_id=str(instrument.institution_id),
+        programme_id=str(instrument.programme_id) if instrument.programme_id else None,
+        type=instrument.type,
+        instrument_number=instrument.instrument_number,
+        bank_name=instrument.bank_name,
+        branch=instrument.branch,
+        ifsc=instrument.ifsc,
+        amount_paise=instrument.amount_paise,
+        issue_date=instrument.issue_date,
+        maturity_date=instrument.maturity_date,
+        tenure_months=instrument.tenure_months,
+        interest_rate=float(instrument.interest_rate) if instrument.interest_rate else None,
+        depositor_name=instrument.depositor_name,
+        lien_in_favour=instrument.lien_in_favour,
+        status=instrument.status,
+        verification_status=instrument.verification_status,
+        officer_verified=instrument.officer_verified,
+        predecessor_id=str(instrument.predecessor_id) if instrument.predecessor_id else None,
+        successor_id=str(instrument.successor_id) if instrument.successor_id else None,
+        created_at=instrument.created_at,
+        updated_at=instrument.updated_at,
     )
 
 
-@router.post("/{instrument_id}/extract", response_model=DocumentExtractionResponse)
+@router.post("/{instrument_id}/extract", response_model=InstrumentResponse)
 async def extract_fields(
     instrument_id: str,
-    document_id: Optional[str] = Query(default=None),
+    current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Extract fields from the uploaded instrument document via OCR/text layer."""
-    try:
-        parsed_instrument_id = UUID(instrument_id)
-        parsed_document_id = UUID(document_id) if document_id else None
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail="Invalid instrument or document ID.") from exc
+    """Return a stored instrument after client OCR fields have been attached."""
+    from uuid import UUID
 
-    result = await db.execute(
-        select(Instrument).where(Instrument.id == parsed_instrument_id)
-    )
+    result = await db.execute(select(Instrument).where(Instrument.id == UUID(instrument_id)))
     instrument = result.scalar_one_or_none()
 
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrument not found.")
+    await _ensure_instrument_access(instrument, current_user, db)
 
-    # Find the associated document
-    document_query = select(Document).where(
-        Document.instrument_id == parsed_instrument_id
+    doc_result = await db.execute(
+        select(Document).where(Document.instrument_id == UUID(instrument_id))
     )
-    if parsed_document_id:
-        document_query = document_query.where(Document.id == parsed_document_id)
-    document_query = document_query.order_by(Document.uploaded_at.desc()).limit(1)
-    doc_result = await db.execute(document_query)
     document = doc_result.scalar_one_or_none()
 
     if not document:
         raise HTTPException(status_code=404, detail="No document found for this instrument.")
-
-    try:
-        extracted_fields = await extract_document_fields(document, settings)
-    except OCRConfigurationError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except DocumentStorageConfigurationError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except DocumentStorageError as exc:
+    if document.ocr_status not in ("OCR_DONE", "NEEDS_REVIEW"):
         raise HTTPException(
-            status_code=500, detail="Stored document could not be decrypted."
-        ) from exc
-    except GeminiOCRError as exc:
-        document.ocr_status = "FAILED"
-        await db.flush()
-        await db.commit()
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
-
-    extracted_by_name = {
-        item["field_name"]: item for item in extracted_fields
-    }
-    provenance_result = await db.execute(
-        select(ProvenanceField).where(
-            ProvenanceField.instrument_id == parsed_instrument_id
+            status_code=409,
+            detail="OCR results must be generated from the uploaded receipt and reviewed before they are recorded.",
         )
-    )
-    provenance_fields = {
-        field.field_name: field for field in provenance_result.scalars().all()
-    }
-    for field_name, item in extracted_by_name.items():
-        provenance = provenance_fields.get(field_name)
-        if not provenance:
-            continue
-        value = item["document_value"]
-        provenance.document_value = value
-        provenance.document_confidence = item["confidence"]
-        provenance.document_page = item["page"]
-        provenance.document_bbox = item["bbox"]
-        if item["confidence"] < 0.7:
-            provenance.status = "LOW_CONFIDENCE"
-        else:
-            provenance.status = (
-                "MATCH"
-                if _normalize_provenance_value(field_name, provenance.declared_value)
-                == _normalize_provenance_value(field_name, value)
-                else "MISMATCH"
-            )
-
-    document.ocr_status = "OCR_DONE" if extracted_fields else "NEEDS_REVIEW"
-    await db.flush()
-
-    return DocumentExtractionResponse(
-        instrument_id=str(instrument.id),
-        document_id=str(document.id),
-        ocr_status=document.ocr_status,
-        fields=extracted_fields,
-    )
-
-
-def _normalize_provenance_value(field_name: str, value: Optional[str]) -> str:
-    if not value:
-        return ""
-    normalized = " ".join(value.casefold().split())
-    if field_name == "amount":
-        cleaned_amount = re.sub(r"[^\d.,-]", "", normalized).replace(",", "")
-        try:
-            return str(Decimal(cleaned_amount).normalize())
-        except (InvalidOperation, ValueError):
-            return normalized
-    if field_name in ("issue_date", "maturity_date"):
-        for date_format in ("%d/%m/%Y", "%d-%m-%Y", "%d-%b-%Y"):
-            try:
-                return datetime.strptime(value.strip(), date_format).date().isoformat()
-            except ValueError:
-                continue
-        try:
-            return datetime.fromisoformat(value.strip()).date().isoformat()
-        except ValueError:
-            return normalized
-    return normalized
+    return await get_instrument(instrument_id, current_user, db)
 
 
 @router.post("/{instrument_id}/verify-bank", response_model=InstrumentResponse)
 async def verify_bank(
     instrument_id: str,
     mode: str = Query("SANDBOX", description="SANDBOX/LETTER/API"),
+    current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Verify instrument details against bank sandbox/letter/API."""
@@ -565,9 +776,13 @@ async def verify_bank(
 
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrument not found.")
+    if current_user["role"] not in ("DEALING_OFFICER", "DIRECTOR_RB", "COMPETENT_AUTHORITY", "ADMIN"):
+        raise HTTPException(status_code=403, detail="Only authorized AICTE officers may verify bank records.")
+    await _ensure_instrument_access(instrument, current_user, db)
 
     # Record the bank verification
-    from app.models.bank_verification import BankVerification
+    from sqlalchemy.dialects.postgresql import UUID as PGUUID
+    from app.models.bank_verifications import BankVerification
 
     # Sandbox mode: deterministic fixture based on institution
     if mode == "SANDBOX":
@@ -582,7 +797,7 @@ async def verify_bank(
             instrument.verification_status = existing.status
             instrument.officer_verified = existing.officer_verified_by is not None
             await db.flush()
-            return await get_instrument(instrument_id, db)
+            return await get_instrument(instrument_id, current_user, db)
 
         # Create sandbox verification based on institution patterns
         if "Sanjeevani" in str(instrument.institution_id):
@@ -619,7 +834,7 @@ async def verify_bank(
 
         # Create bank verification record
         verification = BankVerification(
-            id=uuid4(),
+            id=PGUUID(),
             instrument_id=UUID(instrument_id),
             status=status,
             record_json=bank_record,
@@ -643,7 +858,7 @@ async def verify_bank(
         instrument.officer_verified = True
 
         verification = BankVerification(
-            id=uuid4(),
+            id=PGUUID(),
             instrument_id=UUID(instrument_id),
             status="FOUND",
             record_json={"mode": "LETTER", "note": "Bank letter uploaded by officer"},
@@ -663,7 +878,7 @@ async def verify_bank(
         instrument.officer_verified = False
 
         verification = BankVerification(
-            id=uuid4(),
+            id=PGUUID(),
             instrument_id=UUID(instrument_id),
             status="SOURCE_UNAVAILABLE",
             record_json={"mode": "API", "note": "API integration not configured in prototype"},
@@ -682,12 +897,13 @@ async def verify_bank(
     await db.flush()
 
     # Re-fetch and return the updated instrument
-    return await get_instrument(instrument_id, db)
+    return await get_instrument(instrument_id, current_user, db)
 
 
 @router.get("/{instrument_id}/provenance", response_model=InstrumentProvenanceResponse)
 async def get_provenance(
     instrument_id: str,
+    current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Get three-way provenance (declared vs. document vs. bank) for an instrument."""
@@ -698,6 +914,7 @@ async def get_provenance(
 
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrument not found.")
+    await _ensure_instrument_access(instrument, current_user, db)
 
     # Get all provenance fields
     pf_result = await db.execute(

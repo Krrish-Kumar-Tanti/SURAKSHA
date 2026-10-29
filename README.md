@@ -118,11 +118,13 @@ SURAKSHA enforces strict principle-of-least-privilege governance across 5 distin
 | **`COMPETENT_AUTHORITY`** | Member Secretary Approver | Final sign-off, issue digital NOC and automated RTGS Sanction Orders. |
 | **`AUDITOR`** | Central Vigilance / CAG | Read-only chain verification, audit clock inspection, system-wide oversight. |
 
+Submitted receipt files are encrypted with AES-256-GCM and stored in PostgreSQL, linked to the institution's instrument record rather than a registrar's personal profile. Institution users can view their institution's submissions; regional officers can access records in their region, while auditors and competent authorities have wider read access. Receipt content is only served through an authenticated, role-scoped endpoint. `DOCUMENT_MASTER_KEY` must be set as a secret in production and backed up securely; loss of that key makes stored receipts unreadable. The prototype does not yet define an archival/deletion retention schedule.
+
 ---
 
 ## 🗄️ Database Architecture (PostgreSQL 15)
 
-The production schema consists of **18 strongly-typed, indexed relational tables**:
+The production schema consists of **19 strongly-typed, indexed relational tables**:
 
 ```
 suraksha (PostgreSQL)
@@ -131,6 +133,7 @@ suraksha (PostgreSQL)
  ├── programmes             (Engineering, Management, Pharmacy, etc.)
  ├── instruments            (FDR receipts, principal paise, lock-in status)
  ├── documents              (Encrypted storage keys, mime-types, SHA-256 hashes)
+ ├── document_contents      (AES-256-GCM encrypted receipt bytes in PostgreSQL)
  ├── bank_verifications     (SFTP reconciliation records & CBS timestamps)
  ├── provenance_fields      (OCR confidence scores & field diff extractions)
  ├── obligations            (Calculated statutory deposit requirements)

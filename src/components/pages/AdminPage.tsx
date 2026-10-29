@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, Shield } from 'lucide-react';
+import { RefreshCw, Shield, ArrowLeft } from 'lucide-react';
 import { checkBackendHealth } from '../../lib/api';
 
 type BackendStatus = Awaited<ReturnType<typeof checkBackendHealth>>;
 
-export function AdminPage() {
+interface AdminPageProps {
+  onNavigate?: (screen: string) => void;
+}
+
+export function AdminPage({ onNavigate }: AdminPageProps = {}) {
   const [status, setStatus] = useState<BackendStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -22,8 +26,18 @@ export function AdminPage() {
   }, []);
 
   return (
-    <main className="min-h-[70vh] bg-[#F8F5EE] px-4 py-10 text-left text-[#1C1D1A] sm:px-8">
+    <main className="min-h-[70vh] bg-[#F8F5EE] px-4 py-8 text-left text-[#1C1D1A] sm:px-8">
       <div className="mx-auto max-w-[1100px]">
+        {onNavigate && (
+          <div className="mb-4">
+            <button
+              onClick={() => onNavigate('home')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#DDD6C9] bg-white hover:bg-[#FAF8F5] text-xs font-medium text-[#444C3D] transition cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Overview
+            </button>
+          </div>
+        )}
         <div className="mb-8">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] px-3.5 py-1.5 text-xs font-medium text-[#444C3D]">
             <Shield className="h-3.5 w-3.5" />
