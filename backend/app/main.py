@@ -9,10 +9,11 @@ app = FastAPI(
     description="Security Deposit / FDR Control Tower — SIH26265",
 )
 
-# Enable CORS for configured frontend origins.
+# Enable CORS for configured frontend origins and Vercel/localhost domains.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|.*\.vercel\.app|.*\.onrender\.com)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

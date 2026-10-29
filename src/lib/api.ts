@@ -311,7 +311,7 @@ export async function checkBackendHealth(): Promise<{ status: string; service?: 
   } catch {
     // Offline fallback
   }
-  return { status: 'mock_ready', service: 'Simulated Adapter Mode', sih: 'SIH26265', connected: false };
+  return { status: 'offline', service: 'SURAKSHA Control Tower Backend', sih: 'SIH26265', connected: false };
 }
 
 // 2. Authentication Login

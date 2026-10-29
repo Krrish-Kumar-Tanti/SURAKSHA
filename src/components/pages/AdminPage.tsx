@@ -61,9 +61,13 @@ export function AdminPage({ onNavigate }: AdminPageProps = {}) {
                     : 'The backend service is currently unreachable.'}
               </p>
               {status && (
-                <p className="mt-2 text-xs text-[#706E66]">
-                  Status: {status.status}{status.sih ? ` · ${status.sih}` : ''}
-                </p>
+                <div className="mt-2.5 flex items-center gap-2">
+                  <span className={`inline-block h-2 w-2 rounded-full ${status.connected ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                  <p className="text-xs text-[#706E66]">
+                    Status: <span className="font-mono font-medium">{status.status}</span>
+                    {status.sih ? ` · ${status.sih}` : ''}
+                  </p>
+                </div>
               )}
             </div>
             <button

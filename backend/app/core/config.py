@@ -20,7 +20,15 @@ class Settings(BaseSettings):
     DOCUMENT_STORAGE_DIR: str = Field(default="./storage/documents")
     GEMINI_API_KEY: Optional[str] = Field(default=None)
     GEMINI_OCR_MODEL: str = Field(default="gemini-2.5-flash")
-    CORS_ORIGINS: List[str] = Field(default=["http://localhost:5173", "http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"])
+    CORS_ORIGINS: List[str] = Field(default=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "https://suraksha-sooty.vercel.app",
+    ])
     DEMO_MODE: bool = Field(default=True)
     SEED_DATASET: str = Field(default="demo_v1")
     AP_SCHEDULER_API_ENABLED: bool = Field(default=True)
