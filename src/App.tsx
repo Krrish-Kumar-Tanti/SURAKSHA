@@ -437,7 +437,7 @@ function AppMain() {
                       {t('hero.subtitle')}
                     </p>
 
-                    {/* Prominent Action Buttons: Sign In, How It Works, Guide */}
+                    {/* Prominent Action Buttons: Sign In, How It Works */}
                     <div className="flex flex-wrap items-center justify-start gap-3">
                       <button
                         onClick={() => setActiveScreen('login')}
@@ -453,14 +453,6 @@ function AppMain() {
                       >
                         <Cpu className="w-4 h-4 text-[#444C3D]" />
                         {t('hero.howItWorksBtn')}
-                      </button>
-
-                      <button
-                        onClick={() => navigateToScreen('guide')}
-                        className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#1C1D1A] rounded-xl font-medium text-sm border border-[#DDD6C9] transition-all cursor-pointer"
-                      >
-                        <BookOpen className="w-4 h-4 text-[#444C3D]" />
-                        {t('hero.guideBtn')}
                       </button>
                     </div>
                   </div>
