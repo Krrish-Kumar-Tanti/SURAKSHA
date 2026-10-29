@@ -5,7 +5,9 @@
  * Includes resilient synthetic fallback data so the demo NEVER breaks.
  */
 
-export const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+export const API_BASE_URL =
+  (import.meta as any).env?.VITE_API_BASE_URL ||
+  'https://suraksha-uwjg.onrender.com/api/v1';
 
 export interface UserSession {
   id: string;
@@ -301,7 +303,7 @@ export function createDemoSession(role: string, email: string, displayName: stri
 export async function checkBackendHealth(): Promise<{ status: string; service?: string; sih?: string; connected: boolean }> {
   try {
     const healthUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '') + '/health';
-    const res = await fetch(healthUrl, { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(healthUrl, { signal: AbortSignal.timeout(8000) });
     if (res.ok) {
       const data = await res.json();
       return { ...data, connected: true };
