@@ -1,7 +1,7 @@
-export type AppScreen = 'home' | 'guide' | 'howItWorks' | 'portfolio' | 'wizard' | 'provenance' | 'policy' | 'release' | 'audit' | 'admin';
+export type AppScreen = 'home' | 'guide' | 'howItWorks' | 'contact' | 'portfolio' | 'wizard' | 'provenance' | 'policy' | 'release' | 'audit' | 'admin';
 export type CockpitTab = 'portfolio' | 'provenance' | 'calculator' | 'graph';
 
-const commonScreens: readonly AppScreen[] = ['home', 'guide', 'howItWorks'];
+const commonScreens: readonly AppScreen[] = ['home', 'guide', 'howItWorks', 'contact'];
 
 const roleScreens: Record<string, readonly AppScreen[]> = {
   INSTITUTION_USER: [...commonScreens, 'portfolio', 'wizard', 'provenance', 'policy', 'release'],

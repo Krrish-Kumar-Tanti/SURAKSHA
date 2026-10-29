@@ -53,7 +53,7 @@ export function Navbar({
   const canSwitchDemoRole = userSession?.token.startsWith('jwt_synthetic_token_') ?? false;
 
   const handleNavClick = (screen: string) => {
-    if (!isAuthenticated && screen !== 'home' && screen !== 'guide' && screen !== 'howItWorks') {
+    if (!isAuthenticated && screen !== 'home' && screen !== 'guide' && screen !== 'howItWorks' && screen !== 'contact') {
       onLoginClick();
       return;
     }
@@ -65,6 +65,7 @@ export function Navbar({
     { screen: 'home', label: t('nav.overview', 'Overview') },
     { screen: 'guide', label: t('nav.guide', 'Guide') },
     { screen: 'howItWorks', label: t('nav.howItWorks', 'How It Works') },
+    { screen: 'contact', label: t('nav.contact', 'Contact Us') },
     { screen: 'portfolio', label: t('nav.portfolio', 'Portfolio') },
     { screen: 'wizard', label: t('nav.wizard', 'FDR Submission') },
     { screen: 'provenance', label: t('nav.provenance', 'Provenance') },
@@ -81,7 +82,7 @@ export function Navbar({
 
   const visibleNavItems = navItems.filter(({ screen }) => {
     if (!isAuthenticated) {
-      return screen === 'home' || screen === 'guide' || screen === 'howItWorks';
+      return screen === 'home' || screen === 'guide' || screen === 'howItWorks' || screen === 'contact';
     }
     return isScreenAllowed(currentRole, screen);
   });

@@ -40,6 +40,7 @@ import { AuditChainPage } from './components/pages/AuditChainPage';
 import { AdminPage } from './components/pages/AdminPage';
 import { GuidePage } from './components/pages/GuidePage';
 import { HowItWorksPage } from './components/pages/HowItWorksPage';
+import { ContactPage } from './components/pages/ContactPage';
 import { HeroIntroSplash } from './components/HeroIntroSplash';
 import { getSavedSession, clearSession, saveSession, UserSession } from './lib/api';
 import { AppScreen, getDefaultScreen, isScreenAllowed } from './lib/roleAccess';
@@ -102,12 +103,12 @@ function AppMain() {
       setNavigationHistory((prev) => [...prev, 'home']);
       return;
     }
-    if (!isAuthenticated && screen !== 'home' && screen !== 'guide' && screen !== 'howItWorks') {
+    if (!isAuthenticated && screen !== 'home' && screen !== 'guide' && screen !== 'howItWorks' && screen !== 'contact') {
       setActiveScreen('login');
       setNavigationHistory(['home']);
       return;
     }
-    if (screen === 'home' || screen === 'guide' || screen === 'howItWorks' || isScreenAllowed(currentRole, screen)) {
+    if (screen === 'home' || screen === 'guide' || screen === 'howItWorks' || screen === 'contact' || isScreenAllowed(currentRole, screen)) {
       setNavigationHistory((prev) => {
         const targetIndex = prev.lastIndexOf(screen);
         if (targetIndex >= 0) {
@@ -121,7 +122,7 @@ function AppMain() {
 
   const visibleScreen: AppScreen | 'login' = activeScreen === 'login'
     ? 'login'
-    : (activeScreen === 'guide' || activeScreen === 'howItWorks' || activeScreen === 'home')
+    : (activeScreen === 'guide' || activeScreen === 'howItWorks' || activeScreen === 'contact' || activeScreen === 'home')
       ? activeScreen as AppScreen
       : isAuthenticated && !isScreenAllowed(currentRole, activeScreen)
         ? getDefaultScreen(currentRole)
@@ -222,6 +223,19 @@ function AppMain() {
             onNavigate={navigateToScreen} 
             currentRole={currentRole} 
           />
+          <Footer currentRole={currentRole} />
+        </>
+      )}
+
+      {/* CONTACT US SCREEN (Official Directory & Interactive WhatsApp Desk) */}
+      {visibleScreen === 'contact' && (
+        <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
+          <ContactPage onNavigate={navigateToScreen} />
           <Footer currentRole={currentRole} />
         </>
       )}

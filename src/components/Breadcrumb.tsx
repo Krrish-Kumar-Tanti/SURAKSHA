@@ -19,6 +19,8 @@ export function Breadcrumb({ history, currentScreen, onGoBack }: BreadcrumbProps
         return t('nav.guide', 'Guide');
       case 'howItWorks':
         return t('nav.howItWorks', 'How It Works');
+      case 'contact':
+        return t('nav.contact', 'Contact Us');
       case 'portfolio':
         return t('nav.portfolio', 'Portfolio');
       case 'wizard':
