@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { AnimatedHeading } from './AnimatedHeading';
+import { BotanicalBranch } from './BotanicalBranch';
 
 export function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -34,8 +35,14 @@ export function FaqSection() {
   ];
 
   return (
-    <section className="py-20 px-6 lg:px-10 max-w-[1000px] mx-auto relative z-10">
-      <div className="text-center mb-14">
+    <section className="py-20 relative z-10">
+      {/* Full-width Botanical Vine divider */}
+      <div className="w-full overflow-hidden mb-10 opacity-85">
+        <BotanicalBranch className="w-full text-[#444C3D]" />
+      </div>
+
+      <div className="max-w-[1000px] mx-auto px-6 lg:px-10">
+        <div className="text-center mb-14">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-4 shadow-sm">
           <HelpCircle className="w-3.5 h-3.5 text-[#444C3D]" />
           Regulatory Clarity
@@ -122,6 +129,7 @@ export function FaqSection() {
           );
         })}
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 }

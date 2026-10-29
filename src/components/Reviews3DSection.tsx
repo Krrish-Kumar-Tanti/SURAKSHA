@@ -12,6 +12,7 @@ import {
   Scale
 } from 'lucide-react';
 import { AnimatedHeading } from './AnimatedHeading';
+import { BotanicalBranch } from './BotanicalBranch';
 
 interface Review {
   id: number;
@@ -189,15 +190,21 @@ export function Reviews3DSection() {
   };
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-10 max-w-[1376px] mx-auto relative z-10 overflow-hidden">
-      {/* Decorative ambient background accents */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] bg-gradient-to-tr from-[#DDD6C9]/25 to-[#EFEAE1]/20 rounded-full blur-3xl pointer-events-none -z-10"
-        aria-hidden="true" 
-      />
+    <section className="py-20 relative z-10 overflow-hidden">
+      {/* Full-width Botanical Vine divider */}
+      <div className="w-full overflow-hidden mb-10 opacity-85">
+        <BotanicalBranch className="w-full text-[#444C3D]" />
+      </div>
 
-      {/* Header */}
-      <div className="text-center max-w-2xl mx-auto mb-14 sm:mb-16">
+      <div className="max-w-[1376px] mx-auto px-4 sm:px-6 lg:px-10">
+        {/* Decorative ambient background accents */}
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] bg-gradient-to-tr from-[#DDD6C9]/25 to-[#EFEAE1]/20 rounded-full blur-3xl pointer-events-none -z-10"
+          aria-hidden="true" 
+        />
+
+        {/* Header */}
+        <div className="text-center max-w-2xl mx-auto mb-14 sm:mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-4 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-[#444C3D]" />
           Verified Stakeholder Perspectives
@@ -430,6 +437,7 @@ export function Reviews3DSection() {
           • Real-time audit logs cryptographically verified under AICTE SIH26265 Protocol •
         </p>
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 }

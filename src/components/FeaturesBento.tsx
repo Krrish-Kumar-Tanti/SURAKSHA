@@ -12,11 +12,18 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import { AnimatedHeading } from './AnimatedHeading';
+import { BotanicalBranch } from './BotanicalBranch';
 
 export function FeaturesBento() {
   return (
-    <section className="py-24 px-6 lg:px-10 max-w-[1376px] mx-auto relative z-10">
-      <div className="text-center max-w-2xl mx-auto mb-16">
+    <section className="py-20 relative z-10">
+      {/* Full-width Botanical Vine divider */}
+      <div className="w-full overflow-hidden mb-10 opacity-85">
+        <BotanicalBranch className="w-full text-[#444C3D]" />
+      </div>
+
+      <div className="max-w-[1376px] mx-auto px-6 lg:px-10">
+        <div className="text-center max-w-2xl mx-auto mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-4">
           Security-deposit workflows
         </div>
@@ -292,6 +299,7 @@ export function FeaturesBento() {
         </div>
 
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 }
