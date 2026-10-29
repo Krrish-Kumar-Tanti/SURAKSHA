@@ -34,8 +34,3 @@ class PledgeEdge(Base):
         foreign_keys=[from_instrument_id],
         back_populates="pledge_edges_from",
     )
-    to_instrument = relationship(
-        "Instrument",
-        foreign_keys=[to_entity_id],
-        back_populates="pledge_edges_to",
-    )

@@ -74,3 +74,19 @@ class InstrumentProvenanceResponse(BaseModel):
     verification_status: str
     fields: List[Dict[str, Any]]
     findings: List[Dict[str, Any]]
+
+
+class DocumentUploadResponse(BaseModel):
+    id: str
+    instrument_id: str
+    file_name: str
+    sha256: str
+    size_bytes: int
+    ocr_status: str
+
+
+class DocumentExtractionResponse(BaseModel):
+    instrument_id: str
+    document_id: str
+    ocr_status: str
+    fields: List[Dict[str, Any]]

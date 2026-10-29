@@ -29,3 +29,5 @@ class Programme(Base):
     )
 
     institution = relationship("Institution", back_populates="programmes")
+    instruments = relationship("Instrument", back_populates="programme")
+    requirements = relationship("Requirement", back_populates="programme")

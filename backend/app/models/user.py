@@ -27,4 +27,21 @@ class User(Base):
         ),
     )
 
-    institution = relationship("Institution", back_populates="users", uselist=False)
+    institution = relationship(
+        "Institution",
+        primaryjoin="foreign(User.institution_id) == Institution.id",
+        back_populates="users",
+        uselist=False,
+    )
+    uploaded_documents = relationship("Document", back_populates="uploader")
+    bank_verifications_recorded = relationship(
+        "BankVerification", back_populates="officer"
+    )
+    findings_actor = relationship("Finding", back_populates="actor")
+    obligations_created = relationship("Obligation", back_populates="owner")
+    release_requests_created = relationship(
+        "ReleaseRequest",
+        back_populates="requester",
+        foreign_keys="ReleaseRequest.requested_by",
+    )
+    clearances_verified = relationship("Clearance", back_populates="verifier")

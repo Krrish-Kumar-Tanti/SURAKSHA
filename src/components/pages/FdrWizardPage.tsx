@@ -13,7 +13,13 @@ import {
   FileText
 } from 'lucide-react';
 import { AnimatedHeading } from '../AnimatedHeading';
-import { calculatePolicyDeposit } from '../../lib/api';
+import {
+  calculatePolicyDeposit,
+  createFdrInstrument,
+  DocumentExtraction,
+  extractFdrDocument,
+  uploadFdrDocument,
+} from '../../lib/api';
 
 interface FdrWizardPageProps {
   onNavigate: (screen: string) => void;
@@ -23,6 +29,7 @@ interface FdrWizardPageProps {
 export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: FdrWizardPageProps) {
   const [step, setStep] = useState(1);
   const [bankName, setBankName] = useState('State Bank of India');
+  const [branch, setBranch] = useState('Pune Camp');
   const [ifsc, setIfsc] = useState('SBIN0001482');
   const [fdrNumber, setFdrNumber] = useState('FDR-SBI-2026-9921');
   const [depositAmount, setDepositAmount] = useState('3500000'); // ₹35 Lakhs
@@ -36,6 +43,10 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
   const [generatedHash, setGeneratedHash] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdInstrumentId, setCreatedInstrumentId] = useState<string | null>(null);
+  const [uploadedDocumentId, setUploadedDocumentId] = useState<string | null>(null);
+  const [ocrResult, setOcrResult] = useState<DocumentExtraction | null>(null);
 
   // File Upload Handlers
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -49,8 +60,8 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!/\.(pdf|png|jpe?g|tiff?)$/i.test(file.name)) {
-      setFormError('Choose a PDF, PNG, JPG, or TIFF file.');
+    if (!/\.(pdf|png|jpe?g)$/i.test(file.name)) {
+      setFormError('Choose a PDF, PNG, or JPG file.');
       e.target.value = '';
       return;
     }
@@ -64,6 +75,8 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
     setSelectedFile(file);
     setUploadDone(false);
     setGeneratedHash('');
+    setUploadedDocumentId(null);
+    setOcrResult(null);
     try {
       const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
       const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -112,6 +125,60 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
     }
     setFormError('');
     setStep(3);
+  };
+
+  const handleUploadAndRead = async () => {
+    if (!selectedFile || !uploadDone) {
+      setFormError('Select a valid receipt file before starting OCR.');
+      setStep(3);
+      return;
+    }
+    setIsSubmitting(true);
+    setFormError('');
+    try {
+      let instrumentId = createdInstrumentId;
+      if (!instrumentId) {
+        const issue = new Date(`${issueDate}T00:00:00`);
+        const maturity = new Date(`${maturityDate}T00:00:00`);
+        const result = await createFdrInstrument({
+          institution_id: '11111111-1111-4111-8111-111111111111',
+          programme_id: '11111111-1111-4111-8111-111111111101',
+          type: 'FDR',
+          instrument_number: fdrNumber.trim(),
+          bank_name: bankName,
+          branch: branch.trim(),
+          ifsc: ifsc.trim().toUpperCase(),
+          amount_paise: Math.round(Number(depositAmount) * 100),
+          issue_date: issue.toISOString(),
+          maturity_date: maturity.toISOString(),
+          tenure_months: Number(tenorYears) * 12,
+          interest_rate: null,
+          depositor_name: 'Sanjeevani Education Trust',
+          lien_in_favour: 'AICTE',
+        });
+        instrumentId = result.id;
+        setCreatedInstrumentId(instrumentId);
+      }
+
+      let documentId = uploadedDocumentId;
+      if (!documentId) {
+        const uploaded = await uploadFdrDocument(instrumentId, selectedFile);
+        documentId = uploaded.id;
+        setUploadedDocumentId(documentId);
+      }
+
+      const extraction = await extractFdrDocument(instrumentId, documentId);
+      setOcrResult(extraction);
+      if (extraction.ocr_status === 'NEEDS_REVIEW' || extraction.fields.length === 0) {
+        setFormError('The document was stored securely, but OCR could not read any supported fields. Check the document and retry with a clearer scan.');
+        return;
+      }
+      setIsSubmitted(true);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Document upload or OCR failed. Please retry.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -205,6 +272,15 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                     value={ifsc}
                     onChange={(e) => setIfsc(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-lg bg-[#FAF8F5] border border-[#DDD6C9] text-sm text-[#1C1D1A] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-[#55544E] mb-1.5">Bank branch</label>
+                  <input
+                    type="text"
+                    value={branch}
+                    onChange={(e) => setBranch(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg bg-[#FAF8F5] border border-[#DDD6C9] text-sm text-[#1C1D1A]"
                   />
                 </div>
               </div>
@@ -324,7 +400,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                   Step 3: Select a receipt file
                 </h3>
                 <p className="text-xs text-[#55544E] mt-1 font-mono">
-                  Select the receipt file to calculate its SHA-256 fingerprint.
+                  Select a receipt file. It will be uploaded and read when you submit for OCR.
                 </p>
               </div>
 
@@ -333,7 +409,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
-                accept=".pdf,.png,.jpg,.jpeg,.tiff"
+                accept=".pdf,.png,.jpg,.jpeg"
                 className="hidden"
               />
 
@@ -346,7 +422,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
               >
                 <Upload className={`w-8 h-8 mx-auto mb-2 ${uploadDone ? 'text-emerald-600' : 'text-[#706E66]'}`} />
                 <div className="font-semibold text-sm text-[#1C1D1A]">
-                  {selectedFile ? `FDR Certificate Selected (${selectedFile.name})` : 'Click to Upload FDR Certificate (PDF / TIFF / JPG)'}
+                  {selectedFile ? `FDR Certificate Selected (${selectedFile.name})` : 'Click to Upload FDR Certificate (PDF / PNG / JPG)'}
                 </div>
                 <div className="text-xs text-[#706E66] mt-1 font-mono">
                   {uploadDone ? 'File fingerprint calculated.' : 'Maximum file size: 25 MB'}
@@ -360,7 +436,7 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                     {generatedHash}
                   </div>
                   <div className="text-xs text-[#55544E]">
-                    The fingerprint identifies the selected file.
+                    The file will be encrypted in backend storage before OCR processing.
                   </div>
                 </div>
               )}
@@ -477,13 +553,22 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
                 >
                   ← Back
                 </button>
-                <button
-                  onClick={() => setIsSubmitted(true)}
-                  disabled={!isCompliant}
-                  className="px-6 py-2.5 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-40"
-                >
-                  Create demo preview <ArrowRight className="w-4 h-4" />
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={() => setIsSubmitted(true)}
+                    disabled={!isCompliant}
+                    className="px-5 py-2.5 rounded-lg border border-[#DDD6C9] text-xs font-medium text-[#55544E] cursor-pointer disabled:opacity-40"
+                  >
+                    Preview only (no upload)
+                  </button>
+                  <button
+                    onClick={handleUploadAndRead}
+                    disabled={!isCompliant || !uploadDone || isSubmitting}
+                    className="px-6 py-2.5 rounded-lg bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-40"
+                  >
+                    {isSubmitting ? 'Uploading and reading…' : 'Upload and run OCR'} <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -498,15 +583,33 @@ export function FdrWizardPage({ onNavigate, currentRole = 'INSTITUTION_USER' }: 
 
           <div>
             <span className="text-xs font-mono text-[#444C3D] font-bold bg-[#EFEAE1] border border-[#DDD6C9] px-3 py-1 rounded-full">
-              Submission preview
+              {ocrResult ? 'Document uploaded and OCR processed' : 'Local preview only'}
             </span>
             <h3 className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif'] mt-3">
               Review complete
             </h3>
             <p className="text-sm text-[#55544E] max-w-lg mx-auto mt-2">
-              Your entered details are ready for review.
+              {ocrResult
+                ? 'The encrypted document is stored and the extracted fields are ready for review.'
+                : 'This preview did not upload the selected document or run OCR.'}
             </p>
           </div>
+
+          {ocrResult && (
+            <div className="max-w-2xl mx-auto p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] text-left space-y-2">
+              <div className="text-xs font-mono font-bold text-[#444C3D]">
+                OCR results — {ocrResult.ocr_status.replace('_', ' ')}
+              </div>
+              {ocrResult.fields.map((field) => (
+                <div key={field.field_name} className="flex justify-between gap-4 text-xs border-t border-[#E5DFD5] pt-2">
+                  <span className="text-[#706E66]">{field.field_name.replace('_', ' ')}</span>
+                  <span className="text-right text-[#1C1D1A]">
+                    {field.document_value} <span className="text-[#706E66]">({Math.round(field.confidence * 100)}%)</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="max-w-md mx-auto p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] text-left text-xs space-y-1.5 font-mono">
             <div className="flex justify-between">

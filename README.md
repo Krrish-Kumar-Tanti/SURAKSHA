@@ -196,14 +196,21 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Initialize all 18 database tables
+# Configure environment variables & encryption key
+cp .env.example .env
+# Set GEMINI_API_KEY and generate DOCUMENT_MASTER_KEY in backend/.env:
+# python -c "import base64,secrets; print(base64.b64encode(secrets.token_bytes(32)).decode())"
+
+# Initialize database tables
 python init_db.py
 
-# Start FastAPI server with live reload
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+# Start FastAPI server
+python run.py  # or: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 > API will be running at **http://localhost:8000**  
-> Interactive Docs available at **http://localhost:8000/docs**
+> Live Backend Health: **[http://localhost:8000/health](http://localhost:8000/health)**  
+> Interactive Docs available at **http://localhost:8000/docs**  
+> *Note:* FDR certificates uploaded in the registrar wizard are encrypted at rest with `DOCUMENT_MASTER_KEY` and analyzed via Gemini OCR.
 
 ---
 
