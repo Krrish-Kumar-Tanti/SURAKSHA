@@ -1,14 +1,16 @@
-export type AppScreen = 'home' | 'portfolio' | 'wizard' | 'provenance' | 'policy' | 'release' | 'audit' | 'admin';
+export type AppScreen = 'home' | 'guide' | 'howItWorks' | 'portfolio' | 'wizard' | 'provenance' | 'policy' | 'release' | 'audit' | 'admin';
 export type CockpitTab = 'portfolio' | 'provenance' | 'calculator' | 'graph';
 
+const commonScreens: readonly AppScreen[] = ['home', 'guide', 'howItWorks'];
+
 const roleScreens: Record<string, readonly AppScreen[]> = {
-  INSTITUTION_USER: ['home', 'portfolio', 'wizard', 'provenance', 'policy', 'release'],
-  DEALING_OFFICER: ['home', 'portfolio', 'provenance', 'policy', 'release', 'audit'],
-  DIRECTOR_RB: ['home', 'portfolio', 'provenance', 'policy', 'release', 'audit'],
-  COMPETENT_AUTHORITY: ['home', 'portfolio', 'provenance', 'policy', 'release', 'audit'],
-  ACCOUNTS: ['home', 'release', 'audit'],
-  AUDITOR: ['home', 'portfolio', 'provenance', 'policy', 'release', 'audit'],
-  ADMIN: ['admin', 'home', 'portfolio', 'audit'],
+  INSTITUTION_USER: [...commonScreens, 'portfolio', 'wizard', 'provenance', 'policy', 'release'],
+  DEALING_OFFICER: [...commonScreens, 'portfolio', 'provenance', 'policy', 'release', 'audit'],
+  DIRECTOR_RB: [...commonScreens, 'portfolio', 'provenance', 'policy', 'release', 'audit'],
+  COMPETENT_AUTHORITY: [...commonScreens, 'portfolio', 'provenance', 'policy', 'release', 'audit'],
+  ACCOUNTS: [...commonScreens, 'release', 'audit'],
+  AUDITOR: [...commonScreens, 'portfolio', 'provenance', 'policy', 'release', 'audit'],
+  ADMIN: [...commonScreens, 'admin', 'portfolio', 'audit'],
 };
 
 const defaultScreens: Record<string, AppScreen> = {

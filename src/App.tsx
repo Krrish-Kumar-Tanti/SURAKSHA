@@ -13,7 +13,9 @@ import {
   FileCheck, 
   Activity, 
   Layers, 
-  ChevronRight 
+  ChevronRight,
+  BookOpen,
+  Cpu
 } from 'lucide-react';
 
 import { Breadcrumb } from './components/Breadcrumb';
@@ -36,18 +38,22 @@ import { PolicyTracePage } from './components/pages/PolicyTracePage';
 import { ReleaseGraphPage } from './components/pages/ReleaseGraphPage';
 import { AuditChainPage } from './components/pages/AuditChainPage';
 import { AdminPage } from './components/pages/AdminPage';
+import { GuidePage } from './components/pages/GuidePage';
+import { HowItWorksPage } from './components/pages/HowItWorksPage';
 import { HeroIntroSplash } from './components/HeroIntroSplash';
 import { getSavedSession, clearSession, saveSession, UserSession } from './lib/api';
 import { AppScreen, getDefaultScreen, isScreenAllowed } from './lib/roleAccess';
+import { I18nProvider, useLanguage } from './lib/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function App() {
+function AppMain() {
   const [userSession, setUserSession] = useState<UserSession | null>(getSavedSession());
   const [currentRole, setCurrentRole] = useState(userSession?.role || 'DEALING_OFFICER');
   const [activeScreen, setActiveScreen] = useState<string>(userSession ? getDefaultScreen(userSession.role) : 'home');
   const [showIntro, setShowIntro] = useState(true);
   const [navigationHistory, setNavigationHistory] = useState<readonly string[]>([]);
+  const { language, t } = useLanguage();
 
   const isAuthenticated = !!userSession;
 
@@ -96,19 +102,17 @@ export default function App() {
       setNavigationHistory((prev) => [...prev, 'home']);
       return;
     }
-    if (!isAuthenticated && screen !== 'home') {
+    if (!isAuthenticated && screen !== 'home' && screen !== 'guide' && screen !== 'howItWorks') {
       setActiveScreen('login');
       setNavigationHistory(['home']);
       return;
     }
-    if (screen === 'home' || isScreenAllowed(currentRole, screen)) {
+    if (screen === 'home' || screen === 'guide' || screen === 'howItWorks' || isScreenAllowed(currentRole, screen)) {
       setNavigationHistory((prev) => {
-        // If navigating back, trim history up to the target screen
         const targetIndex = prev.lastIndexOf(screen);
         if (targetIndex >= 0) {
           return prev.slice(0, targetIndex);
         }
-        // Forward navigation: append current screen to history
         return [...prev, activeScreen as string];
       });
       setActiveScreen(screen);
@@ -117,9 +121,11 @@ export default function App() {
 
   const visibleScreen: AppScreen | 'login' = activeScreen === 'login'
     ? 'login'
-    : isAuthenticated && !isScreenAllowed(currentRole, activeScreen)
-      ? getDefaultScreen(currentRole)
-      : isAuthenticated ? activeScreen as AppScreen : 'home';
+    : (activeScreen === 'guide' || activeScreen === 'howItWorks' || activeScreen === 'home')
+      ? activeScreen as AppScreen
+      : isAuthenticated && !isScreenAllowed(currentRole, activeScreen)
+        ? getDefaultScreen(currentRole)
+        : isAuthenticated ? activeScreen as AppScreen : 'home';
 
   // Global Lenis Smooth Scroll Setup connected to GSAP ScrollTrigger
   useEffect(() => {
@@ -175,7 +181,7 @@ export default function App() {
       {/* Top Scroll Progress Line */}
       <div id="scroll-progress" className="fixed top-0 left-0 h-[2.5px] bg-[#444C3D] z-50 transition-all duration-75" />
 
-      {/* Navbar with Role Switcher */}
+      {/* Navbar with Role Switcher & Language Toggle */}
       <Navbar
         currentRole={currentRole}
         onRoleChange={handleDemoRoleChange}
@@ -186,6 +192,39 @@ export default function App() {
         onLoginClick={() => setActiveScreen('login')}
         onLogoutClick={handleLogout}
       />
+
+      {/* GUIDE SCREEN (Persona Guide for 7 roles) */}
+      {visibleScreen === 'guide' && (
+        <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
+          <GuidePage 
+            currentRole={currentRole} 
+            onRoleChange={handleDemoRoleChange} 
+            onNavigate={navigateToScreen} 
+          />
+          <Footer currentRole={currentRole} />
+        </>
+      )}
+
+      {/* HOW IT WORKS SCREEN (Architectural Blueprint for all visitors) */}
+      {visibleScreen === 'howItWorks' && (
+        <>
+          <Breadcrumb
+            history={navigationHistory}
+            currentScreen={activeScreen as string}
+            onGoBack={(screen) => navigateToScreen(screen)}
+          />
+          <HowItWorksPage 
+            onNavigate={navigateToScreen} 
+            currentRole={currentRole} 
+          />
+          <Footer currentRole={currentRole} />
+        </>
+      )}
 
       {visibleScreen === 'admin' && (
         <>
@@ -285,54 +324,65 @@ export default function App() {
                 <div className="space-y-1">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFEAE1] border border-[#DDD6C9] text-[#444C3D] text-xs font-mono font-medium">
                     <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                    Signed in as {currentRole}
+                    {t('cockpit.signedInAs')} {t(`role.${currentRole}`, currentRole)}
                   </div>
                   <h2 className="text-3xl font-normal text-[#1C1D1A] font-['Instrument_Serif'] pt-1">
-                    Your SURAKSHA workspace
+                    {t('cockpit.workspaceTitle')}
                   </h2>
                   <p className="text-xs text-[#55544E] font-mono">
-                    Signed in as <strong className="text-[#1C1D1A]">{userSession?.displayName}</strong> · Region: {userSession?.regionCode || 'WRO'}
-                    {isScreenAllowed(currentRole, 'audit') && ' · Sample audit events'}
+                    {t('cockpit.signedInAs')} <strong className="text-[#1C1D1A]">{userSession?.displayName}</strong> · {t('cockpit.region')}: {userSession?.regionCode || 'WRO'}
                   </p>
                 </div>
 
                 {/* Quick Navigation Action Pills */}
                 <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => navigateToScreen('guide')}
+                    className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-[#444C3D]" /> {t('nav.guide')}
+                  </button>
+                  <button
+                    onClick={() => navigateToScreen('howItWorks')}
+                    className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Cpu className="w-3.5 h-3.5 text-[#444C3D]" /> {t('nav.howItWorks')}
+                  </button>
                   {isScreenAllowed(currentRole, 'portfolio') && <button
                     onClick={() => navigateToScreen('portfolio')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <Building2 className="w-3.5 h-3.5 text-[#444C3D]" /> Portfolio Table
+                    <Building2 className="w-3.5 h-3.5 text-[#444C3D]" /> {t('cockpit.portfolioTable')}
                   </button>}
                   {isScreenAllowed(currentRole, 'wizard') && <button
                     onClick={() => navigateToScreen('wizard')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <FileCheck className="w-3.5 h-3.5 text-[#444C3D]" /> Submit FDR
+                    <FileCheck className="w-3.5 h-3.5 text-[#444C3D]" /> {t('cockpit.submitFdr')}
                   </button>}
                   {isScreenAllowed(currentRole, 'provenance') && <button
                     onClick={() => navigateToScreen('provenance')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <Activity className="w-3.5 h-3.5 text-[#444C3D]" /> 3-Way Provenance
+                    <Activity className="w-3.5 h-3.5 text-[#444C3D]" /> {t('cockpit.threeWayProv')}
                   </button>}
                   {isScreenAllowed(currentRole, 'policy') && <button
                     onClick={() => navigateToScreen('policy')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <Scale className="w-3.5 h-3.5 text-[#444C3D]" /> Simulate APH Calculation
+                    <Scale className="w-3.5 h-3.5 text-[#444C3D]" /> {t('cockpit.simulatePolicy')}
                   </button>}
                   {isScreenAllowed(currentRole, 'release') && <button
                     onClick={() => navigateToScreen('release')}
                     className="px-3.5 py-2 rounded-xl bg-[#444C3D] hover:bg-[#353C2F] text-white text-xs font-medium inline-flex items-center gap-1.5 transition shadow-sm cursor-pointer"
                   >
-                    {currentRole === 'ACCOUNTS' ? 'Release Letters' : 'Release Graph DAG'} <ChevronRight className="w-3.5 h-3.5" />
+                    {currentRole === 'ACCOUNTS' ? t('nav.releaseLetters') : t('cockpit.releaseGraph')} <ChevronRight className="w-3.5 h-3.5" />
                   </button>}
                   {isScreenAllowed(currentRole, 'audit') && <button
                     onClick={() => navigateToScreen('audit')}
                     className="px-3.5 py-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6C9] hover:border-[#444C3D] text-[#1C1D1A] text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#444C3D]" /> Audit Chain
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#444C3D]" /> {t('cockpit.auditChain')}
                   </button>}
                 </div>
               </div>
@@ -370,39 +420,114 @@ export default function App() {
 
                 {/* Hero Content */}
                 <div className="relative z-10 max-w-[1440px] mx-auto w-full pointer-events-none">
-                  <div className="max-w-[620px] lg:max-w-[680px] text-left pointer-events-auto">
+                  <div className="max-w-[620px] lg:max-w-[720px] text-left pointer-events-auto">
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#DDD6C9] bg-[#EFEAE1] text-[#444C3D] text-xs font-mono font-medium mb-8 shadow-sm">
                       <span className="w-2 h-2 rounded-full bg-[#444C3D] animate-pulse" />
-                      SIH26265 · AICTE Approval Process Handbook (APH 2024–27)
+                      {t('hero.badge')}
                     </div>
 
                     <AnimatedHeading
                       as="h1"
-                      className="text-[clamp(2.6rem,5.2vw,4.8rem)] font-normal leading-[1.06] tracking-[-0.02em] text-[#1C1D1A] mb-6"
+                      className="text-[clamp(2.5rem,5vw,4.5rem)] font-normal leading-[1.06] tracking-[-0.02em] text-[#1C1D1A] mb-6"
                     >
-                      ( AICTE Security Deposit *Control Tower* )
+                      {t('hero.title')}
                     </AnimatedHeading>
 
-                    <p className="text-base sm:text-lg md:text-xl text-[#55544E] max-w-[580px] mb-10 leading-relaxed font-normal">
-                      Security-deposit workflows for institutions and AICTE staff, including submission, review, policy estimates, and release.
+                    <p className="text-base sm:text-lg md:text-xl text-[#55544E] max-w-[620px] mb-8 leading-relaxed font-normal">
+                      {t('hero.subtitle')}
                     </p>
 
-                    <div className="flex flex-wrap items-center justify-start gap-4">
+                    {/* Prominent Action Buttons: Sign In, How It Works, Guide */}
+                    <div className="flex flex-wrap items-center justify-start gap-3">
                       <button
                         onClick={() => setActiveScreen('login')}
-                        className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-[#444C3D] hover:bg-[#353C2F] text-white rounded-lg font-medium text-[1rem] tracking-[-0.01em] shadow-sm hover:-translate-y-0.5 transition-all cursor-pointer"
+                        className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#444C3D] hover:bg-[#353C2F] text-white rounded-xl font-medium text-sm tracking-[-0.01em] shadow-sm hover:-translate-y-0.5 transition-all cursor-pointer"
                       >
                         <Lock className="w-4 h-4" />
-                        Sign In to Control Tower <span>→</span>
+                        {t('hero.signInBtn')} <span>→</span>
                       </button>
 
-                      <a
-                        href="#pillars"
-                        className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#1C1D1A] rounded-lg font-medium text-sm border border-[#DDD6C9] transition-all cursor-pointer"
+                      <button
+                        onClick={() => navigateToScreen('howItWorks')}
+                        className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#FAF8F5] hover:bg-[#EFEAE1] text-[#1C1D1A] rounded-xl font-medium text-sm border border-[#DDD6C9] transition-all cursor-pointer shadow-2xs"
                       >
-                        Explore Regulatory Pillars <ArrowRight className="w-4 h-4 text-[#444C3D]" />
-                      </a>
+                        <Cpu className="w-4 h-4 text-[#444C3D]" />
+                        {t('hero.howItWorksBtn')}
+                      </button>
+
+                      <button
+                        onClick={() => navigateToScreen('guide')}
+                        className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#ECE7DE] hover:bg-[#E3DDCF] text-[#1C1D1A] rounded-xl font-medium text-sm border border-[#DDD6C9] transition-all cursor-pointer"
+                      >
+                        <BookOpen className="w-4 h-4 text-[#444C3D]" />
+                        {t('hero.guideBtn')}
+                      </button>
                     </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Three Hub Quick Exploration Banner */}
+              <section className="py-8 px-6 bg-white border-y border-[#E5DFD5]">
+                <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div 
+                    onClick={() => navigateToScreen('home')}
+                    className="p-6 rounded-2xl bg-[#FAF8F5] border border-[#E5DFD5] hover:border-[#444C3D] transition cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-[#444C3D] uppercase tracking-wider">
+                        01 · {language === 'hi' ? 'अवलोकन' : 'Overview'}
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-[#706E66] group-hover:translate-x-1 transition-transform" />
+                    </div>
+                    <h3 className="text-xl font-['Instrument_Serif'] mt-2 text-[#1C1D1A]">
+                      {language === 'hi' ? 'सार्वभौम नियंत्रण टॉवर' : 'Sovereign Control Tower'}
+                    </h3>
+                    <p className="text-xs text-[#55544E] mt-1.5 leading-relaxed">
+                      {language === 'hi'
+                        ? 'संपूर्ण संस्थागत संविभाग, लाइव परिपक्वता घड़ियां एवं ऑडिट लेज़र।'
+                        : 'Explore portfolio metrics, maturity count-downs, and cryptographic governance.'}
+                    </p>
+                  </div>
+
+                  <div 
+                    onClick={() => navigateToScreen('guide')}
+                    className="p-6 rounded-2xl bg-[#FAF8F5] border border-[#E5DFD5] hover:border-[#444C3D] transition cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-[#444C3D] uppercase tracking-wider">
+                        02 · {language === 'hi' ? 'भूमिका गाइड' : 'Persona Guide'}
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-[#706E66] group-hover:translate-x-1 transition-transform" />
+                    </div>
+                    <h3 className="text-xl font-['Instrument_Serif'] mt-2 text-[#1C1D1A]">
+                      {language === 'hi' ? '7 अधिकृत संवर्ग' : '7 Authorized Personas'}
+                    </h3>
+                    <p className="text-xs text-[#55544E] mt-1.5 leading-relaxed">
+                      {language === 'hi'
+                        ? 'कुलसचिव, संवीक्षक, क्षेत्रीय निदेशक, सक्षम प्राधिकारी, लेखा, CAG एवं व्यवस्थापक।'
+                        : 'Step-by-step duties and statutory boundaries for each login role.'}
+                    </p>
+                  </div>
+
+                  <div 
+                    onClick={() => navigateToScreen('howItWorks')}
+                    className="p-6 rounded-2xl bg-[#FAF8F5] border border-[#E5DFD5] hover:border-[#444C3D] transition cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-[#444C3D] uppercase tracking-wider">
+                        03 · {language === 'hi' ? 'कार्यप्रणाली' : 'How It Works'}
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-[#706E66] group-hover:translate-x-1 transition-transform" />
+                    </div>
+                    <h3 className="text-xl font-['Instrument_Serif'] mt-2 text-[#1C1D1A]">
+                      {language === 'hi' ? '6 प्रमुख डोमेन वास्तुकला' : '6 Core System Domains'}
+                    </h3>
+                    <p className="text-xs text-[#55544E] mt-1.5 leading-relaxed">
+                      {language === 'hi'
+                        ? 'इन-ब्राउज़र OCR, त्रिपक्षीय मिलान, तालिका 1.4 नीति, धारा 6.46 DAG एवं संप्रभु वॉल्ट।'
+                        : 'Technical teardown of in-browser OCR, 3-way reconciliation, policy, and release DAG.'}
+                    </p>
                   </div>
                 </div>
               </section>
@@ -410,10 +535,19 @@ export default function App() {
               {/* Participating Banks Ticker */}
               <section className="py-10 px-6 bg-[#EFEAE1]/60 relative z-10 border-y border-[#E5DFD5]">
                 <div className="text-center text-[11px] font-mono uppercase tracking-[0.15em] mb-5 text-[#706E66]">
-                  Simulated Banking & Statutory Desk Adapters
+                  {t('hero.banksHeader')}
                 </div>
                 <div className="max-w-[1200px] mx-auto flex items-center justify-center gap-8 md:gap-14 flex-wrap opacity-80 hover:opacity-100 transition-opacity">
-                  {['State Bank of India', 'Punjab National Bank', 'Canara Bank', 'HDFC Bank', 'ICICI Bank', 'Bank of Baroda', 'PGRC Student Desk', 'Central Vigilance Bureau'].map((name) => (
+                  {[
+                    language === 'hi' ? 'भारतीय स्टेट बैंक' : 'State Bank of India',
+                    language === 'hi' ? 'पंजाब नेशनल बैंक' : 'Punjab National Bank',
+                    language === 'hi' ? 'केनरा बैंक' : 'Canara Bank',
+                    language === 'hi' ? 'एचडीएफसी बैंक' : 'HDFC Bank',
+                    language === 'hi' ? 'आईसीआईसीआई बैंक' : 'ICICI Bank',
+                    language === 'hi' ? 'बैंक ऑफ बड़ौदा' : 'Bank of Baroda',
+                    language === 'hi' ? 'PGRC छात्र शिकायत सेल' : 'PGRC Student Desk',
+                    language === 'hi' ? 'केंद्रीय सतर्कता ब्यूरो (CVO)' : 'Central Vigilance Bureau',
+                  ].map((name) => (
                     <span key={name} className="font-semibold text-xs sm:text-sm text-[#444C3D] tracking-tight font-mono">
                       {name}
                     </span>
@@ -439,11 +573,19 @@ export default function App() {
               <Reviews3DSection />
 
               {/* Official AICTE Footer */}
-              <Footer />
+              <Footer currentRole={currentRole} />
             </>
           )}
         </>
       )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <I18nProvider>
+      <AppMain />
+    </I18nProvider>
   );
 }
