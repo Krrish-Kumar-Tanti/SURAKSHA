@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SURAKSHA • SIH 2026 Presentation Deck (Problem Statement 26265)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sih-blue: #0077B6;
+      --sih-dark-blue: #023E8A;
+      --sih-light-blue: #EBF5FB;
+      --sih-orange: #F37021;
+      --sih-green: #2B9348;
+      --sih-cyan: #0096C7;
+      --bg-white: #FFFFFF;
+      --card-white: #FFFFFF;
+      --text-dark: #1E293B;
+      --text-muted: #475569;
+      --text-soft: #64748B;
+      --border-gray: #CBD5E1;
+      --border-light: #E2E8F0;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 999px;
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
+      --shadow-card: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 10px -3px rgba(15, 23, 42, 0.04);
+      --shadow-float: 0 15px 35px -5px rgba(2, 62, 138, 0.12), 0 5px 15px rgba(0,0,0,0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0B0F19;
+      color: var(--text-dark);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 16px 0;
+    }
+
+    /* Fixed Deck Navigation Bar */
+    .deck-nav {
+      position: fixed;
+      top: 14px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #F8FAFC;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .nav-btn.active {
+      background: #0284C7;
+      color: #FFFFFF;
+      border-color: #38BDF8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+    }
+
+    .nav-arrow {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #FFFFFF;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .nav-arrow:hover {
+      background: #0284C7;
+    }
+
+    /* 1920x1080 Aspect Presentation Canvas */
+    .deck-container {
+      width: 1920px;
+      height: 1080px;
+      position: relative;
+      background: var(--bg-white);
+      overflow: hidden;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.55);
+      transform-origin: top center;
+    }
+
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 40px 64px 0;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      background: #FFFFFF;
+      transition: opacity 0.25s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* ===================================================
+       OFFICIAL PRESENTATION HEADER & FOOTER
+       =================================================== */
+    .ppt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      min-height: 80px;
+      padding-bottom: 12px;
+    }
+
+    .team-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 130px;
+      height: 48px;
+      border-radius: var(--radius-full);
+      border: 2px solid #5B4E7A;
+      font-size: 19px;
+      font-weight: 800;
+      color: #332752;
+      background: #FFFFFF;
+      letter-spacing: 0.04em;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ppt-title-center {
+      text-align: center;
+      flex: 1;
+      padding: 0 24px;
+    }
+
+    .ppt-main-heading {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: 0.01em;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .ppt-subtitle-sub {
+      font-size: 19px;
+      color: #334155;
+      font-weight: 600;
+      margin-top: 4px;
+      letter-spacing: 0.01em;
+    }
+
+    .sih-logo-corner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: right;
+    }
+
+    .sih-logo-img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+
+    .sih-logo-text {
+      line-height: 1.15;
+    }
+
+    .sih-logo-text .sih-t1 {
+      font-size: 15px;
+      font-weight: 900;
+      color: #1E293B;
+      letter-spacing: 0.02em;
+    }
+
+    .sih-logo-text .sih-t2 {
+      font-size: 20px;
+      font-weight: 900;
+      color: #1E293B;
+    }
+
+    /* Official Bottom Blue Ribbon Banner */
+    .ppt-bottom-ribbon {
+      width: calc(100% + 128px);
+      margin-left: -64px;
+      background: #0077B6;
+      color: #FFFFFF;
+      padding: 12px 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      box-shadow: 0 -4px 12px rgba(0, 119, 182, 0.2);
+    }
+
+    .slide-page-num {
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    /* ===================================================
+       SLIDE 1: TITLE PAGE (AUTHENTIC PRESENTATION FORMAT)
+       =================================================== */
+    .slide-1-content {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 80px;
+      align-items: center;
+      flex: 1;
+      padding: 30px 40px 60px;
+    }
+
+    .s1-meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .s1-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .s1-meta-label {
+      font-size: 20px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: -0.01em;
+    }
+
+    .s1-meta-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.35;
+    }
+
+    .s1-meta-value.accent {
+      font-weight: 800;
+      color: #0077B6;
+    }
+
+    .s1-visual-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .s1-hex-badge {
+      position: absolute;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(235, 245, 251, 0.85) 0%, rgba(241, 245, 249, 0.3) 70%, transparent 100%);
+      border-radius: 40px;
+      transform: rotate(12deg);
+      border: 3px solid rgba(0, 119, 182, 0.15);
+      z-index: 1;
+    }
+
+    .s1-bulb-graphic {
+      position: relative;
+      z-index: 2;
+      width: 400px;
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===================================================
+       SLIDE 2: PROPOSED SOLUTION (SURAKSHA)
+       =================================================== */
+    .slide-2-content {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 60px;
+      flex: 1;
+      padding: 10px 10px 30px;
+      align-items: start;
+    }
+
+    .s2-left-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .s2-heading-block h3 {
+      font-size: 26px;
+      font-weight: 900;
+      color: #0077B6;
+      border-bottom: 3px solid #0077B6;
+      display: inline-block;
+      padding-bottom: 2px;
+      margin-bottom: 8px;
+    }
+
+    .s2-heading-block .name {
+      font-size: 26px;
+      font-weight: 900;
+      color: #0F172A;
+    }
+
+    .s2-heading-block .tagline {
+      font-size: 16px;
+      color: #475569;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* Clean Linear Process Strip */
+    .s2-pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 6px 0 12px;
+    }
+
+    .s2-pipe-node {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 20px;
+      border-radius: var(--radius-full);
+      border: 2px solid #0284C7;
+      background: #FFFFFF;
+      font-weight: 800;
+      font-size: 15px;
+      color: #0369A1;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.1);
+      letter-spacing: 0.03em;
+    }
+
+    .s2-pipe-arrow {
+      color: #0284C7;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .s2-solve-box h4 {
+      font-size: 22px;
+      font-weight: 900;
+      color: #0077B6;
+      text-decoration: underline;
+      margin-bottom: 8px;
+    }
+
+    .s2-solve-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1E293B;
+    }
+
+    .s2-solve-list li::before {
+      content: "• ";
+      color: #0077B6;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    /* Redesigned 3D Uniqueness Star Diagram (Zero typos) */
+    .uniqueness-diagram-card {
+      margin-top: 10px;
+      position: relative;
+      height: 270px;
+      background: #F8FAFC;
+      border: 2px dashed #CBD5E1;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .u-center-hub {
+      position: absolute;
+      width: 140px;
+      height: 60px;
+      background: #0077B6;
+      color: #FFFFFF;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      box-shadow: 0 10px 25px rgba(0, 119, 182, 0.35);
+      z-index: 5;
+    }
+
+    .u-node {
+      position: absolute;
+      background: #FFFFFF;
+      border: 2px solid #0077B6;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #0F172A;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      z-index: 4;
+      line-height: 1.25;
+    }
+
+    .u-node.n1 { top: 18px; left: 60px; }
+    .u-node.n2 { top: 18px; right: 60px; }
+    .u-node.n3 { top: 105px; right: 20px; }
+    .u-node.n4 { bottom: 20px; right: 50px; }
+    .u-node.n5 { bottom: 20px; left: 80px; }
+    .u-node.n6 { top: 105px; left: 20px; }
+
+    /* SVG Connecting Lines for Uniqueness */
+    .u-svg-canvas {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Right Column: High-Depth HOW IT WORKS Stack */
+    .s2-right-pane {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .s2-how-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: #0077B6;
+      border-bottom: 3px solid #0077B6;
+      display: inline-block;
+      padding-bottom: 2px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .how-step-card {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #FFFFFF;
+      border: 2px solid #0077B6;
+      border-radius: var(--radius-full);
+      padding: 10px 24px;
+      box-shadow: 0 6px 16px rgba(0, 119, 182, 0.08);
+      position: relative;
+    }
+
+    .how-step-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #E0F2FE;
+      color: #0284C7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .how-step-body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .how-step-name {
+      font-size: 16px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: 0.03em;
+    }
+
+    .how-step-desc {
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748B;
+    }
+
+    /* ===================================================
+       SLIDE 3: TECHNICAL APPROACH (3 UPRIGHT CARDS)
+       =================================================== */
+    .slide-3-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 36px;
+      flex: 1;
+      padding: 10px 0 24px;
+    }
+
+    .s3-pillar-box {
+      background: #FFFFFF;
+      border: 2.5px solid #0F172A;
+      border-radius: 28px;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+
+    .s3-box-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 16px;
+      margin-bottom: 22px;
+    }
+
+    .s3-header-icon {
+      font-size: 38px;
+      margin-bottom: 8px;
+    }
+
+    .s3-box-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      text-decoration: underline;
+    }
+
+    .s3-box-sub {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0077B6;
+      margin-top: 4px;
+    }
+
+    .s3-items-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      flex: 1;
+    }
+
+    .s3-item-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .s3-row-badge {
+      font-size: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .s3-row-text h5 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0F172A;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+    }
+
+    .s3-row-text ul {
+      list-style: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .s3-row-text ul li::before {
+      content: "• ";
+      color: #0077B6;
+      font-weight: 900;
+    }
+
+    /* Bottom Tech Stack Bar */
+    .s3-tech-stack-strip {
+      background: #E0F2FE;
+      border: 2px solid #38BDF8;
+      border-radius: var(--radius-full);
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.1);
+    }
+
+    .s3-tech-label {
+      font-size: 20px;
+      font-weight: 900;
+      color: #0C4A6E;
+      letter-spacing: 0.05em;
+    }
+
+    .s3-tech-chips {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .s3-chip {
+      background: #FFFFFF;
+      border: 1.5px solid #BAE6FD;
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 800;
+      color: #0369A1;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ===================================================
+       SLIDE 4: FEASIBILITY & VIABILITY (3 COLORED TABS)
+       =================================================== */
+    .slide-4-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 36px;
+      flex: 1;
+      padding: 20px 0 30px;
+    }
+
+    .s4-card-col {
+      background: #FFFFFF;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      border: 2px solid #E2E8F0;
+    }
+
+    .s4-tab-header {
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #FFFFFF;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .tab-orange { background: #EA580C; }
+    .tab-blue { background: #0284C7; }
+    .tab-green { background: #16A34A; }
+
+    .s4-body-container {
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    .col-orange-body { background: #FFF7ED; }
+    .col-blue-body { background: #F0F9FF; }
+    .col-green-body { background: #F0FDF4; }
+
+    .s4-feature-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .s4-feat-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .s4-feat-info h5 {
+      font-size: 17px;
+      font-weight: 900;
+      color: #0F172A;
+      margin-bottom: 4px;
+    }
+
+    .s4-feat-info p {
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    /* ===================================================
+       SLIDE 5: IMPACT AND BENEFITS (NO TIN CANS, NO COP ICONS)
+       =================================================== */
+    .slide-5-grid {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 48px;
+      flex: 1;
+      padding: 10px 0 26px;
+    }
+
+    .s5-left-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .s5-section-title-badge {
+      display: inline-block;
+      background: #C7D2FE;
+      color: #1E1B4B;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 6px 20px;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 4 Distinct Arch Capsules */
+    .s5-audience-arches {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 6px;
+    }
+
+    .arch-card {
+      border-top-left-radius: 40px;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      border: 2px solid #0F172A;
+      padding: 16px 8px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .arch-avatar {
+      font-size: 34px;
+      margin-bottom: 6px;
+    }
+
+    .arch-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0F172A;
+      line-height: 1.2;
+    }
+
+    .arch-yellow { background: #FEF9C3; }
+    .arch-blue { background: #E0F2FE; }
+    .arch-green { background: #DCFCE7; }
+    .arch-pink { background: #FCE7F3; }
+
+    /* Stacked Pill Rows */
+    .s5-pill-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .s5-impact-pill {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 2px solid #0F172A;
+      border-radius: var(--radius-full);
+      padding: 10px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .s5-pill-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .s5-pill-content {
+      line-height: 1.3;
+    }
+
+    .s5-pill-content .head {
+      font-size: 15px;
+      font-weight: 900;
+      color: #0F172A;
+    }
+
+    .s5-pill-content .sub {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .pill-yellow-soft { background: #FEFCE8; }
+    .pill-gray-soft { background: #F1F5F9; }
+    .pill-blue-soft { background: #EFF6FF; }
+    .pill-green-soft { background: #F0FDF4; }
+    .pill-gold-soft { background: #FEF3C7; }
+
+    /* Right Column: Key Benefits */
+    .s5-right-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    .s5-benefits-title-pill {
+      align-self: flex-start;
+      display: inline-block;
+      background: #FEF9C3;
+      border: 2px solid #0F172A;
+      color: #0F172A;
+      font-size: 20px;
+      font-weight: 900;
+      padding: 6px 28px;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 8px;
+    }
+
+    /* Sleek Benefit Oval Cards */
+    .benefit-capsule-box {
+      background: #FFFFFF;
+      border: 2.5px solid #0F172A;
+      border-radius: 28px;
+      padding: 16px 26px;
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .b-head {
+      font-size: 18px;
+      font-weight: 900;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .b-body {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #475569;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Navigation Controls -->
+  <div class="deck-nav">
+    <button class="nav-arrow" onclick="prevSlide()" title="Previous slide (Left Arrow)">◀</button>
+    <button class="nav-btn active" onclick="goToSlide(0)">Slide 1 · Title Page</button>
+    <button class="nav-btn" onclick="goToSlide(1)">Slide 2 · Proposed Solution</button>
+    <button class="nav-btn" onclick="goToSlide(2)">Slide 3 · Technical Approach</button>
+    <button class="nav-btn" onclick="goToSlide(3)">Slide 4 · Feasibility & Viability</button>
+    <button class="nav-btn" onclick="goToSlide(4)">Slide 5 · Impact & Benefits</button>
+    <button class="nav-arrow" onclick="nextSlide()" title="Next slide (Right Arrow)">▶</button>
+  </div>
+
+  <!-- 1920x1080 Stage Viewport -->
+  <div class="deck-container" id="stage">
+
+    <!-- ==========================================
+         SLIDE 1: TITLE PAGE
+         ========================================== -->
+    <div class="slide active" id="slide-0">
+      <div class="ppt-header">
+        <div style="width: 130px;"></div>
+        <div class="ppt-title-center">
+          <h2 class="ppt-main-heading">TITLE PAGE</h2>
+        </div>
+        <div class="sih-logo-corner">
+          <svg class="sih-logo-img" viewBox="0 0 64 64" fill="none">
+            <path d="M32 10C19.85 10 10 19.85 10 32C10 39.5 13.8 46.1 19.5 50V54H44.5V50C50.2 46.1 54 39.5 54 32C54 19.85 44.15 10 32 10Z" fill="#F8FAFC" stroke="#0077B6" stroke-width="3"/>
+            <path d="M22 24C22 20 26 16 32 16" stroke="#EA580C" stroke-width="4" stroke-linecap="round"/>
+            <path d="M32 16C38 16 42 20 42 24" stroke="#16A34A" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="32" cy="32" r="5" fill="#0077B6"/>
+            <path d="M26 44H38M28 48H36" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <div class="sih-logo-text">
+            <div class="sih-t1">SMART INDIA</div>
+            <div class="sih-t2">HACKATHON</div>
+            <div style="font-weight: 800; font-size: 15px; color: #EA580C;">2026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-1-content">
+        <div class="s1-meta-list">
+          <div class="s1-meta-item">
+            <span class="s1-meta-label">Problem Statement ID -</span>
+            <span class="s1-meta-value accent">26265</span>
+          </div>
+
+          <div class="s1-meta-item">
+            <span class="s1-meta-label">Problem Statement Title -</span>
+            <span class="s1-meta-value">Streamline of Security Deposit / FDR Portal</span>
+          </div>
+
+          <div class="s1-meta-item">
+            <span class="s1-meta-label">Theme -</span>
+            <span class="s1-meta-value">Smart Automation</span>
+          </div>
+
+          <div class="s1-meta-item">
+            <span class="s1-meta-label">PS Category -</span>
+            <span class="s1-meta-value">Software</span>
+          </div>
+
+          <div class="s1-meta-item">
+            <span class="s1-meta-label">Team ID -</span>
+            <span class="s1-meta-value accent">SIH2026-TEAM-26265</span>
+          </div>
+
+          <div class="s1-meta-item">
+            <span class="s1-meta-label">Team Name -</span>
+            <span class="s1-meta-value accent">Parity</span>
+          </div>
+        </div>
+
+        <div class="s1-visual-wrapper">
+          <div class="s1-hex-badge"></div>
+          <div class="s1-bulb-graphic">
+            <svg width="340" height="340" viewBox="0 0 200 200" fill="none">
+              <!-- Digital Brain Bulb Vector Graphic -->
+              <path d="M100 20 C60 20 30 50 30 90 C30 115 45 135 65 150 L65 165 C65 170 70 175 75 175 L125 175 C130 175 135 170 135 165 L135 150 C155 135 170 115 170 90 C170 50 140 20 100 20 Z" fill="#F8FAFC" stroke="#0F172A" stroke-width="4"/>
+              
+              <!-- Left Brain Half (Orange Circuit) -->
+              <path d="M100 30 C75 30 50 52 50 85 C50 105 60 120 75 135" stroke="#EA580C" stroke-width="6" stroke-linecap="round"/>
+              <path d="M75 60 L60 75" stroke="#EA580C" stroke-width="4" stroke-linecap="round"/>
+              <path d="M85 90 L65 105" stroke="#EA580C" stroke-width="4" stroke-linecap="round"/>
+              
+              <!-- Right Brain Half (Green Binary Code) -->
+              <path d="M100 30 C125 30 150 52 150 85 C150 105 140 120 125 135" stroke="#16A34A" stroke-width="6" stroke-linecap="round"/>
+              <text x="110" y="65" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="900" fill="#16A34A">1010</text>
+              <text x="115" y="85" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="900" fill="#16A34A">0101</text>
+              <text x="110" y="105" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="900" fill="#16A34A">1100</text>
+
+              <line x1="100" y1="20" x2="100" y2="175" stroke="#0077B6" stroke-width="4" stroke-dasharray="4 4"/>
+              <rect x="75" y="180" width="50" height="8" rx="4" fill="#0F172A"/>
+            </svg>
+            <div style="font-size: 26px; font-weight: 900; color: #0077B6; margin-top: 10px; letter-spacing: 0.05em;">
+              SIH 2026
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ppt-bottom-ribbon">
+        <span>@SIH Idea submission- Template</span>
+        <span class="slide-page-num">1</span>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 2: PROPOSED SOLUTION (SURAKSHA)
+         ========================================== -->
+    <div class="slide" id="slide-1">
+      <div class="ppt-header">
+        <div class="team-badge-pill">PARITY</div>
+        <div class="ppt-title-center">
+          <h2 class="ppt-main-heading" style="text-decoration: underline;">SURAKSHA</h2>
+          <div class="ppt-subtitle-sub">AICTE Security Deposit Control Tower</div>
+        </div>
+        <div class="sih-logo-corner">
+          <svg class="sih-logo-img" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="28" fill="#F8FAFC" stroke="#0077B6" stroke-width="2"/>
+            <path d="M22 24C22 20 26 16 32 16" stroke="#EA580C" stroke-width="4" stroke-linecap="round"/>
+            <path d="M32 16C38 16 42 20 42 24" stroke="#16A34A" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <div class="sih-logo-text">
+            <div class="sih-t1">SMART INDIA</div>
+            <div class="sih-t2">HACKATHON 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-2-content">
+        <div class="s2-left-pane">
+          <div class="s2-heading-block">
+            <h3>Proposed Solution</h3>
+            <div class="name">SURAKSHA</div>
+            <div class="tagline">Policy-driven FDR verification and security deposit management for AICTE.</div>
+          </div>
+
+          <!-- Linear Pipeline Strip -->
+          <div class="s2-pipeline">
+            <div class="s2-pipe-node">SUBMIT</div>
+            <span class="s2-pipe-arrow">➔</span>
+            <div class="s2-pipe-node">EXTRACT</div>
+            <span class="s2-pipe-arrow">➔</span>
+            <div class="s2-pipe-node">VALIDATE</div>
+            <span class="s2-pipe-arrow">➔</span>
+            <div class="s2-pipe-node">VERIFY</div>
+            <span class="s2-pipe-arrow">➔</span>
+            <div class="s2-pipe-node">REPORT</div>
+          </div>
+
+          <div class="s2-solve-box">
+            <h4>How it solves the problem:</h4>
+            <ul class="s2-solve-list">
+              <li>Automated FDR verification and three-way reconciliation</li>
+              <li>Secure deposit tracking, 10-year lien custody & release control</li>
+              <li>Centralized digital records eliminating physical paper delays</li>
+            </ul>
+          </div>
+
+          <!-- Uniqueness Diagram with Zero Typos & Vector Connections -->
+          <div class="uniqueness-diagram-card">
+            <svg class="u-svg-canvas" viewBox="0 0 700 270">
+              <line x1="350" y1="135" x2="160" y2="40" stroke="#0077B6" stroke-width="2.5" stroke-dasharray="3 3"/>
+              <line x1="350" y1="135" x2="540" y2="40" stroke="#0077B6" stroke-width="2.5" stroke-dasharray="3 3"/>
+              <line x1="350" y1="135" x2="570" y2="125" stroke="#0077B6" stroke-width="2.5" stroke-dasharray="3 3"/>
+              <line x1="350" y1="135" x2="530" y2="230" stroke="#0077B6" stroke-width="2.5" stroke-dasharray="3 3"/>
+              <line x1="350" y1="135" x2="180" y2="230" stroke="#0077B6" stroke-width="2.5" stroke-dasharray="3 3"/>
+              <line x1="350" y1="135" x2="130" y2="125" stroke="#0077B6" stroke-width="2.5" stroke-dasharray="3 3"/>
+            </svg>
+
+            <div class="u-center-hub">UNIQUENESS</div>
+            
+            <div class="u-node n1">Centralized<br>FDR Tracking</div>
+            <div class="u-node n2">Audit Trail &<br>Release Control</div>
+            <div class="u-node n3">Role-Based<br>Access Control</div>
+            <div class="u-node n4">Duplicate Pledge<br>Radar</div>
+            <div class="u-node n5">Statutory Deposit<br>Validation</div>
+            <div class="u-node n6">3-Way FDR<br>Reconciliation</div>
+          </div>
+        </div>
+
+        <!-- Right: HOW IT WORKS Stack (Zero Watermarks) -->
+        <div class="s2-right-pane">
+          <div class="s2-how-title">HOW IT WORKS</div>
+
+          <div class="how-step-card">
+            <div class="how-step-icon-wrap">☁️</div>
+            <div class="how-step-body">
+              <div class="how-step-name">SUBMIT</div>
+              <div class="how-step-desc">Upload FDR Documents & Trust Declarations</div>
+            </div>
+          </div>
+
+          <div class="how-step-card">
+            <div class="how-step-icon-wrap">⚙️</div>
+            <div class="how-step-body">
+              <div class="how-step-name">EXTRACT</div>
+              <div class="how-step-desc">Extract key details via Gemini Vision OCR</div>
+            </div>
+          </div>
+
+          <div class="how-step-card">
+            <div class="how-step-icon-wrap">📋</div>
+            <div class="how-step-body">
+              <div class="how-step-name">VALIDATE</div>
+              <div class="how-step-desc">Check fields against APH Table 1.4 rules</div>
+            </div>
+          </div>
+
+          <div class="how-step-card">
+            <div class="how-step-icon-wrap">📑</div>
+            <div class="how-step-body">
+              <div class="how-step-name">VERIFY</div>
+              <div class="how-step-desc">Reconcile records against Bank API Sandbox</div>
+            </div>
+          </div>
+
+          <div class="how-step-card">
+            <div class="how-step-icon-wrap">🔍</div>
+            <div class="how-step-body">
+              <div class="how-step-name">TRACK</div>
+              <div class="how-step-desc">Monitor 10-year lien, maturity & renewal status</div>
+            </div>
+          </div>
+
+          <div class="how-step-card">
+            <div class="how-step-icon-wrap">📄</div>
+            <div class="how-step-body">
+              <div class="how-step-name">REPORT</div>
+              <div class="how-step-desc">Generate audit trail & cryptographically signed NOC</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ppt-bottom-ribbon">
+        <span>@SIH Idea submission- Template</span>
+        <span class="slide-page-num">2</span>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 3: TECHNICAL APPROACH (3 CARDS + TECH STACK)
+         ========================================== -->
+    <div class="slide" id="slide-2">
+      <div class="ppt-header">
+        <div class="team-badge-pill">PARITY</div>
+        <div class="ppt-title-center">
+          <h2 class="ppt-main-heading">TECHNICAL APPROACH</h2>
+          <div class="ppt-subtitle-sub">One Control Tower • Policy Driven Verification • Secure FDR Lifecycle</div>
+        </div>
+        <div class="sih-logo-corner">
+          <svg class="sih-logo-img" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="28" fill="#F8FAFC" stroke="#0077B6" stroke-width="2"/>
+          </svg>
+          <div class="sih-logo-text">
+            <div class="sih-t1">SMART INDIA</div>
+            <div class="sih-t2">HACKATHON 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-3-cards-grid">
+        <!-- Card 1: Input Modes -->
+        <div class="s3-pillar-box">
+          <div class="s3-box-header">
+            <div class="s3-header-icon">💻</div>
+            <h4 class="s3-box-title">INPUT MODES</h4>
+          </div>
+          <div class="s3-items-stack">
+            <div class="s3-item-row">
+              <div class="s3-row-badge">🏛️</div>
+              <div class="s3-row-text">
+                <h5>INSTITUTION MODE</h5>
+                <ul>
+                  <li>FDR Submission & Document Upload</li>
+                  <li>Deposit Sizing Declaration</li>
+                  <li>Leased Campus Land Acreage Form</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="s3-item-row">
+              <div class="s3-row-badge">🛡️</div>
+              <div class="s3-row-text">
+                <h5>VERIFICATION MODE</h5>
+                <ul>
+                  <li>Three-Way Provenance Reconciliation</li>
+                  <li>Bank API Sandbox Lien Verification</li>
+                  <li>OCR Bounding-Box Evidence Review</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="s3-item-row">
+              <div class="s3-row-badge">👤</div>
+              <div class="s3-row-text">
+                <h5>ADMIN MODE</h5>
+                <ul>
+                  <li>APH Statutory Policy Management</li>
+                  <li>13-Gate Release Monitoring</li>
+                  <li>Tamper-Evident Audit Verification</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Unified Compliance Engine -->
+        <div class="s3-pillar-box">
+          <div class="s3-box-header">
+            <div class="s3-header-icon">⚙️</div>
+            <h4 class="s3-box-title">UNIFIED COMPLIANCE ENGINE</h4>
+          </div>
+          <div class="s3-items-stack">
+            <div class="s3-item-row">
+              <div class="s3-row-badge">📜</div>
+              <div class="s3-row-text">
+                <h5>FDR RECONCILIATION</h5>
+                <ul>
+                  <li>Declared vs Document vs Bank Sandbox</li>
+                  <li>Confidence-Scored Field Extraction</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="s3-item-row">
+              <div class="s3-row-badge">⚖️</div>
+              <div class="s3-row-text">
+                <h5>POLICY VALIDATION</h5>
+                <ul>
+                  <li>AICTE APH Table 1.4 Native Rules</li>
+                  <li>2.0× Leased Land Multiplier Calculation</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="s3-item-row">
+              <div class="s3-row-badge">📋</div>
+              <div class="s3-row-text">
+                <h5>RELEASE ELIGIBILITY</h5>
+                <ul>
+                  <li>13-Gate Autonomous Clearance DAG</li>
+                  <li>PGRC Complaints & Vigilance Clearance</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="s3-item-row">
+              <div class="s3-row-badge">🔄</div>
+              <div class="s3-row-text">
+                <h5>LIFECYCLE MONITORING</h5>
+                <ul>
+                  <li>10-Year Maturity, Renewal & Penalty Tracking</li>
+                  <li>Duplicate Collateral Radar</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Audit Report -->
+        <div class="s3-pillar-box">
+          <div class="s3-box-header">
+            <div class="s3-header-icon">📊</div>
+            <h4 class="s3-box-title">AUDIT REPORT</h4>
+            <div class="s3-box-sub">Evidence-Linked, Traceable Decisions</div>
+          </div>
+          <div class="s3-items-stack">
+            <div class="s3-item-row">
+              <div class="s3-row-badge">🔍</div>
+              <div class="s3-row-text">
+                <h5>VERIFICATION RESULTS</h5>
+                <ul>
+                  <li>99.4% OCR Confidence Coordinate Match</li>
+                  <li>Bank API Sandbox Clearance Logs</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="s3-item-row">
+              <div class="s3-row-badge">📐</div>
+              <div class="s3-row-text">
+                <h5>POLICY CALCULATION TRACE</h5>
+                <ul>
+                  <li>Deterministic Mathematical Explanations</li>
+                  <li>Clause Citations for Every ₹ Value</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="s3-item-row">
+              <div class="s3-row-badge">✅</div>
+              <div class="s3-row-text">
+                <h5>RELEASE ELIGIBILITY STATUS</h5>
+                <ul>
+                  <li>Atomic Locks on Outstanding Dues</li>
+                  <li>Instant Digital Sanction Order Generation</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="s3-item-row">
+              <div class="s3-row-badge">🔒</div>
+              <div class="s3-row-text">
+                <h5>TAMPER-EVIDENT HISTORY</h5>
+                <ul>
+                  <li>SHA-256 Genesis-Chained Audit Trail</li>
+                  <li>Forensic Historic State Time Machine</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Tech Stack Banner -->
+      <div class="s3-tech-stack-strip">
+        <span class="s3-tech-label">TECH STACK</span>
+        <div class="s3-tech-chips">
+          <span class="s3-chip">🐳 Docker Containers</span>
+          <span class="s3-chip">⚛️ React + Vite</span>
+          <span class="s3-chip">⚡ FastAPI (Python 3.11)</span>
+          <span class="s3-chip">🐘 PostgreSQL 15</span>
+          <span class="s3-chip">🗄️ SQLAlchemy 2.0</span>
+          <span class="s3-chip">🛡️ JWT + RBAC</span>
+          <span class="s3-chip">🤖 Gemini Vision OCR</span>
+        </div>
+      </div>
+
+      <div class="ppt-bottom-ribbon">
+        <span>@SIH Idea submission- Template</span>
+        <span class="slide-page-num">3</span>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 4: FEASIBILITY AND VIABILITY (3 COLORED TABS)
+         ========================================== -->
+    <div class="slide" id="slide-3">
+      <div class="ppt-header">
+        <div class="team-badge-pill">PARITY</div>
+        <div class="ppt-title-center">
+          <h2 class="ppt-main-heading">FEASIBILITY AND VIABILITY</h2>
+        </div>
+        <div class="sih-logo-corner">
+          <svg class="sih-logo-img" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="28" fill="#F8FAFC" stroke="#0077B6" stroke-width="2"/>
+          </svg>
+          <div class="sih-logo-text">
+            <div class="sih-t1">SMART INDIA</div>
+            <div class="sih-t2">HACKATHON 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-4-grid">
+        <!-- Col 1: Technical (Orange) -->
+        <div class="s4-card-col">
+          <div class="s4-tab-header tab-orange">
+            <span>💻</span>
+            <span>Technical Feasibility</span>
+          </div>
+          <div class="s4-body-container col-orange-body">
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">📱</div>
+              <div class="s4-feat-info">
+                <h5>Digital Applications System</h5>
+                <p>Online submission of FDR applications with supporting documents and cryptographic client-side hashing.</p>
+              </div>
+            </div>
+
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">📄</div>
+              <div class="s4-feat-info">
+                <h5>Document Verification</h5>
+                <p>Cross-check declared FDR details against documents and bank verification data with 99.4% OCR confidence.</p>
+              </div>
+            </div>
+
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">📋</div>
+              <div class="s4-feat-info">
+                <h5>Application Tracking</h5>
+                <p>Monitor FDR status, 10-year lock-in, maturity, renewal penalties, and release eligibility in real-time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 2: Operational (Blue) -->
+        <div class="s4-card-col">
+          <div class="s4-tab-header tab-blue">
+            <span>🏢</span>
+            <span>Operational Feasibility</span>
+          </div>
+          <div class="s4-body-container col-blue-body">
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">🛡️</div>
+              <div class="s4-feat-info">
+                <h5>Multi-Level Verification</h5>
+                <p>Coordinate verification and clearances across relevant AICTE regional offices, head office, and legal cells.</p>
+              </div>
+            </div>
+
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">⚙️</div>
+              <div class="s4-feat-info">
+                <h5>Document Management</h5>
+                <p>Maintain institutional records, supporting evidence, bank verification receipts, and full immutable verification history.</p>
+              </div>
+            </div>
+
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">📑</div>
+              <div class="s4-feat-info">
+                <h5>Release Management</h5>
+                <p>Check mandatory clearances, outstanding PGRC discrepancies, and approval requirements before release.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 3: Economic (Green) -->
+        <div class="s4-card-col">
+          <div class="s4-tab-header tab-green">
+            <span>📈</span>
+            <span>Economic Viability</span>
+          </div>
+          <div class="s4-body-container col-green-body">
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">⚖️</div>
+              <div class="s4-feat-info">
+                <h5>Reduced Paperwork</h5>
+                <p>Centralized digital records eliminate courier logistics, physical registers, and regional godown storage costs.</p>
+              </div>
+            </div>
+
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">✔</div>
+              <div class="s4-feat-info">
+                <h5>Automated Compliance Check</h5>
+                <p>Policy-based validation identifies deposit discrepancies and incorrect sizing, recovering rightful statutory dues.</p>
+              </div>
+            </div>
+
+            <div class="s4-feature-row">
+              <div class="s4-feat-icon">🛡️</div>
+              <div class="s4-feat-info">
+                <h5>Improved Transparency</h5>
+                <p>Evidence-linked decisions and audit trails safeguard the ₹2,500+ Cr national corpus and prevent double-pledging.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ppt-bottom-ribbon">
+        <span>@SIH Idea submission- Template</span>
+        <span class="slide-page-num">4</span>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 5: IMPACT AND BENEFITS
+         ========================================== -->
+    <div class="slide" id="slide-4">
+      <div class="ppt-header">
+        <div class="team-badge-pill">PARITY</div>
+        <div class="ppt-title-center">
+          <h2 class="ppt-main-heading">IMPACT AND BENEFITS</h2>
+        </div>
+        <div class="sih-logo-corner">
+          <svg class="sih-logo-img" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="28" fill="#F8FAFC" stroke="#0077B6" stroke-width="2"/>
+          </svg>
+          <div class="sih-logo-text">
+            <div class="sih-t1">SMART INDIA</div>
+            <div class="sih-t2">HACKATHON 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-5-grid">
+        <!-- Left: Impact Audience -->
+        <div class="s5-left-pane">
+          <div class="s5-section-title-badge">Impact Audience</div>
+
+          <!-- 4 Arches -->
+          <div class="s5-audience-arches">
+            <div class="arch-card arch-yellow">
+              <div class="arch-avatar">🏛️</div>
+              <div class="arch-name">Regional Officers</div>
+            </div>
+            <div class="arch-card arch-blue">
+              <div class="arch-avatar">👤</div>
+              <div class="arch-name">AICTE Admins</div>
+            </div>
+            <div class="arch-card arch-green">
+              <div class="arch-avatar">🏫</div>
+              <div class="arch-name">Technical Institutions</div>
+            </div>
+            <div class="arch-card arch-pink">
+              <div class="arch-avatar">⚖️</div>
+              <div class="arch-name">Auditors & Banks</div>
+            </div>
+          </div>
+
+          <!-- 5 Stacked Pills -->
+          <div class="s5-pill-rows">
+            <div class="s5-impact-pill pill-yellow-soft">
+              <div class="s5-pill-icon">🎯</div>
+              <div class="s5-pill-content">
+                <div class="head">Impact on AICTE Regional Officers</div>
+                <div class="sub">Centralized FDR records, evidence-based verification, side-by-side OCR diffs.</div>
+              </div>
+            </div>
+
+            <div class="s5-impact-pill pill-gray-soft">
+              <div class="s5-pill-icon">🏛️</div>
+              <div class="s5-pill-content">
+                <div class="head">Impact on AICTE Administrators</div>
+                <div class="sub">Unified monitoring of all ₹2,500+ Cr deposits, pending 13-gate clearances.</div>
+              </div>
+            </div>
+
+            <div class="s5-impact-pill pill-blue-soft">
+              <div class="s5-pill-icon">⭐</div>
+              <div class="s5-pill-content">
+                <div class="head">Impact on Technical Institutions</div>
+                <div class="sub">Transparent application tracking, automated calculations, proactive maturity alerts.</div>
+              </div>
+            </div>
+
+            <div class="s5-impact-pill pill-green-soft">
+              <div class="s5-pill-icon">👥</div>
+              <div class="s5-pill-content">
+                <div class="head">Impact on Auditors & Accounts Teams</div>
+                <div class="sub">Traceable decisions, documented approvals, and immutable SHA-256 audit visibility.</div>
+              </div>
+            </div>
+
+            <div class="s5-impact-pill pill-gold-soft">
+              <div class="s5-pill-icon">📈</div>
+              <div class="s5-pill-content">
+                <div class="head">Overall Impact</div>
+                <div class="sub">Faster verification • Safer releases • Proactive monitoring • Stronger accountability</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Key Benefits (Zero Canva Watermarks, Clean Depth) -->
+        <div class="s5-right-pane" style="border-left: 2px dashed #CBD5E1; padding-left: 36px;">
+          <div class="s5-benefits-title-pill">Key Benefits</div>
+
+          <div class="benefit-capsule-box">
+            <div class="b-head">⚡ Faster Verification</div>
+            <div class="b-body">Reduces manual bank verification from 6 weeks to automated clearing via Bank API Sandbox.</div>
+          </div>
+
+          <div class="benefit-capsule-box">
+            <div class="b-head">📐 Accurate Compliance</div>
+            <div class="b-body">Applies versioned policy rules for 100% traceable results and deterministic Table 1.4 sizing.</div>
+          </div>
+
+          <div class="benefit-capsule-box">
+            <div class="b-head">🛡️ Secure Release Workflow</div>
+            <div class="b-body">Flags missing clearances and atomically blocks release when conditions are unmet.</div>
+          </div>
+
+          <div class="benefit-capsule-box">
+            <div class="b-head">🔍 Duplicate Pledge Detection</div>
+            <div class="b-body">Identifies potentially duplicated FDR records across 10,000+ colleges using NetworkX graph radar.</div>
+          </div>
+
+          <div class="benefit-capsule-box">
+            <div class="b-head">⏱️ Better Monitoring</div>
+            <div class="b-body">Tracks 10-year lock-in maturity dates, pending actions, and automated penalty surcharges.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ppt-bottom-ribbon">
+        <span>@SIH Idea submission- Template</span>
+        <span class="slide-page-num">5</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const navBtns = document.querySelectorAll('.nav-btn');
+
+    function updateScale() {
+      const container = document.getElementById('stage');
+      const winWidth = window.innerWidth;
+      const winHeight = window.innerHeight;
+      const scaleX = (winWidth - 40) / 1920;
+      const scaleY = (winHeight - 90) / 1080;
+      const scale = Math.min(scaleX, scaleY, 1);
+      container.style.transform = `scale(${scale})`;
+      container.style.marginTop = `${Math.max(0, (winHeight - (1080 * scale) - 50) / 2)}px`;
+    }
+
+    function goToSlide(idx) {
+      if (idx < 0 || idx >= slides.length) return;
+      slides[currentSlide].classList.remove('active');
+      navBtns[currentSlide].classList.remove('active');
+
+      currentSlide = idx;
+      slides[currentSlide].classList.add('active');
+      navBtns[currentSlide].classList.add('active');
+    }
+
+    function nextSlide() {
+      goToSlide((currentSlide + 1) % slides.length);
+    }
+
+    function prevSlide() {
+      goToSlide((currentSlide - 1 + slides.length) % slides.length);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    window.addEventListener('resize', updateScale);
+    updateScale();
+  </script>
+</body>
+</html>
